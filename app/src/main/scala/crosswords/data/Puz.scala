@@ -2,9 +2,8 @@
 package crosswords.data
 
 import java.io._
-
+import crosswords.util.Text
 import play.api.libs.json.{Json, JsObject}
-
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -37,7 +36,7 @@ object Puz {
     val solution = in.drop(offset + 0x34).take(width * height).map(_.toChar).mkString.grouped(width).toVector
 
     // Get strings
-    val strings = split[Byte](in.drop(offset + 0x33 + 2 * width * height), 0).
+    val strings = Text.split[Byte](in.drop(offset + 0x33 + 2 * width * height), 0).
       map(s => new String(s.toArray, "ISO-8859-1")).toVector
     val title = strings(0)
     val author = strings(1)
@@ -110,20 +109,6 @@ object Puz {
 
   // TODO encode to .puz?
 
-
-  // Split a sequence at given values.
-  private def split[A](seq: Seq[A], value: A): Seq[Seq[A]] = {
-    val buf = new ArrayBuffer[Seq[A]]()
-    var i = 0
-    var j = seq.indexOf(value)
-    while (j >= 0) {
-      buf += seq.view(i + 1, j)
-      i = j
-      j = seq.indexOf(value, i + 1)
-    }
-    buf += seq.view(i, seq.size)
-    buf
-  }
 
   def main(args: Array[String]) {
 
