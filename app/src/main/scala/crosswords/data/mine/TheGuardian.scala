@@ -89,7 +89,9 @@ object TheGuardian {
     val title = _title.findFirstMatchIn(content).map(_.group(1))
     if (title.isDefined) {
       json += "title" -> Json.toJson(title.get)
-      json += "category" -> Json.toJson(title.get.split(" ").head)
+      val category = title.get.split(" ").head.toLowerCase
+      if (category == "cryptic" || category == "quiptic")
+        json += "categories" -> Json.toJson(Seq("cryptic"))
     }
 
     // Try to get url
@@ -175,6 +177,7 @@ object TheGuardian {
       // Download HTML file
       println("downloading " + category + "/" + id + "...")
       val html = Source.fromURL(_root + category + "/" + id).mkString
+      // TODO on failure, mark as inexisting
 
       // Save content
       val out = new FileWriter(htmlFile)
@@ -185,6 +188,7 @@ object TheGuardian {
 
     // Convert to JSON
     val json = parse(Source.fromFile(htmlFile))
+    // TODO on failure, mark as irrelevant, not crash
 
     // Save content
     val out = new FileWriter(jsonFile)
@@ -203,12 +207,13 @@ object TheGuardian {
       if (ensure(category, id))
         count += 1
       id -= 1
+      // TODO sleep a bit to let the server breath XD
     }
   }
 
   def main(args: Array[String]) {
 
-    query("quick", 13989, 10)
+    query("cryptic", 26482, 1)
 
   }
 

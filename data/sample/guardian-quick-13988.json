@@ -1,7 +1,9 @@
 {
   "source" : "The Guardian",
-  "id" : "crossword-ag5zfngtcHV6emxlLWhyZHIWCxIJQ3Jvc3N3b3JkGICAgIDX6pEJDA",
+  "language" : "eng",
+  "title" : "Quick crossword No 13,988",
   "url" : "http://www.theguardian.com/crosswords/quick/13988",
+  "date" : "2015-03-10",
   "words" : [ {
     "word" : "NARCOSIS",
     "clue" : "Unconsciousness induced by drugs (8)",
