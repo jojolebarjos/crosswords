@@ -65,9 +65,9 @@ object TheGuardian {
     private val _begin = """<div class="crossword">"""
     private val _end = """<div id="crossword-help">"""
 
-    private val _identifier = """var crossword_identifier = '([^']*)';""".r
-    private val _path = """var path = "([^"]*)"""".r
-    private val _authordate = """<ul class="article-attributes">\s*<li class="byline">Set by <a href="[^"]*">([^<]*)</a></li>\s*<li class="publication"><a href="[^"]*">[^<]*</a>, ([^<]+)</li>""".r
+    private val _url = """var path = "([^"]*)"""".r
+    private val _author = """<ul class="article-attributes">\s*<li class="byline">Set by <a href="[^"]*">([^<]*)</a></li>""".r
+    private val _date = """<li class="publication"><a href="[^"]*">[^<]*</a>, ([^<]+)</li>""".r
 
     private val _solution = """solutions\["(\d+)-(across|down)-(\d+)"] = "([A-Z])";""".r
     private val _location = """<span style="left: (\d+)px; top: (\d+)px;" class="(across|down)">(\d+)</span>""".r
@@ -82,28 +82,27 @@ object TheGuardian {
       // Prepare interesting data
       val content = Text.bound(source.getLines().mkString, _begin, _end)
       var json = Json.obj(
-        "source" -> "The Guardian" // TODO correct tag?
+        "source" -> "The Guardian",
+        "language" -> "eng"
       )
 
-      // Try to get unique identifier
-      val identifier = _identifier.findFirstMatchIn(content).map(_.group(1))
-      if (identifier.isDefined)
-        json += "id" -> Json.toJson(identifier.get) // TODO correct tag?
-
       // Try to get url
-      val path = _path.findFirstMatchIn(content).map(_.group(1))
-      if (path.isDefined)
-        json += "url" -> Json.toJson(path.get)
-
-      // TODO category, difficulty, number...
-
-      // Try to get author and date
-      val authordate = _authordate.findFirstMatchIn(content).map(m => (m.group(1), m.group(2)))
-      if (authordate.isDefined) {
-        json += "author" -> Json.toJson(authordate.get._1)
-        val date = _dateformatin.parse(authordate.get._2)
-        json += "date" -> Json.toJson(_dateformatout.format(date))
+      val url = _url.findFirstMatchIn(content).map(_.group(1))
+      if (url.isDefined) {
+        json += "url" -> Json.toJson(url.get)
+        val category = url.get.split("/").init.last
+        json += "category" -> Json.toJson(category)
       }
+
+      // Try to get author
+      val author = _author.findFirstMatchIn(content).map(_.group(1))
+      if (author.isDefined)
+        json += "author" -> Json.toJson(author.get)
+
+      // Try to get date
+      val date = _date.findFirstMatchIn(content).map(m => _dateformatin.parse(m.group(1)))
+      if (date.isDefined)
+        json += "date" -> Json.toJson(_dateformatout.format(date.get))
 
       // Get word locations
       val locations = _location.findAllMatchIn(content).map(m => (
@@ -133,6 +132,7 @@ object TheGuardian {
       )}.toVector
       json += "words" -> Json.toJson(words)
 
+      // Done
       json
 
     }
@@ -141,7 +141,7 @@ object TheGuardian {
 
   def main(args: Array[String]) {
 
-    val source = Source.fromFile("sample-guardian.html")
+    val source = Source.fromFile("../sample/guardian-cryptic-26482.html")
     val json = Crossword.parse(source)
     println(Json.prettyPrint(json))
 
