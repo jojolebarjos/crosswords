@@ -1,0 +1,197 @@
+{
+  "words" : [ {
+    "word" : "STINGER",
+    "clue" : "Small cat grabbing end of scorpion's venomous tail (7)",
+    "x" : 0,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "SHARK",
+    "clue" : "Head to sea and listen for ocean predator (5)",
+    "x" : 0,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ITCHY",
+    "clue" : "Having flea bite irritation, a female dog (with no lead) fray's tail (5)",
+    "x" : 2,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "GALLOPS",
+    "clue" : "Woman cuts and runs like a horse (7)",
+    "x" : 4,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "RUDDERS",
+    "clue" : "Stabilizers right cow parts (7)",
+    "x" : 6,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "MUSCLES",
+    "clue" : "Moves with force to get mollusks in the sound (7)",
+    "x" : 8,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "MUSHERS",
+    "clue" : "At the start, Manitoban leads dogsled participants (7)",
+    "x" : 8,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SKIPPER",
+    "clue" : "Sea captain's salt on cured fish (7)",
+    "x" : 10,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "LECTURING",
+    "clue" : "Giving sermon around east Connecticut, attracting animals (9)",
+    "x" : 12,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SHREDDERS",
+    "clue" : "Those who tear up from the remotest bit of dander in animals that molt (9)",
+    "x" : 14,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ACCOLADES",
+    "clue" : "Awards monkey with a cold case (9)",
+    "x" : 0,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "INCUR",
+    "clue" : "Acquire stylish mongrel (5)",
+    "x" : 10,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "KEYNOTE",
+    "clue" : "The basic idea that's central to monkey not evolving (7)",
+    "x" : 0,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "EXPOUND",
+    "clue" : "Add details to former animal shelter (7)",
+    "x" : 8,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "LOCUSTS",
+    "clue" : "Desires eating a bit of okra with cold grasshoppers (7)",
+    "x" : 0,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "LABYRINTH",
+    "clue" : "Lab with a little yellow rat at the start in the endless maze (9)",
+    "x" : 0,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "CREATURAL",
+    "clue" : "Pertaining to animals captured primarily down in backwood (9)",
+    "x" : 2,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "SARDINE",
+    "clue" : "Rinsed a pickled canned fish (7)",
+    "x" : 8,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "BREADTH",
+    "clue" : "Migratory red bat habitat's original range (7)",
+    "x" : 0,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "DEADEND",
+    "clue" : "Demanded getting rear of aquarium removed and then remodeled with no way out (4,3)",
+    "x" : 4,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "HONESTY",
+    "clue" : "Perfect pig pen's plainness (7)",
+    "x" : 6,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "DAMAGES",
+    "clue" : "Ruins a beaver's work before long (7)",
+    "x" : 8,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "DORMANT",
+    "clue" : "Inactive student housing insect (7)",
+    "x" : 8,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "MANGLED",
+    "clue" : "Cut up the last piece of chum and went fishing (7)",
+    "x" : 10,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "RETRAIN",
+    "clue" : "Keep holding rottweiler's lead and teach a new trick (7)",
+    "x" : 0,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "RENEGED",
+    "clue" : "Went back with sample from echidna amid confusion of gender (7)",
+    "x" : 8,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "GROAN",
+    "clue" : "A cry of pain from horse after introduction to gelding (5)",
+    "x" : 12,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "DISKS",
+    "clue" : "Kids displaced carcass' tail and parts of spinal column (5)",
+    "x" : 14,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "NURSE",
+    "clue" : "Some puppies running the wrong way to suckle (5)",
+    "x" : 0,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "STALLIONS",
+    "clue" : "Big cats trailing last mottled horses (9)",
+    "x" : 6,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "HOLIDAY",
+    "clue" : "Festive meal for a horse holding no restraint (7)",
+    "x" : 0,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "TIDINGS",
+    "clue" : "News announcement:  Badger digs nit (7)",
+    "x" : 8,
+    "y" : 14,
+    "dir" : "East"
+  } ],
+  "title" : "Animalia",
+  "author" : "  Ed Mehling  "
+}

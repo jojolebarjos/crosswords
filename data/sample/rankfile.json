@@ -1,0 +1,473 @@
+{
+  "words" : [ {
+    "word" : "RAND",
+    "clue" : "Author Ayn",
+    "x" : 0,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "ROBS",
+    "clue" : "Sticks up",
+    "x" : 0,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "AREA",
+    "clue" : "Painter's estimation",
+    "x" : 1,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "NELL",
+    "clue" : "Dudley Do-Right's beloved",
+    "x" : 2,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "DOLOR",
+    "clue" : "Sorrow",
+    "x" : 3,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SLAP",
+    "clue" : "\"__ me five!\"",
+    "x" : 5,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "STANDARD",
+    "clue" : "Like some transmissions",
+    "x" : 5,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "LAP",
+    "clue" : "Once around the track",
+    "x" : 6,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ACT",
+    "clue" : "Play piece",
+    "x" : 7,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "PHASE",
+    "clue" : "Terrible twos, e.g.",
+    "x" : 8,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "MASTS",
+    "clue" : "Ketch's pair",
+    "x" : 10,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "MANE",
+    "clue" : "Mare hair",
+    "x" : 10,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ACHE",
+    "clue" : "Tummy trouble",
+    "x" : 11,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SCOPE",
+    "clue" : "Rifleman's aim improver",
+    "x" : 12,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "TROLL",
+    "clue" : "Fish from the stern",
+    "x" : 13,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SAKES",
+    "clue" : "\"Land __ alive!\"",
+    "x" : 14,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "OREO",
+    "clue" : "Twistable cookie",
+    "x" : 0,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "TACH",
+    "clue" : "RPM indicator",
+    "x" : 5,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "ACCRA",
+    "clue" : "Ghana's capital",
+    "x" : 10,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "BELLCAPTAINHOOK",
+    "clue" : "Pirate working in a hotel?",
+    "x" : 0,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "COAT",
+    "clue" : "Paint layer",
+    "x" : 4,
+    "y" : 2,
+    "dir" : "South"
+  }, {
+    "word" : "ITSY",
+    "clue" : "__-bitsy",
+    "x" : 9,
+    "y" : 2,
+    "dir" : "South"
+  }, {
+    "word" : "SALOON",
+    "clue" : "Oater brawl site",
+    "x" : 0,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "STEEPLE",
+    "clue" : "Belfry's place",
+    "x" : 8,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "RADOMES",
+    "clue" : "Antenna housings on planes",
+    "x" : 3,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "OREM",
+    "clue" : "City near Provo, Utah",
+    "x" : 6,
+    "y" : 4,
+    "dir" : "South"
+  }, {
+    "word" : "MELANGE",
+    "clue" : "Hodgepodge",
+    "x" : 7,
+    "y" : 4,
+    "dir" : "South"
+  }, {
+    "word" : "ELS",
+    "clue" : "Ernie on the links",
+    "x" : 12,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "ALB",
+    "clue" : "Priestly garb",
+    "x" : 0,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "ASPS",
+    "clue" : "Nile slitherers",
+    "x" : 0,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "LURE",
+    "clue" : "Angler's decoy",
+    "x" : 1,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "BEET",
+    "clue" : "Sugar-yielding vegetable",
+    "x" : 2,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "TARE",
+    "clue" : "Button on a butcher's scale",
+    "x" : 4,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "YEW",
+    "clue" : "Flexible wood",
+    "x" : 9,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "ERR",
+    "clue" : "Drop an easy one",
+    "x" : 10,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "WIDE",
+    "clue" : "Like EEE shoes",
+    "x" : 11,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "SUES",
+    "clue" : "Brings to court",
+    "x" : 0,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "SMUG",
+    "clue" : "Self-satisfied",
+    "x" : 3,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "REL",
+    "clue" : "Fam. member",
+    "x" : 5,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "RIVER",
+    "clue" : "Indus or Irrawaddy",
+    "x" : 10,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "VOLT",
+    "clue" : "Electrical unit",
+    "x" : 12,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "EMMA",
+    "clue" : "Actress Samms",
+    "x" : 13,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "ROOD",
+    "clue" : "Crucifix",
+    "x" : 14,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "PREMEDMAJORDOMO",
+    "clue" : "College student working as a butler?",
+    "x" : 0,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "EPA",
+    "clue" : "MPG raters",
+    "x" : 4,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "JEER",
+    "clue" : "Give a razzing to",
+    "x" : 8,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "OVERSTAY",
+    "clue" : "Wear out, as a welcome",
+    "x" : 9,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "SETUP",
+    "clue" : "Arrange a date for",
+    "x" : 0,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "NEV",
+    "clue" : "Silver State: Abbr.",
+    "x" : 7,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "ELMO",
+    "clue" : "\"Blondie\" tyke",
+    "x" : 11,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "GAB",
+    "clue" : "Chew the fat",
+    "x" : 3,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "BARR",
+    "clue" : "Comic Roseanne",
+    "x" : 5,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "GEEK",
+    "clue" : "Weirdo",
+    "x" : 7,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "KATE",
+    "clue" : "Model Moss",
+    "x" : 10,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "TAD",
+    "clue" : "Wee bit",
+    "x" : 12,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "PAM",
+    "clue" : "Non-stick coating for pans",
+    "x" : 0,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "PESOS",
+    "clue" : "Mexicali moola",
+    "x" : 0,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "ARENA",
+    "clue" : "Pug's workplace",
+    "x" : 1,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "MAMET",
+    "clue" : "\"Glengarry Glen Ross\" playwright David",
+    "x" : 2,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "AVERRAL",
+    "clue" : "Verification",
+    "x" : 5,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "VEINS",
+    "clue" : "Phlebolotomists' concerns",
+    "x" : 6,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "LEEDS",
+    "clue" : "City on the Aire",
+    "x" : 11,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "ERASURE",
+    "clue" : "It may leave a smudge",
+    "x" : 0,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "SINO",
+    "clue" : "Chinese: Prefix",
+    "x" : 3,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "UPON",
+    "clue" : "Chance __ (meet accidentally)",
+    "x" : 4,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "STEELE",
+    "clue" : "TV's \"Remington __\"",
+    "x" : 9,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "EYRE",
+    "clue" : "Bronte's Jane",
+    "x" : 12,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "LEIA",
+    "clue" : "\"Star Wars\" princess",
+    "x" : 13,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "ESPN",
+    "clue" : "Armchair athlete's channel",
+    "x" : 14,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "SEMIPRIVATEEYES",
+    "clue" : "Investigators working part-time?",
+    "x" : 0,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "VAL",
+    "clue" : "Actor Kilmer",
+    "x" : 7,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "ADA",
+    "clue" : "Critic __ Louise Huxtable",
+    "x" : 8,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "ONENO",
+    "clue" : "Bridge bid, for short",
+    "x" : 0,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "NADA",
+    "clue" : "Zilch",
+    "x" : 6,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "DRIP",
+    "clue" : "Sink sound",
+    "x" : 11,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "SATON",
+    "clue" : "Suppressed",
+    "x" : 0,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "SLAY",
+    "clue" : "Do in",
+    "x" : 6,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "SEAN",
+    "clue" : "O'Casey or O'Faolain",
+    "x" : 11,
+    "y" : 14,
+    "dir" : "East"
+  } ],
+  "title" : "Rank and File",
+  "author" : "Fred Piscop"
+}

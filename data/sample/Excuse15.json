@@ -1,0 +1,473 @@
+{
+  "words" : [ {
+    "word" : "JAMB",
+    "clue" : "Part of a doorway",
+    "x" : 0,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "JAFAR",
+    "clue" : "Villain in Aladdin",
+    "x" : 0,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "AROMA",
+    "clue" : "Frying bacon's emanation",
+    "x" : 1,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "MAXIM",
+    "clue" : "Magazine with an annual \"Hot 100\" list",
+    "x" : 2,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "BBQ",
+    "clue" : "Pulled pork, for example",
+    "x" : 3,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "JESSE",
+    "clue" : "Uncle on \"The Dukes of Hazzard\"",
+    "x" : 5,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "JEERAT",
+    "clue" : "Make fun of",
+    "x" : 5,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ELSA",
+    "clue" : "\"Born Free\" lioness",
+    "x" : 6,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SIAM",
+    "clue" : "Cambodia neighbor, formerly",
+    "x" : 7,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "SOD",
+    "clue" : "Landscaping clump",
+    "x" : 8,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ETA",
+    "clue" : "Letter from Athens",
+    "x" : 9,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ALTO",
+    "clue" : "Ethel Merman, for one",
+    "x" : 11,
+    "y" : 0,
+    "dir" : "East"
+  }, {
+    "word" : "APERCU",
+    "clue" : "Short summary",
+    "x" : 11,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "LOSEHEART",
+    "clue" : "Begin to despair",
+    "x" : 12,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "TOAT",
+    "clue" : "Precisely",
+    "x" : 13,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "OPUS",
+    "clue" : "Penguin of the comics",
+    "x" : 14,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ARAB",
+    "clue" : "Moroccan, e.g.",
+    "x" : 0,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "ELIOT",
+    "clue" : "\"The Mill on the Floss\" author",
+    "x" : 5,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "POOP",
+    "clue" : "Lowdown",
+    "x" : 11,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "FOXQUESADA",
+    "clue" : "Mexican president Vicente",
+    "x" : 0,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "UDDER",
+    "clue" : "Milk container",
+    "x" : 4,
+    "y" : 2,
+    "dir" : "South"
+  }, {
+    "word" : "ESAU",
+    "clue" : "Son of Isaac and Rebekah",
+    "x" : 11,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "AMI",
+    "clue" : "Cannes companion",
+    "x" : 0,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "DRAM",
+    "clue" : "Fraction of a fluid ounce",
+    "x" : 4,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "FRETS",
+    "clue" : "Is a worrywart",
+    "x" : 10,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "FAQS",
+    "clue" : "Pages for first-time website visitors",
+    "x" : 10,
+    "y" : 3,
+    "dir" : "South"
+  }, {
+    "word" : "RAMADA",
+    "clue" : "Holiday Inn alternative",
+    "x" : 0,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "ANON",
+    "clue" : "In the near future",
+    "x" : 3,
+    "y" : 4,
+    "dir" : "South"
+  }, {
+    "word" : "KEACH",
+    "clue" : "Stacy of \"Prison Break\"",
+    "x" : 8,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "KINDOF",
+    "clue" : "Somewhat",
+    "x" : 8,
+    "y" : 4,
+    "dir" : "South"
+  }, {
+    "word" : "EXES",
+    "clue" : "They've split",
+    "x" : 9,
+    "y" : 4,
+    "dir" : "South"
+  }, {
+    "word" : "NETFLIXQUEUE",
+    "clue" : "Movie lover's request list",
+    "x" : 3,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "FRILLY",
+    "clue" : "Like some lingerie",
+    "x" : 6,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "LUNDI",
+    "clue" : "Dimanche follower",
+    "x" : 7,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "UNIT",
+    "clue" : "Foot or furlong, e.g.",
+    "x" : 13,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "EDDY",
+    "clue" : "Swirl around",
+    "x" : 14,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "ACTOR",
+    "clue" : "One with a part to play",
+    "x" : 0,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "ACAT",
+    "clue" : "\"There's more than one way to skin ___\"",
+    "x" : 0,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "COLA",
+    "clue" : "See 42-Down",
+    "x" : 1,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "THEXFILES",
+    "clue" : "Cigarette Smoking Man's show",
+    "x" : 2,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "RUNES",
+    "clue" : "Letters supposedly invented by Odin",
+    "x" : 6,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "AND",
+    "clue" : "Common connector",
+    "x" : 12,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "COHN",
+    "clue" : "Controversial 1950s attorney Roy",
+    "x" : 0,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "BINDS",
+    "clue" : "Ties up",
+    "x" : 5,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "BAAS",
+    "clue" : "Sounds heard by fleecers",
+    "x" : 5,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "ARID",
+    "clue" : "Not at all moist",
+    "x" : 11,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "AUDI",
+    "clue" : "Volkswagen Group subsidiary",
+    "x" : 11,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "ALE",
+    "clue" : "Drink that may be blonde",
+    "x" : 0,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "WALDO",
+    "clue" : "Young readers might look for him",
+    "x" : 4,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "WUSS",
+    "clue" : "Wimp",
+    "x" : 4,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "PUTTY",
+    "clue" : "Woodworking sealant",
+    "x" : 10,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "PEPSI",
+    "clue" : "With 33-Down, drink invented in 1898",
+    "x" : 10,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "TAXQUALIFIED",
+    "clue" : "Like some retirement accounts",
+    "x" : 0,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "QUEENS",
+    "clue" : "Jamaica's location",
+    "x" : 3,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "ISSUES",
+    "clue" : "Subscribers receive them",
+    "x" : 9,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "FUSSY",
+    "clue" : "Hard to please",
+    "x" : 2,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "SPIKES",
+    "clue" : "Adds liquor to",
+    "x" : 9,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "KAZOO",
+    "clue" : "Jug band instrument",
+    "x" : 12,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "EVENS",
+    "clue" : "Gets lumps out of",
+    "x" : 13,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "SASSY",
+    "clue" : "Prone to sarcastic replies",
+    "x" : 14,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "ARIES",
+    "clue" : "One of the fire signs",
+    "x" : 0,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "ATOM",
+    "clue" : "Scintilla",
+    "x" : 0,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "RAVE",
+    "clue" : "Party with electronic dance music",
+    "x" : 1,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "MASS",
+    "clue" : "Christmas Eve activity",
+    "x" : 7,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "MXCV",
+    "clue" : "LXXIII x XV",
+    "x" : 7,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "AQUA",
+    "clue" : "Water color",
+    "x" : 8,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "AVA",
+    "clue" : "Actress Gardner",
+    "x" : 12,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "TALE",
+    "clue" : "Chronicle",
+    "x" : 0,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "SEXQUIZZES",
+    "clue" : "Cosmo staples",
+    "x" : 5,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "SON",
+    "clue" : "\"Dombey and ___\" (Dickens novel)",
+    "x" : 5,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "ENO",
+    "clue" : "Rock producer Brian",
+    "x" : 6,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "ZIP",
+    "clue" : "Pizzazz",
+    "x" : 11,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "OVEN",
+    "clue" : "It heats the eats",
+    "x" : 0,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "ONCUE",
+    "clue" : "At the proper moment",
+    "x" : 5,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "IONS",
+    "clue" : "Alpha particles, for example",
+    "x" : 11,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "MESS",
+    "clue" : "Sticky situation",
+    "x" : 0,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "NOVAS",
+    "clue" : "Very distant explosions",
+    "x" : 5,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "POSY",
+    "clue" : "Bouquet",
+    "x" : 11,
+    "y" : 14,
+    "dir" : "East"
+  } ],
+  "title" : "Well, Excuse Me!",
+  "author" : "by Trip Payne"
+}

@@ -112,7 +112,7 @@ object Puz {
 
   def main(args: Array[String]) {
 
-    val json = decode(new FileInputStream("Cryptic238.puz"))
+    val json = decode(new FileInputStream("../data/sample/rankfile.puz"))
     println(Json.prettyPrint(json))
 
 

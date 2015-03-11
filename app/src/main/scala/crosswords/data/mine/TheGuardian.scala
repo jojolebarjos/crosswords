@@ -148,7 +148,7 @@ object TheGuardian {
 
   def main(args: Array[String]) {
 
-    val source = Source.fromFile("../sample/guardian-cryptic-26482.html")
+    val source = Source.fromFile("../data/sample/guardian-cryptic-26482.html")
     val json = Crossword.parse(source)
     println(Json.prettyPrint(json))
 
