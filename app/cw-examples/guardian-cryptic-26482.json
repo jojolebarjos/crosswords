@@ -1,0 +1,164 @@
+{
+  "source" : "The Guardian",
+  "id" : "crossword-ag5zfngtcHV6emxlLWhyZHIWCxIJQ3Jvc3N3b3JkGICAgIDR3ZMJDA",
+  "url" : "http://www.theguardian.com/crosswords/cryptic/26482",
+  "author" : "Pasquale",
+  "date" : "2015-01-30",
+  "words" : [ {
+    "word" : "TANGELO",
+    "clue" : "Fruit to set around throne? (7)",
+    "x" : 8,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "EROSIVE",
+    "clue" : "Following pagan god, this writer has to be caustic (7)",
+    "x" : 0,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "BLUEBOTTLE",
+    "clue" : "Fly low with courage (10)",
+    "x" : 8,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "ROOF",
+    "clue" : "Page from mathematical demonstration that may go over one's head (4)",
+    "x" : 2,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "SPUR",
+    "clue" : "Prompt jet has cut time (4)",
+    "x" : 0,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "DRAWER",
+    "clue" : "Artist showing a bit of chest",
+    "x" : 10,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "DAIL",
+    "clue" : "Irish house cleaner with no end of blarney (4)",
+    "x" : 12,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "FLOUNDER",
+    "clue" : "Struggle, having run aground crossing lake (8)",
+    "x" : 7,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "RAPIER",
+    "clue" : "Turned back when pierced by very good sword (6)",
+    "x" : 9,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "ILTROVATORE",
+    "clue" : "Traitor mixed up with love in opera (2,9)",
+    "x" : 0,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "SOLEMN",
+    "clue" : "About original moon-lander, boy gets serious (6)",
+    "x" : 0,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "SUDDENDEATH",
+    "clue" : "Dad enthused about extra period of play (6,5)",
+    "x" : 4,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "MEAGRE",
+    "clue" : "Pasquale given less than full assent? That's mean! (6)",
+    "x" : 0,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "RIFLEMAN",
+    "clue" : "Soldier runs, if pursued by old lover (8)",
+    "x" : 0,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "INSPADES",
+    "clue" : "Decidedly snide, nasty about Harrogate, say (2,6)",
+    "x" : 4,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "LEGALIST",
+    "clue" : "Stickler getting on with the most celebrated people (8)",
+    "x" : 12,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "MISSIVES",
+    "clue" : "Fails to pen four letters, maybe (8)",
+    "x" : 0,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "ARUMDO",
+    "clue" : "Fuss about drink — situation causing disapproval? (1,3,2)",
+    "x" : 4,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "FETCHING",
+    "clue" : "Attractive task for one on an errand? (8)",
+    "x" : 7,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "ABLATION",
+    "clue" : "Removal of a charitable offering presented without love (8)",
+    "x" : 2,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "PENTAD",
+    "clue" : "Ten awkward in accommodation for five (6)",
+    "x" : 9,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "PTOMAINE",
+    "clue" : "Self-consumed radical polemicist producing poisonous stuff (8)",
+    "x" : 0,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "PUNCHEON",
+    "clue" : "Drink a very long time — one has several gallons (8)",
+    "x" : 10,
+    "y" : 0,
+    "dir" : "South"
+  }, {
+    "word" : "RAGE",
+    "clue" : "Student event with energy and passion (4)",
+    "x" : 14,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "ABERDONIAN",
+    "clue" : "Scot had one bairn, struggling without husband (10)",
+    "x" : 6,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "BOTHERED",
+    "clue" : "Troubled and more like an invalid, it seems (8)",
+    "x" : 14,
+    "y" : 6,
+    "dir" : "South"
+  } ]
+}
