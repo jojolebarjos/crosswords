@@ -38,6 +38,8 @@ object TheGuardian {
     ...
     var path = "http://www.theguardian.com/crosswords/cryptic/26482";
     ...
+    <h1>Quick crossword No 13,988</h1>
+    ...
     <ul class="article-attributes">
 			<li class="byline">Set by <a href="http://www.theguardian.com/profile/pasquale">Pasquale</a></li>
 			<li class="publication"><a href="http://www.theguardian.com/theguardian">The Guardian</a>, Friday 30 January 2015 00.00 GMT</li>
@@ -65,6 +67,7 @@ object TheGuardian {
     private val _begin = """<div class="crossword">"""
     private val _end = """<div id="crossword-help">"""
 
+    private val _title = """<h1>([^<]*)</h1>""".r
     private val _url = """var path = "([^"]*)"""".r
     private val _author = """<ul class="article-attributes">\s*<li class="byline">Set by <a href="[^"]*">([^<]*)</a></li>""".r
     private val _date = """<li class="publication"><a href="[^"]*">[^<]*</a>, ([^<]+)</li>""".r
@@ -86,13 +89,17 @@ object TheGuardian {
         "language" -> "eng"
       )
 
+      // Try to get title
+      val title = _title.findFirstMatchIn(content).map(_.group(1))
+      if (title.isDefined) {
+        json += "title" -> Json.toJson(title.get)
+        json += "category" -> Json.toJson(title.get.split(" ").head)
+      }
+
       // Try to get url
       val url = _url.findFirstMatchIn(content).map(_.group(1))
-      if (url.isDefined) {
+      if (url.isDefined)
         json += "url" -> Json.toJson(url.get)
-        val category = url.get.split("/").init.last
-        json += "category" -> Json.toJson(category)
-      }
 
       // Try to get author
       val author = _author.findFirstMatchIn(content).map(_.group(1))

@@ -52,6 +52,6 @@ object Vec {
   val eX = Vec(1, 0)
   val eY = Vec(0, 1)
 
-  def apply(s: Int) = Vec(s, s)
+  def apply(s: Int): Vec = Vec(s, s)
 
 }
