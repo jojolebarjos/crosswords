@@ -15,9 +15,11 @@ import org.joda.time.format.ISODateTimeFormat
  */
 case class Grid(words: immutable.Seq[WordClue], args: immutable.Map[String, JsValue]) {
 
+  def title: Option[String] = args.get("title").flatMap(_.asOpt[String])
   def url: Option[String] = args.get("url").flatMap(_.asOpt[String])
   def source: Option[String] = args.get("source").flatMap(_.asOpt[String])
-  def themes: Option[immutable.Seq[String]] = args.get("themes").flatMap(_.asOpt[Vector[String]])
+  def categories: Option[immutable.Seq[String]] = args.get("categories").flatMap(_.asOpt[Vector[String]])
+  def author: Option[String] = args.get("author").flatMap(_.asOpt[String])
   def difficulty: Option[Int] = args.get("difficulty").flatMap(_.asOpt[Int])
   def date: Option[DateTime] = args.get("date").flatMap(_.asOpt[String]).flatMap(s => try{Option(DateTime.parse(s, ISODateTimeFormat.yearMonthDay))} catch {case e:IllegalArgumentException => None})
   def language: Option[String] = args.get("language").flatMap(_.asOpt[String])
@@ -63,7 +65,6 @@ case class Grid(words: immutable.Seq[WordClue], args: immutable.Map[String, JsVa
 
 object Grid {
   def fromJSON(input: String): Option[Grid] = {
-    //val grid = Json.parse(input) \ "grid"
     val grid = Json.parse(input)
     val argsOpt = grid.asOpt[immutable.Map[String, JsValue]]
     argsOpt match {

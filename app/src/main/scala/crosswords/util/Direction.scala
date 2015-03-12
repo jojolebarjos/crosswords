@@ -18,6 +18,12 @@ object Direction {
     case _ => throw new NoSuchElementException(name)
   }
 
+  def fromString(name: String): Option[Direction] = try {
+    Option(Direction(name))
+  } catch {
+    case e:NoSuchElementException => None
+  }
+
 }
 
 case object North extends Direction

@@ -21,7 +21,7 @@ object WordClue {
     val clue = (jsValue \ "clue").asOpt[String]
     val x = (jsValue \ "x").asOpt[Int]
     val y = (jsValue \ "y").asOpt[Int]
-    val direction = (jsValue \ "dir").asOpt[String].flatMap(dir => try {Option(Direction(dir))} catch {case e: NoSuchElementException => None})
+    val direction = (jsValue \ "dir").asOpt[String].flatMap(Direction.fromString)
 
     if (List(word, clue, x, y, direction).forall(_.isDefined)) {
       Some(WordClue(word.get, clue.get, x.get, y.get, direction.get))
