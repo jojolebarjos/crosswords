@@ -76,6 +76,11 @@ object TheGuardian {
   private val _dateformatout = new SimpleDateFormat("yyyy-MM-dd")
   _dateformatout.setTimeZone(TimeZone.getTimeZone("GMT"))
 
+  /**
+   * Parse crosswords from HTML text.
+   * @param source source to parse
+   * @return a JSON representation of the crossword
+   */
   def parse(source: Source): JsObject = {
 
     // Prepare interesting data
@@ -127,6 +132,10 @@ object TheGuardian {
       m.group(3).trim
     )).toMap
 
+    // TODO extract word size(s) from definition, and split words
+
+    // TODO support multicolumn words?
+
     // Join locations, solutions and clues
     val words = locations.map { case (k, Vec(x, y)) => Json.obj(
       "word" -> solutions(k),
@@ -135,7 +144,11 @@ object TheGuardian {
       "y" -> y,
       "dir" -> k._2.toString
     )}.toVector
+    if (words.isEmpty)
+      throw new NoSuchElementException("empty crossword")
     json += "words" -> Json.toJson(words)
+
+    // TODO if no word, or incomplete definition, throw exception
 
     // Done
     json
@@ -148,16 +161,6 @@ object TheGuardian {
 
   private val _root = "http://www.theguardian.com/crosswords/"
   private val _folder = "../data/guardian/"
-
-  private val _categories = Seq(
-    "quick",
-    "cryptic",
-    //"prize", do not have solutions
-    "quiptic",
-    "speedy",
-    "everyman"
-    // genius and azed are not in new format yet
-  )
 
   private def ensure(category: String, id: Int): Boolean = {
 
@@ -176,8 +179,10 @@ object TheGuardian {
 
       // Download HTML file
       println("downloading " + category + "/" + id + "...")
-      val html = Source.fromURL(_root + category + "/" + id).mkString
-      // TODO on failure, mark as inexisting
+      val html = try Source.fromURL(_root + category + "/" + id).mkString catch { case e: Exception =>
+        System.err.println("failed to wget " + category + "/" + id + " (" + e.getMessage + ")")
+        ""
+      }
 
       // Save content
       val out = new FileWriter(htmlFile)
@@ -187,12 +192,14 @@ object TheGuardian {
     }
 
     // Convert to JSON
-    val json = parse(Source.fromFile(htmlFile))
-    // TODO on failure, mark as irrelevant, not crash
+    val json = try Json.prettyPrint(parse(Source.fromFile(htmlFile))) catch { case e: Exception =>
+      System.err.println("failed to parse " + category + "/" + id + " (" + e.getMessage + ")")
+      ""
+    }
 
     // Save content
     val out = new FileWriter(jsonFile)
-    out.write(Json.prettyPrint(json))
+    out.write(json)
     out.close()
 
     println(category + "/" + id + " successfully exported!")
@@ -200,20 +207,28 @@ object TheGuardian {
 
   }
 
-  private def query(category: String, last: Int, max: Int) {
+  private def query(category: String, last: Int, max: Int, first: Int = 0) {
     var count = 0
     var id = last
-    while (count < max) {
-      if (ensure(category, id))
+    while (count < max && id >= first) {
+      if (ensure(category, id)) {
         count += 1
+        Thread.sleep(1000) // let the server breath a bit ;)
+      }
       id -= 1
-      // TODO sleep a bit to let the server breath XD
     }
   }
 
   def main(args: Array[String]) {
 
-    query("cryptic", 26482, 1)
+    query("quick", 13989, 100, 9093)
+    query("cryptic", 26517, 100, 21620)
+    query("quiptic", 799, 100, 1)
+    query("speedy", 1015, 100, 410)
+    query("everyman", 3570, 100, 2965)
+
+    // "prize" do not have solutions
+    // "genius" and "azed" are not in new format yet
 
   }
 
