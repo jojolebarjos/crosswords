@@ -41,8 +41,8 @@ case class Vec(x: Int, y: Int) {
   def max = math.max(x, y)
   def min = math.min(x, y)
 
-  def clockwise = Vec(y, -x)
-  def counterclockwise = Vec(-y, x)
+  def clockwise = Vec(-y, x)
+  def counterclockwise = Vec(y, -x)
 
 }
 
@@ -53,5 +53,11 @@ object Vec {
   val eY = Vec(0, 1)
 
   def apply(s: Int): Vec = Vec(s, s)
+  def apply(dir: Direction): Vec = dir match {
+    case North => Vec(0, -1)
+    case East => Vec(1, 0)
+    case South => Vec(0, 1)
+    case West => Vec(-1, 0)
+  }
 
 }

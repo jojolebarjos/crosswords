@@ -6,7 +6,11 @@ package crosswords.util
 /**
  * @author Johan Berdat
  */
-sealed trait Direction
+sealed trait Direction {
+
+  def toVec = Vec(this)
+
+}
 
 object Direction {
 
