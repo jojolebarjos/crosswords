@@ -1,0 +1,836 @@
+{
+  "source" : "Puzzles by Jim",
+  "url" : "http://www.puzzlesbyjim.com/challenge--9.html",
+  "title" : "Challenge #9",
+  "author" : "Jim",
+  "language" : "eng",
+  "words" : [ {
+    "word" : "ONE",
+    "clue" : "Four quarters",
+    "x" : 7,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "ELAN",
+    "clue" : "Flair",
+    "x" : 1,
+    "y" : 20,
+    "dir" : "East"
+  }, {
+    "word" : "GAG",
+    "clue" : "Joke",
+    "x" : 7,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "GUSTAV",
+    "clue" : "Composer Mahler",
+    "x" : 7,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "PUNT",
+    "clue" : "Fourth down option",
+    "x" : 15,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "PTS",
+    "clue" : "Quart divs.",
+    "x" : 1,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "ROME",
+    "clue" : "Capital of 59-Down",
+    "x" : 7,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "WHITE",
+    "clue" : "Betty or Barry",
+    "x" : 1,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "WISP",
+    "clue" : "Bit of smoke",
+    "x" : 1,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "NUTTY",
+    "clue" : "Off one's rocker",
+    "x" : 17,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "DHOLE",
+    "clue" : "Wild dog of Asia",
+    "x" : 2,
+    "y" : 17,
+    "dir" : "South"
+  }, {
+    "word" : "LOG",
+    "clue" : "Record of events",
+    "x" : 14,
+    "y" : 19,
+    "dir" : "South"
+  }, {
+    "word" : "ASHRAM",
+    "clue" : "Hindu hermitage",
+    "x" : 6,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "TENT",
+    "clue" : "Campsite dwelling",
+    "x" : 1,
+    "y" : 21,
+    "dir" : "East"
+  }, {
+    "word" : "ENDED",
+    "clue" : "Came to a conclusion",
+    "x" : 11,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "LED",
+    "clue" : "Showed the way",
+    "x" : 13,
+    "y" : 19,
+    "dir" : "South"
+  }, {
+    "word" : "ANIME",
+    "clue" : "Japanese cartoon art",
+    "x" : 14,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "EDMUND",
+    "clue" : "Mountain climber Hillary",
+    "x" : 3,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "PREVENTS",
+    "clue" : "Stops something from happening",
+    "x" : 20,
+    "y" : 14,
+    "dir" : "South"
+  }, {
+    "word" : "WYCHELM",
+    "clue" : "Eurasian tree often planted for shade: 2 wds",
+    "x" : 11,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "EGO",
+    "clue" : "Sense of self",
+    "x" : 6,
+    "y" : 14,
+    "dir" : "South"
+  }, {
+    "word" : "SLOBBER",
+    "clue" : "Drool",
+    "x" : 5,
+    "y" : 13,
+    "dir" : "South"
+  }, {
+    "word" : "OPUS",
+    "clue" : "Major work",
+    "x" : 18,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "ONTHEGO",
+    "clue" : "Very busy: Hyph",
+    "x" : 18,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "SAREE",
+    "clue" : "Eastern wrap: Var",
+    "x" : 21,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "DARWIN",
+    "clue" : "Evolution Theory writer",
+    "x" : 13,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "NED",
+    "clue" : "Beatty of \"Deliverance\"",
+    "x" : 13,
+    "y" : 17,
+    "dir" : "East"
+  }, {
+    "word" : "BELLRINGING",
+    "clue" : "Yuletide activity of many Salvation Army volunteers: 2 wds",
+    "x" : 11,
+    "y" : 19,
+    "dir" : "East"
+  }, {
+    "word" : "RACOON",
+    "clue" : "\"Rocky __\" (Beatles tune)",
+    "x" : 2,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "PIG",
+    "clue" : "Arnold Ziffel or Porky",
+    "x" : 16,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "PAD",
+    "clue" : "Steno's need",
+    "x" : 16,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "REEVE",
+    "clue" : "One of the Canterbury pilgrims",
+    "x" : 17,
+    "y" : 17,
+    "dir" : "East"
+  }, {
+    "word" : "CAN",
+    "clue" : "Give someone a pink slip",
+    "x" : 19,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "MANTRAP",
+    "clue" : "Seductive woman, slangily",
+    "x" : 6,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "SCROD",
+    "clue" : "Young haddock",
+    "x" : 15,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "AVARICES",
+    "clue" : "Greedy desires",
+    "x" : 3,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "CAR",
+    "clue" : "Mercury or Saturn",
+    "x" : 9,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "BASE",
+    "clue" : "Foundation",
+    "x" : 13,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "BOARD",
+    "clue" : "Supervisory committee",
+    "x" : 13,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "MOOCOW",
+    "clue" : "Children's cry at a dairy farm? : Hyph",
+    "x" : 6,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "MIME",
+    "clue" : "Act dumb?",
+    "x" : 6,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "LEVATOR",
+    "clue" : "Muscle used to lift a body part such as an eyelid",
+    "x" : 4,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "ONCE",
+    "clue" : "Singular event",
+    "x" : 13,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "OCTOPI",
+    "clue" : "Tentacled sea creatures",
+    "x" : 19,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "SHAMEFACEDLY",
+    "clue" : "In a sheepish manner",
+    "x" : 1,
+    "y" : 18,
+    "dir" : "East"
+  }, {
+    "word" : "INFAMY",
+    "clue" : "\"A date which will live in __\"",
+    "x" : 6,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "OFT",
+    "clue" : "Frequently",
+    "x" : 8,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "SENSE",
+    "clue" : "Like touch or smell",
+    "x" : 17,
+    "y" : 5,
+    "dir" : "East"
+  }, {
+    "word" : "YETI",
+    "clue" : "Himalayan bigfoot",
+    "x" : 12,
+    "y" : 18,
+    "dir" : "South"
+  }, {
+    "word" : "BARRE",
+    "clue" : "Guitar chord where one finger frets two or more strings",
+    "x" : 16,
+    "y" : 18,
+    "dir" : "East"
+  }, {
+    "word" : "BITS",
+    "clue" : "A byte has 8 of them",
+    "x" : 16,
+    "y" : 18,
+    "dir" : "South"
+  }, {
+    "word" : "USERS",
+    "clue" : "Surfers, in a way",
+    "x" : 20,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "OCULI",
+    "clue" : "Peepers",
+    "x" : 8,
+    "y" : 17,
+    "dir" : "South"
+  }, {
+    "word" : "ITALY",
+    "clue" : "Europe's 'boot'",
+    "x" : 10,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "INCOMMUTABLE",
+    "clue" : "Unable to be changed",
+    "x" : 1,
+    "y" : 6,
+    "dir" : "East"
+  }, {
+    "word" : "LADIDA",
+    "clue" : "Affectedly genteel: Hyph",
+    "x" : 1,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "OMIT",
+    "clue" : "Leave out",
+    "x" : 10,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "SOBEREDUP",
+    "clue" : "Let the booze wear off: 2 wds",
+    "x" : 1,
+    "y" : 19,
+    "dir" : "East"
+  }, {
+    "word" : "ACME",
+    "clue" : "Highest point",
+    "x" : 1,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "MEAL",
+    "clue" : "Breakfast, lunch, or dinner",
+    "x" : 1,
+    "y" : 1,
+    "dir" : "East"
+  }, {
+    "word" : "MPG",
+    "clue" : "It's higher on the hwy.",
+    "x" : 1,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "AVIARY",
+    "clue" : "Birdhouse, in a way",
+    "x" : 13,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "PRESERVATIONISTS",
+    "clue" : "Folks who maintain historical sites and such",
+    "x" : 1,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "PLASMA",
+    "clue" : "4th state of matter in physics",
+    "x" : 1,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "STEALER",
+    "clue" : "Thief",
+    "x" : 16,
+    "y" : 10,
+    "dir" : "South"
+  }, {
+    "word" : "EELS",
+    "clue" : "Snaky swimmers",
+    "x" : 16,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "ORALS",
+    "clue" : "Some exams",
+    "x" : 7,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "YORE",
+    "clue" : "Bygone days",
+    "x" : 21,
+    "y" : 14,
+    "dir" : "South"
+  }, {
+    "word" : "ANYONE",
+    "clue" : "No particular person",
+    "x" : 21,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "PSEUDO",
+    "clue" : "Prefix meaning not real",
+    "x" : 12,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "PENCE",
+    "clue" : "You need 100 to make a pound",
+    "x" : 12,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "RIDGES",
+    "clue" : "Raised borders or margins",
+    "x" : 11,
+    "y" : 21,
+    "dir" : "East"
+  }, {
+    "word" : "OCTANE",
+    "clue" : "Station identification?",
+    "x" : 4,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "OSIER",
+    "clue" : "Willow twig used in basket making",
+    "x" : 4,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "EVINCE",
+    "clue" : "Show clearly",
+    "x" : 14,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "TIDIED",
+    "clue" : "Cleaned up a bit",
+    "x" : 15,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "BODICERIPPER",
+    "clue" : "Steamy romance novel where the heroine is usually ravished: 2 wds",
+    "x" : 10,
+    "y" : 16,
+    "dir" : "East"
+  }, {
+    "word" : "BED",
+    "clue" : "Hospital unit",
+    "x" : 10,
+    "y" : 16,
+    "dir" : "South"
+  }, {
+    "word" : "UNITY",
+    "clue" : "Togetherness",
+    "x" : 18,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "SPY",
+    "clue" : "Intelligence agent",
+    "x" : 19,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "SUPERIOR",
+    "clue" : "Higher in rank",
+    "x" : 19,
+    "y" : 14,
+    "dir" : "South"
+  }, {
+    "word" : "PEAS",
+    "clue" : "Pod dwellers",
+    "x" : 14,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "BAD",
+    "clue" : "Disobedient",
+    "x" : 10,
+    "y" : 6,
+    "dir" : "South"
+  }, {
+    "word" : "PECAN",
+    "clue" : "A kind of nut",
+    "x" : 11,
+    "y" : 9,
+    "dir" : "East"
+  }, {
+    "word" : "POETS",
+    "clue" : "Verse writers",
+    "x" : 11,
+    "y" : 9,
+    "dir" : "South"
+  }, {
+    "word" : "RODEO",
+    "clue" : "Cowboy competition",
+    "x" : 7,
+    "y" : 17,
+    "dir" : "East"
+  }, {
+    "word" : "RADON",
+    "clue" : "Hazardous gas",
+    "x" : 7,
+    "y" : 17,
+    "dir" : "South"
+  }, {
+    "word" : "GRAVIMETRIC",
+    "clue" : "Of or relating to hydrometry",
+    "x" : 1,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "ANDROGENS",
+    "clue" : "They'll make a boy into a man",
+    "x" : 1,
+    "y" : 15,
+    "dir" : "East"
+  }, {
+    "word" : "SNIT",
+    "clue" : "Foul mood",
+    "x" : 6,
+    "y" : 21,
+    "dir" : "East"
+  }, {
+    "word" : "TEC",
+    "clue" : "Another name for a 67-Across",
+    "x" : 10,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "FESS",
+    "clue" : "Classic TV actor Parker",
+    "x" : 6,
+    "y" : 18,
+    "dir" : "South"
+  }, {
+    "word" : "EURO",
+    "clue" : "Mark's replacement",
+    "x" : 18,
+    "y" : 15,
+    "dir" : "East"
+  }, {
+    "word" : "EPERGNE",
+    "clue" : "Large decorative centerpiece",
+    "x" : 18,
+    "y" : 15,
+    "dir" : "South"
+  }, {
+    "word" : "TRADE",
+    "clue" : "Line of work",
+    "x" : 2,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "SATNAV",
+    "clue" : "GPS, for example: Hyph",
+    "x" : 20,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "MON",
+    "clue" : "Sun follower?",
+    "x" : 1,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "APPALOOSA",
+    "clue" : "Breed of horse",
+    "x" : 13,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "ASCI",
+    "clue" : "Fungal spore sacs",
+    "x" : 13,
+    "y" : 7,
+    "dir" : "South"
+  }, {
+    "word" : "DEPOT",
+    "clue" : "Train stop",
+    "x" : 9,
+    "y" : 17,
+    "dir" : "South"
+  }, {
+    "word" : "RUE",
+    "clue" : "Show remorse",
+    "x" : 15,
+    "y" : 19,
+    "dir" : "South"
+  }, {
+    "word" : "ENE",
+    "clue" : "Needle point?",
+    "x" : 12,
+    "y" : 4,
+    "dir" : "South"
+  }, {
+    "word" : "THERMOSPHERE",
+    "clue" : "Atmospheric layer between the mesosphere and the exosphere",
+    "x" : 10,
+    "y" : 4,
+    "dir" : "East"
+  }, {
+    "word" : "IDEM",
+    "clue" : "Footnote word",
+    "x" : 5,
+    "y" : 3,
+    "dir" : "South"
+  }, {
+    "word" : "ADLIB",
+    "clue" : "Go off script: Hyph",
+    "x" : 1,
+    "y" : 17,
+    "dir" : "East"
+  }, {
+    "word" : "ASSET",
+    "clue" : "Liability's opposite",
+    "x" : 1,
+    "y" : 17,
+    "dir" : "South"
+  }, {
+    "word" : "GET",
+    "clue" : "Obtain",
+    "x" : 21,
+    "y" : 19,
+    "dir" : "South"
+  }, {
+    "word" : "SOURS",
+    "clue" : "Goes bad",
+    "x" : 1,
+    "y" : 13,
+    "dir" : "East"
+  }, {
+    "word" : "RAIMENT",
+    "clue" : "Attire",
+    "x" : 4,
+    "y" : 15,
+    "dir" : "South"
+  }, {
+    "word" : "EPSILON",
+    "clue" : "5th letter of the Greek alphabet",
+    "x" : 17,
+    "y" : 3,
+    "dir" : "South"
+  }, {
+    "word" : "NASA",
+    "clue" : "Astronaut's insignia",
+    "x" : 18,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "INTEND",
+    "clue" : "Have in mind",
+    "x" : 5,
+    "y" : 8,
+    "dir" : "East"
+  }, {
+    "word" : "ICED",
+    "clue" : "Decorated a cake",
+    "x" : 5,
+    "y" : 8,
+    "dir" : "South"
+  }, {
+    "word" : "SOLO",
+    "clue" : "Unaccompanied",
+    "x" : 6,
+    "y" : 20,
+    "dir" : "East"
+  }, {
+    "word" : "PATEN",
+    "clue" : "Eucharistic plate",
+    "x" : 19,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "PRIVATEDETECTIVE",
+    "clue" : "Like Sam Spade or Phillip Marlowe: 2 wds",
+    "x" : 6,
+    "y" : 12,
+    "dir" : "East"
+  }, {
+    "word" : "SUER",
+    "clue" : "One who brings court action",
+    "x" : 1,
+    "y" : 7,
+    "dir" : "East"
+  }, {
+    "word" : "AIRLETTER",
+    "clue" : "Mail that is transported by plane: 2 wds",
+    "x" : 13,
+    "y" : 3,
+    "dir" : "East"
+  }, {
+    "word" : "TOWNIE",
+    "clue" : "Non-student resident in a college town",
+    "x" : 11,
+    "y" : 15,
+    "dir" : "East"
+  }, {
+    "word" : "TOOLBAR",
+    "clue" : "Item in a modern computer program",
+    "x" : 11,
+    "y" : 15,
+    "dir" : "South"
+  }, {
+    "word" : "PAVE",
+    "clue" : "Cover with asphalt",
+    "x" : 1,
+    "y" : 2,
+    "dir" : "East"
+  }, {
+    "word" : "TAIPAN",
+    "clue" : "Poisonous snake of Australia",
+    "x" : 16,
+    "y" : 11,
+    "dir" : "East"
+  }, {
+    "word" : "EARTHNUT",
+    "clue" : "Truffle",
+    "x" : 2,
+    "y" : 1,
+    "dir" : "South"
+  }, {
+    "word" : "LABAN",
+    "clue" : "Hungarian choreographer Rudolph",
+    "x" : 3,
+    "y" : 17,
+    "dir" : "South"
+  }, {
+    "word" : "IRON",
+    "clue" : "Pressing need?",
+    "x" : 8,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "ATEOUT",
+    "clue" : "Went to the restaurant: 2 wds",
+    "x" : 11,
+    "y" : 20,
+    "dir" : "East"
+  }, {
+    "word" : "ATHENA",
+    "clue" : "Greek Goddess of wisdom",
+    "x" : 8,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "ERST",
+    "clue" : "Formerly, formerly",
+    "x" : 18,
+    "y" : 21,
+    "dir" : "East"
+  }, {
+    "word" : "LEMONY",
+    "clue" : "Tart",
+    "x" : 5,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "ACRE",
+    "clue" : "Square measure",
+    "x" : 17,
+    "y" : 11,
+    "dir" : "South"
+  }, {
+    "word" : "VANS",
+    "clue" : "Mover's trucks",
+    "x" : 9,
+    "y" : 12,
+    "dir" : "South"
+  }, {
+    "word" : "NONO",
+    "clue" : "Taboo: Hyph",
+    "x" : 18,
+    "y" : 10,
+    "dir" : "East"
+  }, {
+    "word" : "GARNET",
+    "clue" : "January's birthstone",
+    "x" : 9,
+    "y" : 5,
+    "dir" : "South"
+  }, {
+    "word" : "NOTE",
+    "clue" : "A, B, or C but not X, Y, or Z",
+    "x" : 18,
+    "y" : 20,
+    "dir" : "East"
+  }, {
+    "word" : "ABO",
+    "clue" : "Blood letters",
+    "x" : 4,
+    "y" : 16,
+    "dir" : "East"
+  }, {
+    "word" : "BRIDLE",
+    "clue" : "Horse's headgear",
+    "x" : 12,
+    "y" : 14,
+    "dir" : "East"
+  }, {
+    "word" : "BOD",
+    "clue" : "Physique, informally",
+    "x" : 12,
+    "y" : 14,
+    "dir" : "South"
+  }, {
+    "word" : "IRAN",
+    "clue" : "Persia, today",
+    "x" : 17,
+    "y" : 16,
+    "dir" : "South"
+  } ]
+}
