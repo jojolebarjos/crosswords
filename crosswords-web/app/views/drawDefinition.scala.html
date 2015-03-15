@@ -1,0 +1,7 @@
+@(crossword: Crossword)
+
+<ol type="1">
+@for(definition <- crossword.getDefinitions) {
+    <li id="txtdef">@definition</li>
+}
+</ol>

@@ -1,0 +1,53 @@
+@(crossword: Crossword)
+
+@getTdId(i: Int, j: Int) = @{
+    if (crossword.isCellEmpty(i,j) || crossword.isCellCorrect(i,j)) {
+        "cw"
+    } else {
+        "cwred"
+    }
+}
+
+@getInputId(i: Int, j: Int) = @{
+    if (crossword.isCellEmpty(i,j) || crossword.isCellCorrect(i,j)) {
+        "txtcell"
+    } else {
+        "txtcellred"
+    }
+}
+
+<table id="cw">
+    @for(i <- 0 to crossword.getHeight - 1) {
+        <tr id="cw">
+            @for(j <- 0 to crossword.getWidth - 1) {
+                @if(crossword.isCellText(i,j)) {
+                    <td id=@getTdId(i, j)>
+                        @if(crossword.isFirstWordCell(i,j)) {
+                            @if(crossword.isCellEmpty(i,j)) {
+                                <input id=@getInputId(i, j) type="text" maxlength="1" placeholder=@crossword.getCellDefaultValue(i, j) name=@{"cells[" + crossword.getCellNumber(i,j) + "]"}>
+                            } else {
+                                @if(crossword.isCellCorrect(i,j)) {
+                                    <input id=@getInputId(i, j) type="text" maxlength="1" value=@crossword.getCellValue(i,j) name=@{"cells[" + crossword.getCellNumber(i,j) + "]"}>
+                                } else {
+                                    <input id=@getInputId(i, j) type="text" maxlength="1" placeholder=@crossword.getCellDefaultValue(i, j) name=@{"cells[" + crossword.getCellNumber(i,j) + "]"}>
+                                }
+                            }
+                        } else {
+                            @if(crossword.isCellEmpty(i,j)) {
+                                <input id=@getInputId(i, j) type="text" maxlength="1" name=@{"cells[" + crossword.getCellNumber(i,j) + "]"}>
+                            } else {
+                                @if(crossword.isCellCorrect(i,j)) {
+                                    <input id=@getInputId(i, j) type="text" maxlength="1" value=@crossword.getCellValue(i,j) name=@{"cells[" + crossword.getCellNumber(i,j) + "]"}>
+                                } else {
+                                    <input id=@getInputId(i, j) type="text" maxlength="1" name=@{"cells[" + crossword.getCellNumber(i,j) + "]"}>
+                                }
+                            }
+                        }
+                    </td>
+                } else {
+                    <td id="cwbl"></td>
+                }
+            }
+        </tr>
+    }
+</table>

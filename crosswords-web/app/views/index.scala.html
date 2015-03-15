@@ -1,0 +1,23 @@
+@(message: String, crossword: Crossword)
+
+@main(message) {
+    <div id="mainDiv">
+        <h1>Crosswords</h1>
+
+        <form method="POST">
+            <table>
+                <tr><td>
+                    <table>
+                        <tr>
+                            <td> @drawCrossword(crossword) </td>
+                            <td> @drawDefinition(crossword) </td>
+                        </tr>
+                    </table>
+                </td></tr>
+                <tr><td>
+                    @boutonCheck()
+                </td></tr>
+            </table>
+        </form>
+    </div>
+}
