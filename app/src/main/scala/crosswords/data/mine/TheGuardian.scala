@@ -148,8 +148,6 @@ object TheGuardian {
       throw new NoSuchElementException("empty crossword")
     json += "words" -> Json.toJson(words)
 
-    // TODO if no word, or incomplete definition, throw exception
-
     // Done
     json
 
@@ -162,12 +160,12 @@ object TheGuardian {
   private val _root = "http://www.theguardian.com/crosswords/"
   private val _folder = "../data/guardian/"
 
-  private def ensure(category: String, id: Int): Boolean = {
+  private def ensure(category: String, id: Int) {
 
     // Do nothing if there already is the JSON file
     val jsonFile = new File(_folder + category + "/" + id + ".json")
     if (jsonFile.exists())
-      return false
+      return
 
     // Check if the HTML file exists
     val htmlFile = new File(_folder + category + "/" + id + ".html")
@@ -179,8 +177,9 @@ object TheGuardian {
 
       // Download HTML file
       println("downloading " + category + "/" + id + "...")
+      //Thread.sleep(1000) // let the server breath a bit ;)
       val html = try Source.fromURL(_root + category + "/" + id).mkString catch { case e: Exception =>
-        System.err.println("failed to wget " + category + "/" + id + " (" + e.getMessage + ")")
+        System.err.println("failed to get " + category + "/" + id + " (" + e.getMessage + ")")
         ""
       }
 
@@ -203,29 +202,24 @@ object TheGuardian {
     out.close()
 
     println(category + "/" + id + " successfully exported!")
-    true
 
   }
 
-  private def query(category: String, last: Int, max: Int, first: Int = 0) {
-    var count = 0
+  private def query(category: String, last: Int, first: Int = 0) {
     var id = last
-    while (count < max && id >= first) {
-      if (ensure(category, id)) {
-        count += 1
-        Thread.sleep(1000) // let the server breath a bit ;)
-      }
+    while (id >= first) {
+      ensure(category, id)
       id -= 1
     }
   }
 
   def main(args: Array[String]) {
 
-    query("quick", 13989, 100, 9093)
-    query("cryptic", 26517, 100, 21620)
-    query("quiptic", 799, 100, 1)
-    query("speedy", 1015, 100, 410)
-    query("everyman", 3570, 100, 2965)
+    query("quick", 13989, 9093)
+    query("cryptic", 26517, 21620)
+    query("quiptic", 799, 1)
+    query("speedy", 1015, 410)
+    query("everyman", 3570, 2965)
 
     // "prize" do not have solutions
     // "genius" and "azed" are not in new format yet
