@@ -1,0 +1,59 @@
+@(crossword: Crossword)
+
+@*
+    TODO
+    - auto move to next cell when typing
+    - move using arrows
+    - solve letter/word/puzzle buttons
+    ...
+*@
+
+@grid() = {
+    <table class="grid" cellspacing="0" cellpadding="0">
+		<tbody>
+		    @for(y <- 0 until crossword.height) {
+		        <tr>
+    			@for(x <- 0 until crossword.width) {
+    			
+    			    @crossword.grid(Vec(x, y)) match {
+    			    
+    			        case (' ', _) => {
+    			            <td class="black"/>
+    			        }
+    			        
+    			        case (c, 0) => {
+    			            <td class="white">
+    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}">
+    			            </td>
+    			        }
+    			        
+    			        case (c, i) => {
+    			            <td class="white">
+    			                <span class="number">@i</span>
+    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}">
+    			            </td>
+    			        }
+    			        
+    			    }
+    			    
+    			}
+    			</tr>
+		    }
+		</tbody>
+	</table>
+}
+
+@list(title: String, values: Seq[(Int, String)]) = {
+    <h2>@title</h2>
+    <ul class="clues">
+        @for((i, c) <- values) {
+            <li><b>@i</b> @c</li>
+        }
+    </ul>
+}
+
+@main("Crosswords") {
+    @grid()
+    @list("Across", crossword.across)
+    @list("Down", crossword.down)
+}

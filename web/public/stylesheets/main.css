@@ -1,0 +1,49 @@
+
+.grid {
+	border-collapse: collapse;
+	border-right: #111111 solid 1px;
+	border-bottom: #111111 solid 1px;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.white {
+	width: 32pt;
+	height: 32pt;
+	background-color: #EEEEEE;
+	border-left: #111111 solid 1px;
+	border-top: #111111 solid 1px;
+}
+
+.black {
+	width: 32pt;
+	height: 32pt;
+	background-color: #111111;
+	border-left: #111111 solid 1px;
+	border-top: #111111 solid 1px;
+}
+
+.number {
+    z-index: 1;
+    position: absolute;
+    font-size: 8pt;
+    font-family: times, serif;
+    color: #999999;
+    background-color: transparent;
+}
+
+.cell {
+    z-index: 2;
+	vertical-align: middle;
+	text-align: center;
+	font-size: 18pt;
+	outline: none;
+	border: solid 0 #EEEEEE;
+	margin: 0;
+	width: 24pt;
+	background-color: transparent;
+}
+
+.clues {
+    list-style: none;
+}
