@@ -71,14 +71,6 @@ object Mirror {
   private val format = new java.text.SimpleDateFormat("yyyyMMdd")
   private val _root = "http://s3.mirror.co.uk/mirror/crosswords/mir_"
 
-  /*
-   * straight : http://s3.mirror.co.uk/mirror/crosswords/mir_straight_20150317.html
-   * quick : http://s3.mirror.co.uk/mirror/crosswords/mir_2s_straight_20150316.html
-   * cryptic : http://s3.mirror.co.uk/mirror/crosswords/mir_2s_cryptic_20150317.html
-   * quiz : http://s3.mirror.co.uk/mirror/crosswords/mir_quizword_20150317.html
-   *
-   */
-
   private val _folder = "../data/mirror/"
 
   private def ensure(category: String, date: String) {
@@ -143,24 +135,13 @@ object Mirror {
 
   def main(args: Array[String]) {
 
-    //Gérer les dates :
-    //val format = new java.text.SimpleDateFormat("yyyyMMdd")
-    //format.format(new java.util.Date())
-    //format.parse("20150317")
-
     val today =  new Date()
     val last = format.parse("20140401") // 1st of April
 
-    //Manipuler des dates :
-    //Calendar c = Calendar.getInstance();
-    //c.setTime(dt);
-    //c.add(Calendar.DATE, 1);
-    //dt = c.getTime();
-
-    query("straight_", format.parse("20150310"), today)
-    //query("2s_straight_", last, today)
-    //query("2s_cryptic_", last, today)
-    //query("quizword_", last, today)
+    query("straight_", last, today)
+    query("2s_straight_", last, today)
+    query("2s_cryptic_", last, today)
+    query("quizword_", last, today)
 
   }
 

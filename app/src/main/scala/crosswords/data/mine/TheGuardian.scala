@@ -179,7 +179,7 @@ object TheGuardian {
       println("downloading " + category + "/" + id + "...")
       //Thread.sleep(1000) // let the server breath a bit ;)
       val html = try Source.fromURL(_root + category + "/" + id).mkString catch { case e: Exception =>
-        System.err.println("failed to wget " + category + "/" + id + " (" + e.getMessage + ")")
+        System.err.println("failed to get " + category + "/" + id + " (" + e.getMessage + ")")
         ""
       }
 
