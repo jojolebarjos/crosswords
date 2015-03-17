@@ -47,3 +47,12 @@
 .clues {
     list-style: none;
 }
+
+input#searchText {
+    border: none;
+    border-color: transparent;
+    width: 660px;
+    height: 25px;
+    font-size: 20px;
+    font-family: "Times New Roman";
+}

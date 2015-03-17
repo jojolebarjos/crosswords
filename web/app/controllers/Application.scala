@@ -7,7 +7,19 @@ import play.api.libs.json.{Json, JsObject, JsValue}
 object Application extends Controller {
 
   def index = Action {
+    Ok(views.html.index())
+  }
+
+  def crosswordPage = Action {
     Ok(views.html.crossword(crossword(0)))
+  }
+
+  def search = Action {
+    Ok(views.html.search())
+  }
+
+  def contact = Action {
+    Ok(views.html.contact())
   }
   
   def crossword(id: Int): Crossword = {
