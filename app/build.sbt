@@ -7,3 +7,5 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.8"
 
 libraryDependencies += "com.github.nscala-time" %% "nscala-time" % "1.8.0"
+
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
