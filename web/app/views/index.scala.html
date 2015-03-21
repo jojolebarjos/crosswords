@@ -1,6 +1,35 @@
-@()
+@(foo: String)
 
-@main("Crosswords") {
-    <p>Hello world!</p>
+@main("Crosswords")("Home") {
+
+    <h3>Abstract</h3>
+    <p>@foo</p>
+    <p>
+        A lot of websites and newspapers offer puzzles in many ways. While tools are available for games like Sudoku, crosswords have only limited help. There exist web pages providing customized search (e.g. <a href="http://www.crosswordsolver.org/">Crossword Solver</a>) but only to a small extent.
+    </p>
+    <p>
+        Our goal is to collect word definitions from various sources (dictionaries and encyclopedias like <a href="http://www.wiktionary.org/">Wiktionary</a>) and crosswords (from news paper sources like <a href="http://www.theguardian.com/crosswords">The Guardian</a>). This database coule be analysed and hierarchically clustered to group entries by themes, definitions and synonyms. By joining multiple definitions for a single word, characteristic keywords could be identified. Moreover, some projects like <a href="http://wordnet.princeton.edu/">WordNet</a> could improve the results.
+    </p>
+    <p>
+        The goal would be to build a we application providing tools to generate and solve crosswords. In such application, we would provide word proposal through definitions and keywods, as well as word completion.
+    </p>
+    <h3>Goals and milestones</h3>
+    <p>
+        Since we want to create a complete web application, based on machine learning and language processing algorithms results, we can split the project in 3 distincts tasks. Each of them is described on their own page. They will mainly communicate using a <a href="http://wiki.epfl.ch/bigdata2015-crosswords/database">central database</a>. We will also try, as much as possible, to reuse code and algorithms.
+    </p>
+    <ul>
+        <li><a href="http://wiki.epfl.ch/bigdata2015-crosswords/datamining">Data mining</a>&nbsp;and conversion to a <a href="http://wiki.epfl.ch/bigdata2015-crosswords/format">common format</a></li>
+        <li><a href="http://wiki.epfl.ch/bigdata2015-crosswords/algorithms">Processing using machine learning and language processing methods</a></li>
+        <li><a href="http://wiki.epfl.ch/bigdata2015-crosswords/webdesign">Web design</a> of the final product to provide <a href="http://wiki.epfl.ch/bigdata2015-crosswords/features">features</a></li>
+    </ul>
+    <p>
+        The project has 3 milestones:
+    </p>
+    <ol>
+        <li>16 march, framework setup: tools are chosen and locally installed on our machines. We are able to create simple webpages, which are able to access databases. We also have written some scripts to download and parse crosswords and definitions. We also have some clustering/language processing algorithms.</li>
+        <li>13 april, basic result: our first web app version is complete, we are able to use our algorithms to produce satisfactory results for main features, like keywords search/completion. We also have a large database of words and crosswords.</li>
+        <li>4 may, final result: one week before the deadline, we have implemented more features and have tested multiple algorithms. The webpage design is improved.</li>
+    </ol>
+
 }
 

@@ -73,8 +73,8 @@ object PuzzlesByJim {
       "words" -> words.map{case (k@(d, _), (w, v)) => Json.obj(
         "word" -> w,
         "clue" -> clues(k)._2,
-        "x" -> v.x,
-        "y" -> v.y,
+        "x" -> (v.x - 1),
+        "y" -> (v.y - 1),
         "dir" -> d.toString
       )}
     )

@@ -1,13 +1,39 @@
 package controllers
 
 import play.api._
+import play.api.db._
 import play.api.mvc._
 import play.api.libs.json.{Json, JsObject, JsValue}
+import java.sql.ResultSet
+import play.api.Play.current
 
 object Application extends Controller {
 
   def index = Action {
+    
+    val foo = DB.withConnection { connection =>
+        val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        val result = statement.executeQuery("select * from testTable where id > 6")
+        var text = ""
+        while (result.next()) {
+          text += "id:%d val:%d".format(result.getInt("id"), result.getInt("val"))
+        }
+        text
+    }
+    
+    Ok(views.html.index(foo))
+  }
+
+  def crosswordPage = Action {
     Ok(views.html.crossword(crossword(0)))
+  }
+
+  def search = Action {
+    Ok(views.html.search())
+  }
+
+  def contact = Action {
+    Ok(views.html.contact())
   }
   
   def crossword(id: Int): Crossword = {

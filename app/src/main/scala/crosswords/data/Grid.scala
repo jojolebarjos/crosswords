@@ -41,6 +41,7 @@ case class Grid(words: immutable.Seq[WordClue], args: immutable.Map[String, JsVa
         wordClue.direction match {
           case East => x += 1
           case South => y += 1
+          case _ => // ignore
         }
       }
     }
