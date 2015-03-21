@@ -1,9 +1,10 @@
 package crosswords.data.mine
 
-import java.io.{FileWriter, IOException, File}
+import java.io.{FileReader, FileWriter, IOException, File}
 import java.util._
 
-import play.api.libs.json.Json
+import crosswords.util.{Vec, Direction, Text}
+import play.api.libs.json.{JsObject, Json}
 
 import scala.io.Source
 
@@ -69,9 +70,107 @@ object Mirror {
 
 
   private val format = new java.text.SimpleDateFormat("yyyyMMdd")
+  private val formatDateForJson = new java.text.SimpleDateFormat("yyyy-MM-dd")
   private val _root = "http://s3.mirror.co.uk/mirror/crosswords/mir_"
 
   private val _folder = "../data/mirror/"
+
+  private val _begin = """<div class="puzzle-wrapper right-clue center">"""
+  private val _end = """<script type='text/javascript' src='http://s3.mirror.co.uk/production/crosswords/files/jquery.1.8.min.js'>"""
+
+  private val _titlePuzId = """var puzzleId = "([0-9]+)";""".r
+  private val _category = """/mir_([a-z]+)_20""".r
+  private val _date = """_(20[0-9]+).html""".r
+
+  // "http://s3.mirror.co.uk/mirror/crosswords/mir_straight_20140402.html"
+  //private val _url = """var path = "([^"]*)"""".r
+
+
+  /**
+   * Parse crosswords from HTML text.
+   * @param source source to parse
+   * @param url the url from where the html come from
+   * @return a JSON representation of the crossword
+   */
+  def parse(source: Source, url: String): JsObject = {
+
+    // Prepare interesting data
+    val content = Text.bound(source.getLines().mkString, _begin, _end)
+    var json = Json.obj(
+      "source" -> "Mirror",
+      "language" -> "eng"
+    )
+
+    //Adding URL
+    json += "url" -> Json.toJson(url)
+
+    //Find and add category
+    val category = _category.findFirstMatchIn(url).map(_.group(1))
+    json += "categories" -> Json.toJson(Seq(category))
+
+    //Find, format and add date
+    val date = _date.findFirstMatchIn(url).map(_.group(1))
+    json += "date" -> Json.toJson(formatDateForJson.format(format.parse(date.get)))
+
+    //Adding title
+    val titlePuzId = _titlePuzId.findFirstMatchIn(content).map(_.group(1))
+    if (titlePuzId.isDefined) {
+      json += "title" -> Json.toJson(category.get + " " + titlePuzId.get)
+    }
+
+    //Adding source
+    json += "source" -> Json.toJson("Wired Puzzles - Crossword")
+
+    //private val _location = """<span style="left: (\d+)px; top: (\d+)px;" class="(across|down)">(\d+)</span>""".r
+/*
+    // Get word locations
+    val locations = _location.findAllMatchIn(content).map(m => (
+      (m.group(4).toInt, Direction(m.group(3))),
+      Vec(m.group(1).toInt / 29, m.group(2).toInt / 29)
+      )).toMap
+*/
+    println(json.toString())
+    /*
+        // Get word locations
+        val locations = _location.findAllMatchIn(content).map(m => (
+          (m.group(4).toInt, Direction(m.group(3))),
+          Vec(m.group(1).toInt / 29, m.group(2).toInt / 29)
+          )).toMap
+
+        // Get and rebuild solutions
+        val solutions = _solution.findAllMatchIn(content).map(m => (
+          (m.group(1).toInt, Direction(m.group(2))),
+          (m.group(3).toInt, m.group(4).head)
+          )).toVector.groupBy(_._1).mapValues(_.sortBy(_._2._1).map(_._2._2).mkString)
+
+        // Get clues for words
+        val clues = _clue.findAllMatchIn(content).map(m => (
+          (m.group(1).toInt, Direction(m.group(2))),
+          m.group(3).trim
+          )).toMap
+
+
+        // Join locations, solutions and clues
+        val words = locations.map { case (k, Vec(x, y)) => Json.obj(
+          "word" -> solutions(k),
+          "clue" -> clues(k),
+          "x" -> x,
+          "y" -> y,
+          "dir" -> k._2.toString
+        )}.toVector
+        if (words.isEmpty)
+          throw new NoSuchElementException("empty crossword")
+        json += "words" -> Json.toJson(words)
+    */
+    // Done
+    json
+
+  }
+
+
+
+
+
 
   private def ensure(category: String, date: String) {
 
@@ -103,9 +202,9 @@ object Mirror {
 
     }
 
-    /*
+
     // Convert to JSON
-    val json = try Json.prettyPrint(parse(Source.fromFile(htmlFile))) catch { case e: Exception =>
+    val json = try Json.prettyPrint(parse(Source.fromFile(htmlFile), _root + category + date + ".html")) catch { case e: Exception =>
       System.err.println("failed to parse " + category + "/" + date + " (" + e.getMessage + ")")
       ""
     }
@@ -115,7 +214,6 @@ object Mirror {
     out.write(json)
     out.close()
 
-    */
 
     println(category + "/" + date + " successfully exported!")
 
@@ -138,11 +236,25 @@ object Mirror {
     val today =  new Date()
     val last = format.parse("20140401") // 1st of April
 
+    // Testing parsing
+    val htmlFile = new File(_folder + "2s_cryptic_" + "/" + 20140402 + ".html")
+    val url = "http://s3.mirror.co.uk/mirror/crosswords/mir_straight_20140402.html"
+    parse(Source.fromFile(htmlFile), url)
+
+
+
+    /*
+     val category = title.get.split(" ").head.toLowerCase
+     if (category == "cryptic" || category == "quiptic")
+       json += "categories" -> Json.toJson(Seq("cryptic"))
+    */
+
+    /*
     query("straight_", last, today)
     query("2s_straight_", last, today)
     query("2s_cryptic_", last, today)
     query("quizword_", last, today)
-
+    */
   }
 
 }
