@@ -90,13 +90,13 @@ object EnWiktionary {
   private val _derived = """====Derived terms====""".r
   private val _related = """====Related terms====""".r
 
-  private val _folder = "C:/Users/Laurent/Downloads/BD/out/"
+  private val _folder = "C:/Users/Vincent/EPFL/Big Data/xml_out/"
 
 
   /**
    * Parse crosswords from HTML text.
    * @param source source to parse
-   * @return a JSON representation of the crossword
+   * @return a clearer text file with the relevent information to be subsequently parsed into a json file
    */
   def parse(source: BufferedReader): JsObject = {
     var insideArticle = false
@@ -150,7 +150,7 @@ object EnWiktionary {
 
 
   def main(args: Array[String]): Unit = {
-    val fileIn = new FileInputStream("C:/Users/Laurent/Downloads/BD/enwiki.xml")
+    val fileIn = new FileInputStream("C:/Users/Vincent/EPFL/Big Data/enwiki.xml")
     val reader = new InputStreamReader(fileIn, StandardCharsets.UTF_8)
     val src = new BufferedReader(reader)
     parse(src)
