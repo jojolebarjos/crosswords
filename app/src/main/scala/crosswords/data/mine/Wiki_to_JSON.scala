@@ -49,7 +49,7 @@ object Wiki_to_JSON {
 
 
     for(file <- new File(inDir).listFiles.toIterator)
-     // if (file.isFile && Source.fromFile(file).getLines.contains("==English=="))
+      if (file.isFile && Source.fromFile(file).getLines.contains("==English=="))
       {
         //prepare json for the file
         val fileStream = new FileInputStream(file)
@@ -68,10 +68,10 @@ object Wiki_to_JSON {
             case "===Verb===" => inType = InState.verb
             case "===Adjective===" => inType = InState.adjective
             case "===Adverb===" => inType = InState.adverb
-            case "===Synonyms===" => inType = InState.synonym
-            case "===Antonyms===" => inType = InState.antonym
-            case "===Related terms===" => inType = InState.rel_term
-            case "===Derived terms===" => inType = InState.der_term
+            case "====Synonyms====" => inType = InState.synonym
+            case "====Antonyms====" => inType = InState.antonym
+            case "====Related terms====" => inType = InState.rel_term
+            case "====Derived terms====" => inType = InState.der_term
             //cases where we are in the type and are retrieving information
             case l if l.startsWith("#") => definitions = definitions ::: write(inType, l)
             case l if l.startsWith("*") => references = references ::: write(inType, l)
@@ -81,7 +81,7 @@ object Wiki_to_JSON {
 
         var  word = file.getName.replace(".txt","")
         try{
-          word = new String(Base64.getDecoder.decode(file.getName.replace(".txt","").trim))
+          word = new String(Base64.getUrlDecoder.decode(file.getName.replace(".txt","").trim))
         }catch{case e:IllegalArgumentException =>
           println("could not parse word:" + word)
             println(e)
@@ -103,7 +103,7 @@ object Wiki_to_JSON {
                 "reference" -> rf._2
               )}))
 
-        val out = new FileWriter(outDir + "/" + word + ".json")
+        val out = new FileWriter(outDir + "/" + file.getName.replace(".txt",".json")  )
         out.write(Json.prettyPrint(json))
         out.close()
         Source.fromFile(file).close
