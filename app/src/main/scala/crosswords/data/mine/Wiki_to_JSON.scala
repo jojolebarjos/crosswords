@@ -18,7 +18,7 @@ object Wiki_to_JSON {
   object InState extends Enumeration {
     type Instate = Value
     val none, prp_noun, noun, verb, adjective,
-    adverb, synonym, antonym, rel_term, der_term = Value
+    adverb, synonym, antonym, relative, derived = Value
   }
 
 
@@ -35,7 +35,7 @@ object Wiki_to_JSON {
   }
 
   def write(inType : InState.Value, l : String) : List[(String, String)] ={
-    val line = remove_wikistuff(l)
+    val line = remove_wikistuff(l).trim
       inType match {
         case InState.none => List()
         case _ => List((inType.toString, line))
@@ -59,10 +59,14 @@ object Wiki_to_JSON {
         var definitions : List[(String, String)] = List()
         var references : List[(String, String)] = List()
 
+        var in_English = false
+
         var inType = InState.none
         for(line <- Source.fromFile(file).getLines) {
           line match {
             //cases where we "hop" into a new type
+            case "==English==" => in_English = true
+            case "----" => in_English = false
             case "===Proper Noun===" => inType = InState.prp_noun
             case "===Noun===" => inType = InState.noun
             case "===Verb===" => inType = InState.verb
@@ -70,14 +74,24 @@ object Wiki_to_JSON {
             case "===Adverb===" => inType = InState.adverb
             case "====Synonyms====" => inType = InState.synonym
             case "====Antonyms====" => inType = InState.antonym
-            case "====Related terms====" => inType = InState.rel_term
-            case "====Derived terms====" => inType = InState.der_term
+            case "====Related terms====" => inType = InState.relative
+            case "====Derived terms====" => inType = InState.derived
+            case l if l.startsWith("====") => inType = InState.none
             //cases where we are in the type and are retrieving information
-            case l if l.startsWith("#") => definitions = definitions ::: write(inType, l)
-            case l if l.startsWith("*") => references = references ::: write(inType, l)
+            case l if (l.startsWith("#")
+              && in_English)
+              && inType != InState.none
+                 => definitions = definitions ::: write(inType, l)
+            case l if (l.startsWith("*")
+              && in_English
+              && inType != InState.none)
+                => references = references ::: write(inType, l)
             case _ => //do nothing
           }
         }
+
+        references = references.filter(!_._2.isEmpty)
+        definitions = definitions.filter(!_._2.isEmpty)
 
         var  word = file.getName.replace(".txt","")
         try{
@@ -88,32 +102,35 @@ object Wiki_to_JSON {
         }
 
 
-
         val json = Json.obj(
           "word" -> word,
           "language" -> "English",
           "definitions"-> Json.toJson( definitions.map{
             case df => Json.obj(
-                "type" -> df._1,
-                "definition" -> df._2
+              "type" -> df._1,
+              "definition" -> df._2
             )}),
-          "references" ->  Json.toJson( references.map{
-            case rf => Json.obj(
-                "type" -> rf._1,
-                "reference" -> rf._2
-              )}))
+          "synonyms" -> Json.toJson(
+              references.filter( _._1 == InState.synonym.toString).map(_._2)),
+          "antonyms" -> Json.toJson(
+            references.filter( _._1 == InState.antonym.toString).map(_._2)),
+          "derived terms" -> Json.toJson(
+            references.filter( _._1 == InState.derived.toString).map(_._2)),
+          "relative terms" ->  Json.toJson(
+            references.filter( _._1 == InState.relative.toString).map(_._2))
+        )
 
         val out = new FileWriter(outDir + "/" + file.getName.replace(".txt",".json")  )
         out.write(Json.prettyPrint(json))
         out.close()
         Source.fromFile(file).close
-
+        println(word + " is done")
       }
   }
 
   def main(arg: Array[String]): Unit = {
     //launch teh missiles
-    val in_addr = """C:/Users/Vincent/EPFL/Big Data/xml_out_test/"""
+    val in_addr = """C:/Users/Vincent/EPFL/Big Data/xml_out/"""
     val out_addr = """C:/Users/Vincent/EPFL/Big Data/json_out/"""
     toJson(in_addr, out_addr)
   }
