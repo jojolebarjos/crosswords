@@ -5,104 +5,34 @@ import java.io._
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-import play.api.libs.json.JsObject
-
 /**
  * Tools used to automatically data mine from <a href="https://en.wiktionary.org/wiki/Wiktionary:Main_Page">Wiktionary</a>.
- * We used the latest archive that was currently available: http://dumps.wikimedia.org/enwiktionary/20150224/enwiktionary-20150224-pages-articles-multistream.xml.bz2
+ * We used the latest archive that was currently available: <a href="https://dumps.wikimedia.org/enwiktionary/20150224/">dump from 2015-02-24</a>
+ *
  *
  * @author Laurent Valette
  */
 object EnWiktionary {
-
-  // http://en.wiktionary.org/wiki/Wiktionary:ELE
-  // http://en.wiktionary.org/wiki/Wiktionary:Semantic_relations
-  /*
-  ==English==
-  ===Alternative forms===
-  ===Etymology===
-  ===Pronunciation===
-  * Phonetic transcriptions
-  * Audio files in any relevant dialects
-  * Rhymes
-  * Homophones
-  * Hyphenation
-  ===Noun===
-  Declension
-  # Meaning 1
-  #* Quotations
-  # Meaning 2
-  #* Quotations
-       etc.
-  ====Usage notes====
-  ====Synonyms====
-  ====Antonyms====
-  ====Derived terms====
-  ====Related terms====
-  ====Translations====
-  ====References====
-  ====External links====
-  ===Verb===
-  Conjugation
-  # Meaning 1
-  #* Quotations
-       etc.
-  ====Usage notes====
-  ====Synonyms====
-  ====Antonyms====
-  ====Derived terms====
-  ====Related terms====
-  ====Translations====
-  ====Descendants====
-  ====References====
-  ====External links====
-  ===Anagrams===
-  ---- (Dividing line between languages)
-  ==Finnish==
-  ===Etymology===
-  ===Pronunciation===
-  ===Noun===
-  '''Inflections'''
-  # Meaning 1 in English
-  #* Quotation in Finnish
-  #** Quotation translated into English
-  # Meaning 2 in English
-  #* Quotation in Finnish
-  #** Quotation translated into English
-  ====Synonyms====
-  ====Derived terms====
-  ====Related terms====
-   */
-
   private val _title = ".*<title>(.+)</title>.*"
   private val _ns = ".*<ns>0</ns>.*"
   private val _beginText = ".*<text.+>(.*)"
   private val _endText = "(.*)</text>.*"
 
   private val encoder = Base64.getUrlEncoder
-
-  private val _noun = """===Noun===""".r
-  private val _verb = """===Verb===""".r
-  private val _adj = """===Adjective===""".r
-
-  private val _synonyms = """====Synonyms====""".r
-  private val _antonyms = """====Antonyms====""".r
-  private val _derived = """====Derived terms====""".r
-  private val _related = """====Related terms====""".r
-
-  private val _folder = "C:/Users/Vincent/EPFL/Big Data/xml_out/"
-
+  private val _folder = "../data/wiki/wikiMarkup/"
 
   /**
-   * Parse crosswords from HTML text.
+   * Parse crosswords from xml dump.
+   * Write each article in a file named with its title converted in url safe Base64.
+   * Use UTF-8 for both the input and output.
    * @param source source to parse
-   * @return a clearer text file with the relevent information to be subsequently parsed into a json file
+   * @see java.util.Base64
    */
-  def parse(source: BufferedReader): JsObject = {
+  def parse(source: BufferedReader): Unit = {
     var insideArticle = false
     var insideText = false
     var title = ""
-    var out: OutputStreamWriter = null
+    var out: Writer = null
 
     for (line <- Stream.continually(source.readLine()).takeWhile(_ != null)) {
       if (line.matches(_title)) {
@@ -114,10 +44,10 @@ object EnWiktionary {
       } else if (insideArticle && line.matches(_beginText)) {
         val encodedTitle = new String(encoder.encode(title.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)
         val fileOut = new FileOutputStream(new File(_folder + encodedTitle + ".txt"))
-        out = new OutputStreamWriter(fileOut, StandardCharsets.UTF_8)
+        out = new BufferedWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8))
         _beginText.r.findFirstMatchIn(line).map(_.group(1)) match {
           case Some(afterStart) =>
-            // If there is some text after <text> tag, we need to process it
+            // If there is some text after the <text> tag, we need to process it
             if (afterStart.matches(_endText)) {
               _endText.r.findFirstMatchIn(afterStart).map(_.group(1)) match {
                 case Some(t) =>
@@ -145,12 +75,11 @@ object EnWiktionary {
         out.write(line + "\n")
       }
     }
-    null
   }
 
 
   def main(args: Array[String]): Unit = {
-    val fileIn = new FileInputStream("C:/Users/Vincent/EPFL/Big Data/enwiki.xml")
+    val fileIn = new FileInputStream("../data/wiki/enwiki.xml")
     val reader = new InputStreamReader(fileIn, StandardCharsets.UTF_8)
     val src = new BufferedReader(reader)
     parse(src)
