@@ -43,25 +43,32 @@ object EnWiktionary {
         insideArticle = true
       } else if (insideArticle && line.matches(_beginText)) {
         val encodedTitle = new String(encoder.encode(title.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)
-        val fileOut = new FileOutputStream(new File(_folder + encodedTitle + ".txt"))
-        out = new BufferedWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8))
-        _beginText.r.findFirstMatchIn(line).map(_.group(1)) match {
-          case Some(afterStart) =>
-            // If there is some text after the <text> tag, we need to process it
-            if (afterStart.matches(_endText)) {
-              _endText.r.findFirstMatchIn(afterStart).map(_.group(1)) match {
-                case Some(t) =>
-                  out.write(t + "\n")
-                case None => // nothing to do
-              }
-            } else {
-              out.write(afterStart + "\n")
+        try {
+          val file = new File(_folder + encodedTitle + ".txt")
+          if (!file.exists()) {
+            val fileOut = new FileOutputStream(file)
+            out = new BufferedWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8))
+            _beginText.r.findFirstMatchIn(line).map(_.group(1)) match {
+              case Some(afterStart) =>
+                // If there is some text after the <text> tag, we need to process it
+                if (afterStart.matches(_endText)) {
+                  _endText.r.findFirstMatchIn(afterStart).map(_.group(1)) match {
+                    case Some(t) =>
+                      out.write(t + "\n")
+                    case None => // nothing to do
+                  }
+                } else {
+                  out.write(afterStart + "\n")
+                }
+              case None => // nothing to do
             }
-          case None => // nothing to do
+            insideText = true
+          }
+        } catch {
+          case e: FileNotFoundException => println("Ignored file: " + e.getMessage)
         }
-        insideText = true
       } else if (line.matches(_endText)) {
-        if (insideArticle) {
+        if (insideArticle && insideText) {
           _endText.r.findFirstMatchIn(line).map(_.group(1)) match {
             case Some(t) => out.write(t + "\n")
             case None => // nothing to do
