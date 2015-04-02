@@ -11,7 +11,7 @@ import scala.io.Source
 /**
  * Tools used to automatically data mine from <a href="http://www.mirror.co.uk/play/crosswords">Mirror</a>.
  *
- * @author Timothee Emery
+ * @author Timothée Emery
  */
 object Mirror {
 
@@ -108,16 +108,31 @@ object Mirror {
   private val _date = """_(20[0-9]+).html""".r
 
   //Regex to retrieve every case of the grid and its corresponding solution
-  private val _solution =
-    """<div id='cell-([0-9]+)-([0-9]+)' class='cell ' data-clueid='[^\']*' data-reverted='0'>\s*(|<span class='cell-number'>[0-9]+<\/span>)\s*<div class='cell-input' data-solution='(.)'><\/div>""".r
+//  private val _solution =
+//    """<div id='cell-([0-9]+)-([0-9]+)' class='cell ' data-clueid='[^\']*' data-reverted='0'>\s*(|<span class='cell-number'>[0-9]+<\/span>)\s*<div class='cell-input' data-solution='(.)'><\/div>""".r
+
+    private val _solution = ("""<div id='cell-([0-9]+)-([0-9]+)' class='cell ' data-clueid='[^\']*' data-reverted='0'>\s""" +
+      """*(|<span class='cell-number'>[0-9]+<\/span>)\s""" +
+      """*<div class='cell-input' data-solution='(.)'><\/div>""").r
 
   /* Regex to retrieve the starting point of every words, their direction and the clue
   /  Sometimes (especially in the category "quizword") there is double or even triple clues
   /  where one clue is used for different words.
   */
-  val _cluesSingle = """<li id='clue-[0-9]+' data-direction='(across|down)' data-x1='([0-9]+)' data-x2='([0-9]+)' data-y1='([0-9]+)' data-y2='([0-9]+)'\s*data-islink='0' data-linkid='clue-' data-cluenum='[0-9]+'> <b>[^<]+</b> ([^<]+)""".r
-  val _cluesDouble = """<li id='clue-[0-9]+' data-direction='(across|down)-(across|down)' data-x1='([0-9]+)-([0-9]+)'\s*data-x2='([0-9]+)-([0-9]+)' data-y1='([0-9]+)-([0-9]+)' data-y2='([0-9]+)-([0-9]+)'\s*data-islink='0' data-linkid='clue-' data-cluenum='[0-9]+\/[0-9]+'> <b>[0-9]+\/[0-9]+<\/b>([^(]*)\(""".r
-  val _cluesTriple = """data-direction='(across|down)-(across|down)-(across|down)' data-x1='([0-9]+)-([0-9]+)-([0-9]+)' data-x2='([0-9]+)-([0-9]+)-([0-9]+)' data-y1='([0-9]+)-([0-9]+)-([0-9]+)' data-y2='([0-9]+)-([0-9]+)-([0-9]+)'\s*data-islink='0' data-linkid='clue-' data-cluenum='4\/20\/25'> <b>4\/20\/25<\/b> ([^\(]*)""".r
+//  val _cluesSingle = """<li id='clue-[0-9]+' data-direction='(across|down)' data-x1='([0-9]+)' data-x2='([0-9]+)' data-y1='([0-9]+)' data-y2='([0-9]+)'\s*data-islink='0' data-linkid='clue-' data-cluenum='[0-9]+'> <b>[^<]+</b> ([^<]+)""".r
+//  val _cluesDouble = """<li id='clue-[0-9]+' data-direction='(across|down)-(across|down)' data-x1='([0-9]+)-([0-9]+)'\s*data-x2='([0-9]+)-([0-9]+)' data-y1='([0-9]+)-([0-9]+)' data-y2='([0-9]+)-([0-9]+)'\s*data-islink='0' data-linkid='clue-' data-cluenum='[0-9]+\/[0-9]+'> <b>[0-9]+\/[0-9]+<\/b>([^(]*)\(""".r
+//  val _cluesTriple = """data-direction='(across|down)-(across|down)-(across|down)' data-x1='([0-9]+)-([0-9]+)-([0-9]+)' data-x2='([0-9]+)-([0-9]+)-([0-9]+)' data-y1='([0-9]+)-([0-9]+)-([0-9]+)' data-y2='([0-9]+)-([0-9]+)-([0-9]+)'\s*data-islink='0' data-linkid='clue-' data-cluenum='4\/20\/25'> <b>4\/20\/25<\/b> ([^\(]*)""".r
+
+  val _cluesSingle = ("""<li id='clue-[0-9]+' data-direction='(across|down)' data-x1='([0-9]+)' data-x2='([0-9]+)'""" +
+      """ data-y1='([0-9]+)' data-y2='([0-9]+)'\s""" +
+      """*data-islink='0' data-linkid='clue-' data-cluenum='[0-9]+'> <b>[^<]+</b> ([^<]+)""").r
+  val _cluesDouble = ("""<li id='clue-[0-9]+' data-direction='(across|down)-(across|down)' data-x1='([0-9]+)-([0-9]+)'\s""" +
+      """*data-x2='([0-9]+)-([0-9]+)' data-y1='([0-9]+)-([0-9]+)' data-y2='([0-9]+)-([0-9]+)'\s""" +
+      """*data-islink='0' data-linkid='clue-' data-cluenum='[0-9]+\/[0-9]+'> <b>[0-9]+\/[0-9]+<\/b>([^(]*)\(""").r
+  val _cluesTriple = ("""data-direction='(across|down)-(across|down)-(across|down)'""" +
+      """ data-x1='([0-9]+)-([0-9]+)-([0-9]+)' data-x2='([0-9]+)-([0-9]+)-([0-9]+)'""" +
+      """ data-y1='([0-9]+)-([0-9]+)-([0-9]+)' data-y2='([0-9]+)-([0-9]+)-([0-9]+)'\s""" +
+      """*data-islink='0' data-linkid='clue-' data-cluenum='4\/20\/25'> <b>4\/20\/25<\/b> ([^\(]*)""").r
 
   // Regexps used for checking the validity of the parsing,
   // these two are for computing the validity of the solutions map.
@@ -399,7 +414,15 @@ object Mirror {
   def main(args: Array[String]) {
 
     val today =  new Date()
-    val last = _formatForBrowsing.parse("20140402") // 1st of April
+    val last = _formatForBrowsing.parse("20140402") // 1st of April 2014
+    _calendar.setTime(today)
+    _calendar.add(Calendar.DATE, -2)
+    val twoDaysAgo = _calendar.getTime()
+
+//    query("straight_", twoDaysAgo, today)
+//    query("2s_straight_",  twoDaysAgo, today)
+//    query("2s_cryptic_", twoDaysAgo, today)
+//    query("quizword_", twoDaysAgo, today)
 
     query("straight_", last, today)
     query("2s_straight_", last, today)
