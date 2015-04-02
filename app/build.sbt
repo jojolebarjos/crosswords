@@ -9,3 +9,9 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.8"
 libraryDependencies += "com.github.nscala-time" %% "nscala-time" % "1.8.0"
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
+
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "1.2.1",
+  "org.apache.spark" %% "spark-mllib" % "1.2.1"
+)
+
