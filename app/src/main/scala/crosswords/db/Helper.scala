@@ -11,7 +11,7 @@ import java.sql.{SQLException, DriverManager, Connection}
  */
 object Helper {
 
-  val DEFAULT_URL = "jdbc:mysql://localhost:3306/?user=root&password=Root2015"
+  val DEFAULT_URL = "jdbc:mysql://localhost:3306/"
   val DEFAULT_USER = "root"
   val DEFAULT_PASSWORD = "Root2015"
 
@@ -25,7 +25,7 @@ object Helper {
    * Create a new connection using default url and credentials.
    */
   def open(table: String = ""): Connection =
-    open(DEFAULT_URL, DEFAULT_URL, DEFAULT_PASSWORD, table)
+    open(DEFAULT_URL, DEFAULT_USER, DEFAULT_PASSWORD, table)
 
   /**
    * Safely close specified connection.

@@ -129,6 +129,9 @@ object Crosswords {
 
   def main(args: Array[String]) {
 
+    drop()
+    create()
+
   }
 
 }
