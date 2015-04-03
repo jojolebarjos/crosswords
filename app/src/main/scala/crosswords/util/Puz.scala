@@ -1,9 +1,10 @@
 
-package crosswords.data
+package crosswords.util
 
 import java.io._
-import crosswords.util.Text
-import play.api.libs.json.{Json, JsObject}
+
+import play.api.libs.json.{JsObject, Json}
+
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -84,6 +85,7 @@ object Puz {
       }
     }
 
+    // Finalize JSON object
     Json.obj(
       "words" -> words,
       "title" -> title,
@@ -98,12 +100,24 @@ object Puz {
    * @return JSON representation
    */
   def decode(in: InputStream): JsObject = {
-    val array = Iterator.continually(in.read()).takeWhile(_ >= 0).map(_.toByte).toArray
-    in.close()
-    decode(array)
+    try {
+      val array = Iterator.continually(in.read()).takeWhile(_ >= 0).map(_.toByte).toArray
+      decode(array)
+    } finally {
+      try in.close() catch { case _: Exception => /* empty on purpose */ }
+    }
   }
 
+  /**
+   * Encode given JSON crossword.
+   * @param json JSON representation
+   * @return .PUZ bytes
+   */
   def encode(json: JsObject): Array[Byte] = {
+
+    val words = (json \ "words").as[Seq[JsObject]]
+
+
     ???
   }
 

@@ -1,4 +1,4 @@
-package crosswords.data.mine
+package crosswords.mine
 
 import java.io._
 import java.nio.charset.StandardCharsets
