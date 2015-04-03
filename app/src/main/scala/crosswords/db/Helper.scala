@@ -18,7 +18,7 @@ object Helper {
   /**
    * Create a new connection using specified url and credentials.
    */
-  def open(url: String, user: String, password: String, table: String = ""): Connection =
+  def open(url: String, user: String, password: String, table: String): Connection =
     DriverManager.getConnection(url + table + "?user=" + user + "&password=" + password)
 
   /**
@@ -44,7 +44,7 @@ object Helper {
   /**
    * Execute a SQL update.
    */
-  def update(sql: String)(implicit connection: Connection): Int = {
+  def update(connection: Connection, sql: String): Int = {
     val statement = connection.prepareStatement(sql)
     statement.executeUpdate()
   }

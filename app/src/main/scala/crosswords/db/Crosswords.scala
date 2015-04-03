@@ -21,7 +21,7 @@ object Crosswords {
     using(open()) { connection =>
 
       // Drop the table
-      update("drop database if exists CrosswordDB")
+      update(connection, "drop database if exists CrosswordDB")
     }
 
   }
@@ -35,14 +35,14 @@ object Crosswords {
     using(open()) { connection =>
 
       // Create the table
-      update("create database CrosswordDB")
+      update(connection, "create database CrosswordDB")
     }
 
     // Reopen database, with the new database
     using(open("CrosswordDB")) { connection =>
 
       // Create crosswords attributes table
-      update("""
+      update(connection, """
           |create table CrosswordAttributes (
           |    cwid int,
           |    source varchar(50),
@@ -57,7 +57,7 @@ object Crosswords {
         """.stripMargin)
 
       // Create words table
-      update("""
+      update(connection, """
           |create table Words (
           |    wid int,
           |    word varchar(50),
@@ -66,7 +66,7 @@ object Crosswords {
         """.stripMargin)
 
       // Create crosswords table
-      update("""
+      update(connection, """
           |create table Crosswords (
           |    cwid int,
           |    wid int,
@@ -85,7 +85,7 @@ object Crosswords {
         """.stripMargin)
 
       // Create categories table
-      update("""
+      update(connection, """
           |create table Categories (
           |    cid int,
           |    category varchar(50),
@@ -94,7 +94,7 @@ object Crosswords {
         """.stripMargin)
 
       // Create crossword categories table
-      update("""
+      update(connection, """
           |create table CrosswordCategories (
           |    cwid int,
           |    cid int,
@@ -126,5 +126,9 @@ object Crosswords {
   }
 
   // TODO add some download helper
+
+  def main(args: Array[String]) {
+
+  }
 
 }
