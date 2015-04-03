@@ -49,4 +49,33 @@ object Helper {
     statement.executeUpdate()
   }
 
+  /**
+   * Create a result set for specified query.
+   * A row and time limit can be specified.
+   */
+  def query(connection: Connection, sql: String, max: Int = 0, timeout: Int = 0): Result = {
+    val statement = connection.createStatement()
+    if (max > 0)
+      statement.setMaxRows(max)
+    if (timeout > 0)
+      statement.setQueryTimeout(timeout)
+    new Result(statement, sql)
+  }
+
+  /**
+   * Safe block for result usage.
+   * The result is closed at the end.
+   */
+  def using[A](result: Result)(code: Result => A): A =
+    try code(result) finally result.close()
+
+  /**
+   * Query the max value of some integer field in specified table.
+   * Return -1 if the table is empty.
+   */
+  def max(connection: Connection, table: String, field: String): Int = {
+    val sql = "select coalesce(max(" + field + "), -1) from " + table
+    using(query(connection, sql))(_.as1[Int].next())
+  }
+
 }
