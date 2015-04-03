@@ -15,3 +15,4 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-mllib" % "1.2.1"
 )
 
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
