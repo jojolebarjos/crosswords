@@ -78,4 +78,10 @@ object Helper {
     using(query(connection, sql))(_.as1[Int].next())
   }
 
+  /**
+   * Escape special characters in SQL strings.
+   */
+  def escape(string: String): String =
+    string // TODO escape SQL strings
+
 }
