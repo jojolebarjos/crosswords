@@ -2,10 +2,7 @@
 package crosswords.util
 
 import java.io._
-
 import play.api.libs.json.{JsObject, Json}
-
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * Codec for .PUZ file format, used in some crossword applications.
@@ -16,8 +13,6 @@ import scala.collection.mutable.ArrayBuffer
  */
 object Puz {
 
-  private val magic = Seq[Byte](0x41, 0x43, 0x52, 0x4f, 0x53, 0x53, 0x26, 0x44, 0x4f, 0x57, 0x4e, 0x00)
-
   /**
    * Decode given byte array.
    * @param in .PUZ file bytes
@@ -26,6 +21,7 @@ object Puz {
   def decode(in: Seq[Byte]): JsObject = {
 
     // Find initial offset using magic constant (should be 2)
+    val magic = Seq[Byte](0x41, 0x43, 0x52, 0x4f, 0x53, 0x53, 0x26, 0x44, 0x4f, 0x57, 0x4e, 0x00)
     val offset = in.indexOfSlice(magic) - 2
 
     // Width, height and number of clues of the puzzle
@@ -34,7 +30,7 @@ object Puz {
     val count = (in(offset + 0x2E) & 0xFF) | ((in(offset + 0x2F) & 0xFF) << 8)
 
     // Get solution (ASCII 2D array)
-    val solution = in.drop(offset + 0x34).take(width * height).map(_.toChar).mkString.grouped(width).toVector
+    val solution = in.drop(offset + 0x34).take(width * height).map(_.toChar).mkString.grouped(width).map(_.toSeq).toVector
 
     // Get strings
     val strings = Text.split[Byte](in.drop(offset + 0x33 + 2 * width * height), 0).
@@ -44,53 +40,11 @@ object Puz {
     val copyright = strings(2)
     val clues = (1 to count).map(i => strings(i + 2))
 
-    // Check is a cell is black or out of bounds
-    def black(y: Int, x: Int) =
-      x < 0 || y < 0 || x >= width || y >= height || solution(y)(x) == '.'
-
-    // Get expected word size at given location
-    def span(y: Int, x: Int, dy: Int, dx: Int) =
-      if (!black(y - dy, x - dx)) 0
-      else (0 to math.max(width, height)).map(i => black(y + i * dy, x + i * dx)).indexOf(true)
-
-    // Rebuild words and generate JSON
-    var c = 0
-    val words = new ArrayBuffer[JsObject]
-    for (y <- 0 until height; x <- 0 until width) {
-      val w = span(y, x, 0, 1)
-      if (w > 1) {
-        val word = (0 until w).map(i => solution(y)(x + i)).mkString
-        val clue = clues(c)
-        c = c + 1
-        words += Json.obj(
-          "word" -> word,
-          "clue" -> clue,
-          "x" -> x,
-          "y" -> y,
-          "dir" -> "East"
-        )
-      }
-      val h = span(y, x, 1, 0)
-      if (h > 1) {
-        val word = (0 until h).map(i => solution(y + i)(x)).mkString
-        val clue = clues(c)
-        c = c + 1
-        words += Json.obj(
-          "word" -> word,
-          "clue" -> clue,
-          "x" -> x,
-          "y" -> y,
-          "dir" -> "South"
-        )
-      }
-    }
-
-    // Finalize JSON object
+    // Convert to JSON
     Json.obj(
-      "words" -> words,
       "title" -> title,
       "author" -> author
-    )
+    ).deepMerge(Grid.toJson(solution -> clues))
 
   }
 
@@ -115,22 +69,86 @@ object Puz {
    */
   def encode(json: JsObject): Array[Byte] = {
 
-    val words = (json \ "words").as[Seq[JsObject]]
+    // Extract relevant data
+    val title = (json \ "title").asOpt[String].getOrElse("")
+    val author = (json \ "author").asOpt[String].getOrElse("")
+    val (grid, clues) = Grid.toGrid(json)
+    val width = grid.head.size
+    val height = grid.size
+    if (width > 255 || height > 255 || clues.size > 65535)
+      throw new IllegalArgumentException("crossword too big")
 
+    // Board infos
+    val info = Seq[Byte] (
+      '1', '.', '2', '\0', // Version string
+      0, 0, // Reserved
+      0, 0, // Scrambled checksum
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // Reserved
+    )
+    val board = Seq[Byte](
+      width.toByte,
+      height.toByte,
+      (clues.size & 0xFF).toByte, ((clues.size >> 8) & 0xFF).toByte, // #Clues
+      0, 0, // Unknown bitmask
+      0, 0 // Scrambled tag
+    )
 
-    ???
+    // Puzzle layout
+    val solution = grid.flatMap(_.mkString).mkString.toUpperCase
+    if (!solution.forall(c => (c >= 'A' && c <= 'Z') || c == '.'))
+      throw new IllegalArgumentException("invalid word character")
+    val draft = solution.map(c => if (c == '.') '.' else '-')
+    val puzzle = (solution + draft).map(_.toByte)
+
+    // Strings
+    val strings = (Seq(title, author, "") ++ clues).map(_.getBytes("ISO-8859-1") ++ Seq(0.toByte))
+
+    // Checksums
+    val cib = checksum(board, 0)
+    var sum = checksum(puzzle, cib)
+    for (string <- strings if string.size > 0)
+      sum = checksum(string, sum)
+
+    // Masked checksum bullshit
+    val sol = checksum(solution.map(_.toByte), 0)
+    val gri = checksum(draft.map(_.toByte), 0)
+    var str = 0.toShort
+    for (string <- strings if string.size > 0)
+      str = checksum(string, str)
+    val masked = Seq[Byte](
+      (0x49 ^ (cib & 0xFF)).toByte,
+      (0x43 ^ (sol & 0xFF)).toByte,
+      (0x48 ^ (gri & 0xFF)).toByte,
+      (0x45 ^ (str & 0xFF)).toByte,
+      (0x41 ^ ((cib >> 8) & 0xFF)).toByte,
+      (0x54 ^ ((sol >> 8) & 0xFF)).toByte,
+      (0x45 ^ ((gri >> 8) & 0xFF)).toByte,
+      (0x44 ^ ((str >> 8) & 0xFF)).toByte
+    )
+
+    // Header
+    val checksums = Seq[Byte](
+      (sum & 0xFF).toByte, ((sum >> 8) & 0xFF).toByte, // Checksum
+      0x41, 0x43, 0x52, 0x4f, 0x53, 0x53, 0x26, 0x44, 0x4f, 0x57, 0x4e, 0x00, // File magic (ACROSS&DOWN)
+      (cib & 0xFF).toByte, ((cib >> 8) & 0xFF).toByte // CIB Checksum
+    ) ++ masked
+
+    // Combine everything
+    (checksums ++ info ++ board ++ puzzle ++ strings.flatten).toArray
+
   }
 
-  // TODO encode to .puz?
-
-
-  def main(args: Array[String]) {
-
-    val json = decode(new FileInputStream("../data/sample/rankfile.puz"))
-    println(Json.prettyPrint(json))
-
-
-
+  // Modified CRC checksum
+  private def checksum(bytes: Seq[Byte], sum: Short): Short = {
+    var tmp = sum
+    for (b <- bytes) {
+      if ((tmp & 1) != 0)
+        tmp = ((tmp >> 1) + 0x8000).toShort
+      else
+        tmp = (tmp >> 1).toShort
+      tmp = (tmp + b).toShort
+    }
+    tmp
   }
 
 }
