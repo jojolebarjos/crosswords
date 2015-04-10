@@ -1,35 +1,31 @@
 
+package crosswords.spark
+
 import java.io.{InputStreamReader, BufferedReader}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{JobContext, RecordReader, TaskAttemptContext, InputSplit}
 import org.apache.hadoop.mapreduce.lib.input.{FileSplit, FileInputFormat}
-import play.api.libs.json.{JsArray, Json, JsObject, JsValue}
-
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+import play.api.libs.json.{Json, JsValue}
 
 /**
  * File input format used to decode JSON files.
- * This abstract class must be subclassed to implement the conversion between JsObject and String key-values.
  *
  * @author Johan Berdat
  * @author Timothée Emery
  */
-abstract class JsonInputFormat extends FileInputFormat[String, String] {
+class JsonInputFormat extends FileInputFormat[String, JsValue] {
 
   override def createRecordReader(split: InputSplit, task: TaskAttemptContext) = new JsonRecordReader()
 
   override def isSplitable(context: JobContext, filename: Path) = false
 
-  def transform(obj: JsObject): Seq[(String, String)]
+  class JsonRecordReader extends RecordReader[String, JsValue] {
 
-  class JsonRecordReader extends RecordReader[String, String] {
-
-    private var pairs: Seq[(String, String)] = Nil
-    private var index = -1
-
-    def convert(value: JsValue) = value match {
-      case obj : JsObject => transform(obj)
-      case _ => Nil
-    }
+    private var name: String = _
+    private var json: JsValue = _
+    private var finished = false
 
     override def initialize(split: InputSplit, task: TaskAttemptContext) {
 
@@ -49,27 +45,26 @@ abstract class JsonInputFormat extends FileInputFormat[String, String] {
       reader.close()
 
       // Convert to JSON
-      val json = Json.parse(text)
+      name = path.getName
+      json = Json.parse(text)
 
-      // Parse JSON
-      pairs = json match {
-        case arr : JsArray => arr.value.flatMap(convert)
-        case _ => convert(json)
+    }
+
+    override def nextKeyValue() = {
+      if (finished)
+        false
+      else {
+        finished = true
+        true
       }
-
     }
 
     override def getProgress =
-      if (pairs.isEmpty) 1.0f else (index + 1).toFloat / (pairs.size + 1).toFloat
+      if (finished) 1.0f else 0.0f
 
-    override def nextKeyValue() = {
-      index += 1
-      index < pairs.size
-    }
+    override def getCurrentKey = name
 
-    override def getCurrentKey = pairs(index)._1
-
-    override def getCurrentValue = pairs(index)._2
+    override def getCurrentValue = json
 
     override def close() {}
 
@@ -77,20 +72,19 @@ abstract class JsonInputFormat extends FileInputFormat[String, String] {
 
 }
 
-
 /**
- * JSON input format for crossword files.
- *
- * @author Johan Berdat
- * @author Timothée Emery
+ * Extends Spark with helpers for JSON objects.
  */
-class CrosswordInputFormat extends JsonInputFormat {
+object JsonInputFormat {
 
-  override def transform(obj: JsObject): Seq[(String, String)] = {
-    val array = (obj \ "words").asInstanceOf[JsArray].value
-    array.map(w => (w \ "word").as[String] -> (w \ "clue").as[String])
+  implicit def extendSparkContext(context: SparkContext) = new {
+
+    /**
+     * Like <code>SparkContext.textFile</code>, open one or more JSON files, with one tuple per file.
+     */
+    def jsonFile(path: String): RDD[(String, JsValue)] =
+      context.newAPIHadoopFile[String, JsValue, JsonInputFormat](path)
+
   }
 
 }
-
-// TODO input format for definitions JSON
