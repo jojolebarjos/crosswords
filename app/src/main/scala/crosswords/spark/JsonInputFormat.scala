@@ -1,8 +1,9 @@
 
 package crosswords.spark
 
-import java.io.{InputStreamReader, BufferedReader}
+import java.io.{BufferedInputStream, InputStream, InputStreamReader, BufferedReader}
 import crosswords.util.Packer
+import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{JobContext, RecordReader, TaskAttemptContext, InputSplit}
 import org.apache.hadoop.mapreduce.lib.input.{FileSplit, FileInputFormat}
@@ -34,7 +35,12 @@ class JsonInputFormat extends FileInputFormat[String, JsValue] {
       // Get input stream to JSON file
       val path = split.asInstanceOf[FileSplit].getPath
       val system = path.getFileSystem(task.getConfiguration)
-      val input = system.open(path)
+      var input: InputStream = system.open(path)
+      input = new BufferedInputStream(input)
+
+      // Check for compressed format
+      if (path.getName.endsWith(".bz2") || path.getName.endsWith(".gz"))
+        input = new CompressorStreamFactory().createCompressorInputStream(input)
 
       // Read whole file as string
       val reader = new BufferedReader(new InputStreamReader(input))
