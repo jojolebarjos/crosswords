@@ -2,12 +2,14 @@
 package crosswords.spark
 
 import java.io.{InputStreamReader, BufferedReader}
+import crosswords.util.Packer
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.{JobContext, RecordReader, TaskAttemptContext, InputSplit}
 import org.apache.hadoop.mapreduce.lib.input.{FileSplit, FileInputFormat}
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext.rddToPairRDDFunctions
 import org.apache.spark.rdd.RDD
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json.{JsObject, Json, JsValue}
 
 /**
  * File input format used to decode JSON files.
@@ -82,8 +84,14 @@ object JsonInputFormat {
     /**
      * Like <code>SparkContext.textFile</code>, open one or more JSON files, with one tuple per file.
      */
-    def jsonFile(path: String): RDD[(String, JsValue)] =
+    def jsValueFile(path: String): RDD[(String, JsValue)] =
       context.newAPIHadoopFile[String, JsValue, JsonInputFormat](path)
+
+    /**
+     * Like <code>SparkContext.textFile</code>, open one or more JSON files, with one tuple per top-level JSON object.
+     */
+    def jsObjectFile(path: String): RDD[(String, JsObject)] =
+      jsValueFile(path).flatMapValues(Packer.unpack)
 
   }
 

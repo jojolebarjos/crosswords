@@ -11,10 +11,11 @@ object JsonTest {
 
     val context = new SparkContext("local", "shell")
 
-    val values = context.jsonFile("../data/sample/*.json")
-    
-    for ((_, v) <- values)
-      println(Json.prettyPrint(v))
+    val objects = context.jsObjectFile("../data/sample/*.json")
+    val urls = objects.flatMap(obj => (obj._2 \ "url").asOpt[String])
+
+    for (url <- urls.collect())
+      println(url)
 
   }
 
