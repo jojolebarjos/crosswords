@@ -1,4 +1,4 @@
-﻿
+
 package crosswords.spark
 
 import java.io.{BufferedInputStream, InputStream, InputStreamReader, BufferedReader}

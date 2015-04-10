@@ -18,8 +18,7 @@ object JsonTest {
     val objects = context.jsObjectFile("../data/crosswords/*").map(_._2)
 
     // Compute word set
-    val entries = objects.flatMap(c => (c \ "words").as[Seq[JsObject]])
-    val words = entries.map(e => (e \ "word").as[String]).distinct().sortBy(w => w)
+    val words = Bags.clues(objects).map(_._1).distinct().sortBy(w => w)
 
     // Save words to disk
     val array = words.collect()

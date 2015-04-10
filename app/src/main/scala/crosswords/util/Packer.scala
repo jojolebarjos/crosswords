@@ -1,9 +1,8 @@
-﻿
+
 package crosswords.util
 
 import java.io.{FileWriter, File}
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
-import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 /**
