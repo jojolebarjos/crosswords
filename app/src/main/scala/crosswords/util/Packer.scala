@@ -1,7 +1,7 @@
-
+﻿
 package crosswords.util
 
-import java.io.File
+import java.io.{FileWriter, File}
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -36,22 +36,30 @@ object Packer {
     JsArray(unpack(values))
 
   /**
-   * Pack JSON objects into chunks of size <code>size</code> in bytes.
+   * Pack JSON objects into chunks of size <code>bytes</code> in bytes.
    * The last chunk might be smaller than specified size.
    */
-  def pack(values: TraversableOnce[JsValue], size: Int): Seq[JsValue] = {
-    val result = new ArrayBuffer[JsValue]()
-    var buffer = JsArray()
-    for (value <- values) {
-      buffer = pack(Seq(buffer, value))
-      if (Json.prettyPrint(buffer).getBytes("UTF-8").length > size) {
-        result += buffer
-        buffer = JsArray()
+  def pack(values: Iterator[JsValue], bytes: Int): Iterator[JsArray] = new Iterator[JsArray] {
+
+    private var current = compute()
+
+    private def compute() = {
+      var buffer = JsArray()
+      while (values.hasNext && Json.prettyPrint(buffer).getBytes("UTF-8").length < bytes) {
+        val value = values.next()
+        buffer = pack(Seq(buffer, value))
       }
+      buffer
     }
-    if (buffer.value.nonEmpty)
-      result += buffer
-    result
+
+    def hasNext = current.value.nonEmpty
+
+    def next() = {
+      val result = current
+      current = compute()
+      result
+    }
+
   }
 
   /**
@@ -75,6 +83,15 @@ object Packer {
   def read(file: String): Iterator[JsValue] =
     read(new File(file))
 
-  // TODO write all to specified path
+  /**
+   * Write a JSON value into specified file.
+   */
+  def write(path: String, value: JsValue) {
+    val writer = new FileWriter(path)
+    writer.write(Json.prettyPrint(value))
+    writer.close()
+  }
+
+  // TODO write multiple values to specified folder
 
 }
