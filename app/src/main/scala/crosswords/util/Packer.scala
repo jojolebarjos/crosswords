@@ -46,7 +46,7 @@ object Packer {
 
     private def compute() = {
       var buffer = JsArray()
-      while (values.hasNext && Json.prettyPrint(buffer).getBytes("UTF-8").length < bytes) {
+      while (values.hasNext && Json.prettyPrint(buffer).length < bytes) {
         val value = values.next()
         buffer = pack(Seq(buffer, value))
       }
@@ -61,6 +61,16 @@ object Packer {
       result
     }
 
+  }
+
+  /**
+   * Cascaded packing of 10MB for better performances.
+   */
+  def packOptimized(values: Iterator[JsValue]): Iterator[JsArray] = {
+    val a = pack(values, 10000)
+    val b = pack(a, 100000)
+    val c = pack(b, 1000000)
+    pack(c, 10000000)
   }
 
   /**

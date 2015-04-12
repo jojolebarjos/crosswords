@@ -6,8 +6,6 @@ import crosswords.util.{Parallel, Packer}
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import play.api.libs.json.{Json, JsObject}
 
-import scala.collection.mutable
-
 /**
  * Convert Wiktionary dump file into JSON definitions.
  *
@@ -65,8 +63,8 @@ object Wiktionary {
 
     // Iterate and write on disk
     for ((it, i) <- Parallel.split(new Pages(input)).zipWithIndex.par) {
-      for ((obj, j) <- Packer.pack(it.flatMap(p => extract(p._1, p._2)), 100000).zipWithIndex) {
-        Packer.writeBZ2("../data/definitions/wiktionary_" + i + "_" + j + ".json.bz2", obj)
+      for ((objs, j) <- it.flatMap(p => extract(p._1, p._2)).grouped(1000).zipWithIndex) {
+        Packer.writeBZ2("../data/definitions/wiktionary_" + i + "_" + j + ".json.bz2", Packer.pack(objs))
         println("-> core #" + i + ", chunk #" + j)
       }
       println("=> core #" + i + " finished")
