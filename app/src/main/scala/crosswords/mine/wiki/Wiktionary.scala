@@ -2,7 +2,7 @@
 package crosswords.mine.wiki
 
 import java.io._
-import crosswords.util.Packer
+import crosswords.util.{Parallel, Packer}
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import play.api.libs.json.{Json, JsObject}
 
@@ -43,7 +43,7 @@ object Wiktionary {
       // TODO extract definitions and examples sentences
 
       // Create JSON object
-      println("> " + title)
+      //println("> " + title)
       Json.obj(
         "word" -> title,
         "synonyms" -> related,
@@ -63,23 +63,14 @@ object Wiktionary {
     if (path.endsWith(".bz2"))
       input = new CompressorStreamFactory().createCompressorInputStream(input)
 
-
-    val titles = new mutable.HashSet[String]()
-    try {
-    for ((t, p) <- new Pages(input)) {
-      val markup = Markup(p)
-      titles ++= Helper.headers(markup).map(_.title.toString)
-    } }
-    catch { case e => e.printStackTrace()}
-    println(titles.toSeq.sorted.mkString("\r\n"))
-
-
-    /*
     // Iterate and write on disk
-    for ((obj, i) <- Packer.pack(new Pages(input).flatMap(p => extract(p._1, p._2)), 1000000).zipWithIndex) {
-      Packer.writeBZ2("../data/definitions/wiktionary_" + i + ".json.bz2", obj)
-      println("=> chunk #" + i)
-    }*/
+    for ((it, i) <- Parallel.split(new Pages(input)).zipWithIndex.par) {
+      for ((obj, j) <- Packer.pack(it.flatMap(p => extract(p._1, p._2)), 100000).zipWithIndex) {
+        Packer.writeBZ2("../data/definitions/wiktionary_" + i + "_" + j + ".json.bz2", obj)
+        println("-> core #" + i + ", chunk #" + j)
+      }
+      println("=> core #" + i + " finished")
+    }
 
     // Close resources
     input.close()
