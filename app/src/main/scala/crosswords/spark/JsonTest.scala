@@ -4,7 +4,6 @@ package crosswords.spark
 import java.io.{File, BufferedWriter, FileWriter}
 import org.apache.spark.SparkContext
 import JsonInputFormat._
-import play.api.libs.json.JsObject
 
 object JsonTest {
 
@@ -17,16 +16,14 @@ object JsonTest {
     // Get all crosswords
     val objects = context.jsObjectFile("../data/crosswords/*").map(_._2)
 
-    // Compute word set
-    val words = Bags.clues(objects).map(_._1).distinct().sortBy(w => w)
+    // Compute word and counts
+    val words = Bags.clues(objects).map(_._1).countByValue()
 
     // Save words to disk
-    val array = words.collect()
     val output = new BufferedWriter(new FileWriter(new File("../data/words.txt")))
-    for (word <- array)
-      output.write(word + "\r\n")
+    for (word <- words.toSeq.sortBy(_._1))
+      output.write(word._1 + ": " + word._2 + "\r\n")
     output.close()
-    println(array.length + " unique words written")
 
   }
 
