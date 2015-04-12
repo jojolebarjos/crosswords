@@ -1,7 +1,9 @@
 
 package crosswords.util
 
-import java.io.{FileWriter, File}
+import java.io._
+import org.apache.commons.compress.compressors.CompressorStreamFactory
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 import scala.io.Source
 
@@ -87,6 +89,18 @@ object Packer {
    */
   def write(path: String, value: JsValue) {
     val writer = new FileWriter(path)
+    writer.write(Json.prettyPrint(value))
+    writer.close()
+  }
+
+  /**
+   * Write a JSON value into specified Bzip2 file.
+   */
+  def writeBZ2(path: String, value: JsValue) {
+    val writer = new OutputStreamWriter(
+      new BZip2CompressorOutputStream(
+        new BufferedOutputStream(
+          new FileOutputStream(path))))
     writer.write(Json.prettyPrint(value))
     writer.close()
   }
