@@ -32,7 +32,7 @@ object Helper {
    * Find header.
    */
   def headers(markup: Markup, title: String, level: Int = 0): Seq[Header] =
-    headers(markup, h => (level == 0 || level == h.lvl) && h.title.toString == title)
+    headers(markup, h => (level == 0 || level == h.lvl) && h.title.toString.trim.toLowerCase == title.toLowerCase)
 
   /**
    * Iterate over all references

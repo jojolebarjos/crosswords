@@ -225,7 +225,7 @@ class MarkupWemListener extends EmptyWemListener {
   }
 
   override def onReference(ref: WikiReference) {
-    builder.addReference(ref.toString) // TODO onReference
+    builder.addReference(ref.getLink) // TODO onReference
   }
 
   override def onReference(ref: String) {

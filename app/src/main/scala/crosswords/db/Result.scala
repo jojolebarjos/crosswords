@@ -50,8 +50,9 @@ class Result(private val statement: Statement, private val sql: String) extends 
       else if (cls == classOf[Float]) s.getOrElse("0").toFloat
       else if (cls == classOf[Double]) s.getOrElse("0").toDouble
       else if (cls == classOf[BigDecimal]) BigDecimal(s.getOrElse("0"))
+      // TODO handle dates
       else throw new Exception("Failed to cast to " + m.runtimeClass + "!")
-      ).asInstanceOf[A]
+    ).asInstanceOf[A]
   }
 
   private def at(l: List[Option[String]], i: Int): Option[String] = if (i < l.length) l(i) else None
