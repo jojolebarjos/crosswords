@@ -97,10 +97,12 @@ object Wiktionary {
 
       // Enumerate and clean references
       def refs(pred: String => Boolean) =
-        headers(pred).flatMap(Helper.references).map(clean).distinct.sorted.filter(_.nonEmpty)
+        headers(pred).flatMap(Helper.references).map(clean).distinct.filter(_.nonEmpty).sorted
       val equivalents = refs(isEquivalent).filter(w => w.toLowerCase != title.toLowerCase)
       val associated = refs(isAssociated).filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
       val other = refs(_ => true).filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
+
+      // TODO macro expansion
 
       // Extract definitions
       val definitions = Helper.headers(english, !_.title.toString.toLowerCase.contains("translat")).
@@ -144,6 +146,7 @@ object Wiktionary {
     // Iterate and write on disk
     val progress = new Progress(count)
     for ((it, i) <- Parallel.split(new Pages(input)).zipWithIndex.par) {
+      // TODO improve size of packs
       for ((objs, j) <- it.flatMap(p => extract(p._1, p._2)).grouped(1000).zipWithIndex) {
         Packer.writeBZ2("../data/definitions/wiktionary_" + i + "_" + j + ".json.bz2", Packer.pack(objs))
         progress.advance(objs.size)
