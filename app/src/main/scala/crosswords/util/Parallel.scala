@@ -72,9 +72,9 @@ class Progress(val max: Int) {
 
   private def format(seconds: Double): String = {
     if (seconds < 1)
-      return "0"
+      return "00:00:00"
     if (seconds > 3600 * 24)
-      return ">24h"
+      return "##:##:##"
     val h = (seconds / 3600).toInt
     val m = ((seconds - h * 3600) / 60).toInt
     val s = (seconds % 60).toInt
