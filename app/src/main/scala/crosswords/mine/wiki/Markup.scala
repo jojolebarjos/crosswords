@@ -18,6 +18,8 @@ import scala.collection.mutable.ArrayBuffer
  */
 trait Markup
 
+// TODO improve this model, to handle all markup structures
+
 object Markup {
 
   def apply(str: String): Group = {
@@ -225,10 +227,11 @@ class MarkupWemListener extends EmptyWemListener {
   }
 
   override def onReference(ref: WikiReference) {
-    builder.addReference(ref.getLink) // TODO onReference
+    builder.addReference(ref.getLink)
   }
 
   override def onReference(ref: String) {
+    // TODO not sure if this kind of reference is relevant, seems to be images and external links...
     builder.addReference(ref)
   }
 

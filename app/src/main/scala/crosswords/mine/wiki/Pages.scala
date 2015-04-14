@@ -5,8 +5,6 @@ import java.io.InputStream
 import javax.xml.stream.{XMLInputFactory, XMLStreamReader}
 import javax.xml.stream.XMLStreamConstants._
 
-import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory.Woodstox
-
 /**
  * Iterate over pages of specified Wikipedia dump XML file.
  *
