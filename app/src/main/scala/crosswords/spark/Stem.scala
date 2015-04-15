@@ -2,6 +2,7 @@
 package crosswords.spark
 
 import scala.io.Source
+import java.text.Normalizer
 
 /**
  * Clean words and find roots.
@@ -12,6 +13,8 @@ import scala.io.Source
  * @author Patrick Andrade
  */
 object Stem {
+
+  val regex_ASCII = """[^\p{ASCII}]"""
 
   private val escapes = Map(
     "Æ" -> "AE"
@@ -35,8 +38,18 @@ object Stem {
     val ascii = toAscii(sentence)
     ascii.split(" ")
     // TODO improve that A LOT
+    sentence
+      .toUpperCase()
+      .split(" ")
+      .map(
+        word => Normalizer.normalize(word, Normalizer.Form.NFD)
+          .replaceAll(regex_ASCII, ""))
+      .map(word => word_stemmer(word))
   }
 
+  def word_stemmer(word : String) : String = {
+    "vakavkaf"
+  }
 
   def main(args: Array[String]) {
     for (line <- Source.stdin.getLines()) {

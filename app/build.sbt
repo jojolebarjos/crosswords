@@ -20,3 +20,5 @@ libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
 libraryDependencies += "org.wikimodel" % "org.wikimodel.wem" % "2.0.7"
 
 libraryDependencies += "org.codehaus.woodstox" % "woodstox-core-asl" % "4.4.1"
+
+libraryDependencies += "edu.mit" % "jwi" % "2.2.3"
