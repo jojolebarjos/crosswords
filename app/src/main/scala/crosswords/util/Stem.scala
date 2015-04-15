@@ -11,7 +11,7 @@ object Stem {
   def init = {
     // construct the URL to the Wordnet dictionary directory
     val wnhome = System.getenv("WNHOME")
-    val path = wnhome + File.separator + "2.1" + File.separator + "dict"
+    val path = """C:\Users\Vincent\EPFL\Big Data\Wordnet test\WordNet-3.0\WordNet-3.0\dict"""
     val url = new URL("file", null, path)
 
     // construct the dictionary object and open it
@@ -28,12 +28,9 @@ object Stem {
   }
 
   def main(args: Array[String]) {
-    println(getStem("took", POS.VERB))
-    println(getStem("taken", POS.VERB))
-    println(getStem("connection", POS.NOUN))
     println(POS.values().toList)
-    for (pos <- POS.values()) {
-      println(getStem("the", pos))
-    }
+
+      println(getStem("container", null))
+    println("container adfsdgs".split(" ")(0))
   }
 }
