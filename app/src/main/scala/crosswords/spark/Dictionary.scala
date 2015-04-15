@@ -28,12 +28,12 @@ object Dictionary {
    * Attach ID to words.
    */
   def getID(dictionary: RDD[(Long, String)])(words: RDD[String]): RDD[(String, Long)] =
-    words.map(w => (w, ())).join(swap(dictionary)).map(w => (w._1, w._2._2))
+    words.map(w => (w, ())).join(swap(dictionary)).mapValues(_._2)
 
   /**
    * Attach word to IDs.
    */
   def getWord(dictionary: RDD[(Long, String)])(ids: RDD[Long]): RDD[(Long, String)] =
-    ids.map(w => (w, ())).join(dictionary).map(w => (w._1, w._2._2))
+    ids.map(w => (w, ())).join(dictionary).mapValues(_._2)
 
 }
