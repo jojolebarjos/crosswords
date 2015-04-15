@@ -2,7 +2,7 @@
 package crosswords.mine.wiki
 
 import java.io._
-import crosswords.util.{Parallel, Packer}
+import crosswords.util.{Progress, Parallel, Packer}
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import play.api.libs.json.{Json, JsObject}
 
@@ -35,11 +35,13 @@ object Wiktionary {
   /**
    * Hyperonyms, hyponyms, holonyms, synonyms, antonyms,
    * related terms/forms, derived terms, see also,
-   * homographs, homonyms, homophones, anagrams...
+   * homographs, homonyms, homophones, anagrams,
+   * etymology...
    */
   def isAssociated(title: String): Boolean = {
     val t = clean(title)
-    if (t.contains("ym") && (t.contains("hyper") || t.contains("hypo") || t.contains("holo") || t.contains("sy") || t.contains("anto")))
+    if (t.contains("ym") && (t.contains("hyper") || t.contains("hypo") || t.contains("holo") || t.contains("sy") ||
+        t.contains("anto") || t.contains("acro") || t.contains("paro")))
       return true
     if (t.contains("rel") && (t.contains("term") || t.contains("form") || t.contains("char")))
       return true
@@ -51,6 +53,21 @@ object Wiktionary {
       return true
     if (t.contains("anagram"))
       return true
+    if (t.contains("et") && t.contains("gy"))
+      return true
+    false
+  }
+
+  /**
+   * Adjective, verb, adverb, noun, pronouns...
+   */
+  def isDefinition(title: String): Boolean = {
+    val t = clean(title)
+    if (t.contains("adjectiv") || t.contains("verb") || t.contains("parti") || t.contains("noun"))
+      return true
+    if (t.contains("pre") && t.contains("sition"))
+      return true
+    // TODO others
     false
   }
 
@@ -63,6 +80,8 @@ object Wiktionary {
       // Clean undesired symbols and tags
       def clean(ref: Reference) = {
         var result = ref.ref
+        if (result.contains("//"))
+          result = ""
         val colon = result.lastIndexOf(':')
         if (colon >= 0)
           result = result.substring(colon + 1)
@@ -72,24 +91,37 @@ object Wiktionary {
         result
       }
 
+      // Filter headers
+      def headers(pred: String => Boolean) =
+        Helper.headers(english, h => pred(h.title.toString))
+
       // Enumerate and clean references
       def refs(pred: String => Boolean) =
-        Helper.headers(english, h => pred(h.title.toString)).flatMap(Helper.references).map(clean).distinct.sorted
-      val equivalents = refs(isEquivalent)
-      val associated = refs(isAssociated)
+        headers(pred).flatMap(Helper.references).map(clean).distinct.filter(_.nonEmpty).sorted
+      val equivalents = refs(isEquivalent).filter(w => w.toLowerCase != title.toLowerCase)
+      val associated = refs(isAssociated).filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
+      val other = refs(_ => true).filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
 
-      // Extract definitions and examples
-      val definitions = Seq.empty[String]
+      // TODO macro expansion
+
+      // Extract definitions
+      val definitions = Helper.headers(english, !_.title.toString.toLowerCase.contains("translat")).
+        flatMap(h => Helper.definitions(h, false).map(_.paragraph.toString))
+      // TODO use some translation categories as definition
+      // TODO get definitions from paragraphs, and filter header (noun, adverb...)
+
+      // Extract examples
       val examples = Seq.empty[String]
       // TODO extract definitions and examples sentences
 
       // Create JSON object
-      //println("> " + title)
       var obj =  Json.obj("word" -> title)
       if (equivalents.nonEmpty)
         obj += "equivalents" -> Json.toJson(equivalents)
       if (associated.nonEmpty)
         obj += "associated" -> Json.toJson(associated)
+      if (other.nonEmpty)
+        obj += "other" -> Json.toJson(other)
       if (definitions.nonEmpty)
         obj += "definitions" -> Json.toJson(definitions)
       if (examples.nonEmpty)
@@ -112,12 +144,13 @@ object Wiktionary {
       input = new CompressorStreamFactory().createCompressorInputStream(input)
 
     // Iterate and write on disk
-    var current = 0
+    val progress = new Progress(count)
     for ((it, i) <- Parallel.split(new Pages(input)).zipWithIndex.par) {
+      // TODO improve size of packs
       for ((objs, j) <- it.flatMap(p => extract(p._1, p._2)).grouped(1000).zipWithIndex) {
         Packer.writeBZ2("../data/definitions/wiktionary_" + i + "_" + j + ".json.bz2", Packer.pack(objs))
-        val c = synchronized{current += 1000; current}
-        println("-> core #" + i + ", chunk #" + j + ", " + (100.0f * c / count) + "%")
+        progress.advance(objs.size)
+        println(progress)
       }
       println("=> core #" + i + " finished")
     }

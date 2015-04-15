@@ -35,23 +35,57 @@ object Helper {
     headers(markup, h => (level == 0 || level == h.lvl) && h.title.toString.trim.toLowerCase == title.toLowerCase)
 
   /**
-   * Iterate over all references
+   * Get all references
    */
-  def references(markup: Markup): Seq[Reference] = markup match {
+  def references(markup: Markup, subheader: Boolean): Seq[Reference] = markup match {
     case r: Reference =>
       Seq(r)
     case p: Paragraph =>
-      p.content.flatMap(references)
+      p.content.flatMap(i => references(i, subheader))
     case i: Items =>
-      i.items.flatMap(references)
-    case h: Header =>
-      references(h.title) ++ references(h.content)
+      i.items.flatMap(i => references(i, subheader))
+    case h: Header if subheader =>
+      references(h.title, subheader) ++ references(h.content, subheader)
     case m: MacroGroup =>
-      references(m.group)
+      references(m.group, subheader)
     case d: Definition =>
-      references(d.paragraph)
+      references(d.paragraph, subheader)
     case _ =>
       Seq.empty
+  }
+
+  /**
+   * Get all references
+   */
+  def references(markup: Markup): Seq[Reference] =
+    references(markup, true)
+
+  /**
+   * Get all definitions.
+   */
+  def definitions(markup: Markup, subheader: Boolean): Seq[Definition] = markup match {
+    case d: Definition =>
+      Seq(d)
+    case i: Items =>
+      i.items.flatMap(i => definitions(i, subheader))
+    case h: Header if subheader =>
+      definitions(h.content, subheader)
+    case m: MacroGroup =>
+      definitions(m.group, subheader)
+    case _ =>
+      Seq.empty
+  }
+
+  /**
+   * Get all definitions.
+   */
+  def definitions(markup: Markup): Seq[Definition] =
+    definitions(markup, true)
+
+  def expand(markup: Content, mac: Macro => String, ref: Reference => String): String = markup match {
+    case m: Macro => mac(m)
+    case r: Reference => ref(r)
+    case _ => markup.toString
   }
 
   // TODO macro/reference expansion
