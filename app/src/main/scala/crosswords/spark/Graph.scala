@@ -4,7 +4,7 @@ import crosswords.spark.JsonInputFormat._
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.mllib.feature.{HashingTF, IDF, Normalizer}
-import org.apache.spark.mllib.linalg.{SparseVector, Vector}
+import org.apache.spark.mllib.linalg.SparseVector
 
 /**
  * Test of graph representation based on TF-IDF for the adjacency matrix and on Vector Space Model for the similarity.
@@ -19,8 +19,6 @@ object Graph {
     products.sum
   }
 
-  def dotProduct(v1: Vector, v2: Vector) = v1.toArray.zip(v2.toArray).map(x => x._1 * x._2).sum
-
   def main(args: Array[String]) {
     // Open context
     val context = new SparkContext("local", "shell")
@@ -29,14 +27,20 @@ object Graph {
     // See also this: http://qnalist.com/questions/4994960/run-spark-unit-test-on-windows-7
     // System.setProperty("hadoop.home.dir", "C:/winutils/")
 
-    val crosswords = context.jsObjectFile("../data/crosswords/*").map(_._2)
+    val words = context.jsObjectFile("../data/wiki/*.bz2").map(_._2).cache()
+    val defs = Bags.definitions(words)
+    val examples = Bags.examples(words)
+    val equivs = Bags.equivalents(words)
+    val assos = Bags.associated(words)
+    words.unpersist()
 
-    // Compute bags as (word: String, clues: Seq[String]) in upper case
-    val bags = Bags.clues(crosswords).map(bag => (bag._1.toUpperCase, bag._2.toUpperCase.split("\\s+").filter(!_.equals("")).toSeq))
+    // Compute bags as (word: String, any: Seq[String]) in upper case
+    val bags = defs.union(examples).union(equivs).union(assos).map(bag => (bag._1.toUpperCase, bag._2.toUpperCase.split("\\s+").filter(!_.equals("")).toSeq))
 
     // Group all the definitions for the same word and compute the normalized TF-IDF
     val groupedBags = bags.reduceByKey((def1, def2) => def1 ++ def2).cache()
     val binsCount = groupedBags.flatMap(_._2).distinct().count()
+    println("Bin count: " + binsCount)
     val hashTF = new HashingTF(binsCount.toInt)
     val tf = hashTF.transform(groupedBags.map(_._2)).cache()
     val idfModel = new IDF().fit(tf)
@@ -45,7 +49,7 @@ object Graph {
     tf.unpersist()
 
     // Keep list of words, so that we can get them from indexes
-    val words = groupedBags.map(_._1).collect()
+    val wordsUnique = groupedBags.map(_._1).collect()
     groupedBags.unpersist()
 
     // Build a query vector from the query
@@ -65,16 +69,8 @@ object Graph {
     }, true).collect()
     val topK = partialTopK.sortBy(-_._1).take(k)
 
-    topK.foreach { case (rank, id) => println(words(id.toInt), rank) }
+    topK.foreach { case (rank, id) => println(wordsUnique(id.toInt), rank) }
 
     context.stop()
-
-    // Save words to disk
-    /*val array = words.collect()
-    val output = new BufferedWriter(new FileWriter(new File("../data/words.txt")))
-    for (word <- array)
-      output.write(word + "\r\n")
-    output.close()
-    println(array.length + " unique words written")*/
   }
 }
