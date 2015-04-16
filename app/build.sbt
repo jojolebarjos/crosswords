@@ -6,14 +6,15 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.8"
 
-libraryDependencies += "com.github.nscala-time" %% "nscala-time" % "1.8.0"
-
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
 
+// To run on the cluster, change "org.apache.spark" %% "spark-*" % "1.2.1" into "org.apache.spark" %% "spark-core" % "1.2.1" % "provided"
+// Then run 'sbt compile assembly'
+// Then run 'spark-submit --class pacakge.Main --master yarn-cluster --num-executors 25 pathToJar.jar'
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.3.0",
-  "org.apache.spark" %% "spark-mllib" % "1.3.0",
-  "org.apache.spark" %% "spark-graphx" % "1.3.0"
+  "org.apache.spark" %% "spark-core" % "1.2.1",
+  "org.apache.spark" %% "spark-mllib" % "1.2.1",
+  "org.apache.spark" %% "spark-graphx" % "1.2.1"
 )
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
