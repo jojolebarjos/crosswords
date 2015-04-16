@@ -29,11 +29,21 @@ object Stem {
   val wordnetStemmer = new WordnetStemmer(dict)
   val porterStemmer = new PorterStemmer()
 
+  //TODO: Need to be completed
+  private val bad_cases = List(
+    "AM", "IS", "AR",
+    "A"
+  )
 
-
+  // TODO more
   private val escapes = Map(
-    "Æ" -> "AE"
-    // TODO more
+    """’""" -> """'""",
+    "Æ" -> "AE",
+    "Œ" -> "OE",
+    """'LL""" -> """'WILL""",
+    """CAN'T""" -> """CAN NOT""",
+    """N'T""" -> """ NOT""",
+    """'D""" -> """ HAD"""
   )
 
   /**
@@ -46,11 +56,18 @@ object Stem {
     tmp.replaceAll("[_\\W]+", " ").trim
   }
 
+  def removeEscapes(text: String): String = {
+    var tmp = text.toUpperCase
+    for ((a, b) <- escapes)
+      tmp = tmp.replaceAll(a, b)
+    tmp
+  }
+
 
 
   private def initWordNetDictionary = {
     val wordNetHome = System.getenv("WNHOME")
-    val path = wordNetHome + File.separator + "3.1" + File.separator + "dict"
+    val path = wordNetHome + File.separator + "WordNet-3.0" + File.separator + "dict"
     val url = new URL("file",null,path)
 
     val wordNetDictionary = new Dictionary(url)
@@ -58,8 +75,10 @@ object Stem {
     wordNetDictionary
   }
 
+
   private def getStem(word : String) ={
-    wordnetStemmer.findStems(word, null).asScala.toList
+    if (word.matches("""\s*""")) Nil
+    else wordnetStemmer.findStems(word, null).asScala.toList
   }
 
   def main(args: Array[String]) {
@@ -70,18 +89,20 @@ object Stem {
 
   ///TODO : check for ligature. Ask if they have to be split. ex : Æ is considered a letter in its own right
   def normalize(word : String) : String ={
-    Normalizer.normalize(toAscii(word), Normalizer.Form.NFKD)
-          .replaceAll("""[^\p{ASCII}]""", "")
+    Normalizer.normalize(removeEscapes(word), Normalizer.Form.NFKD)
+          .replaceAll("""[^\p{ASCII}]""", "").replaceAll("""[^_\w]""", " ")
   }
 
   def reduce(word : String) : String = {
-      getStem(word)
+      val stems = getStem(word)
         .map(w =>
-        porterStemmer.getPorterStem(w)
-          .toUpperCase())
+        //porterStemmer.getPorterStem(w)
+          //.toUpperCase())
+        w.toUpperCase())
         .toSet
-        .filter( _ != "ar")
-        .minBy(_.length)
+        .filter(w => !bad_cases.contains(w))
+
+    if (!stems.isEmpty) stems.minBy(_.length) else ""
   }
 
 
@@ -90,9 +111,8 @@ object Stem {
    * Clean and simplify text.
    */
   def clean(sentence: String): Seq[String] = {
-    sentence.split(" ")
-    .map(normalize(_))
-    .map(reduce(_))
+    normalize(sentence).split(" ")
+    .map(reduce(_)).filter(_ != "") //.map(normalize(_))
   }
 
 
