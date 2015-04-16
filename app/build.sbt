@@ -1,5 +1,3 @@
-name := "app"
-
 version := "1.0"
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
@@ -8,9 +6,7 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.8"
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
 
-// To run on the cluster, change "org.apache.spark" %% "spark-*" % "1.2.1" into "org.apache.spark" %% "spark-core" % "1.2.1" % "provided"
-// Then run 'sbt compile assembly'
-// Then run 'spark-submit --class pacakge.Main --master yarn-cluster --num-executors 25 pathToJar.jar'
+// To run on the cluster, create the jar with "sbt cluster compile assembly"
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "1.2.1",
   "org.apache.spark" %% "spark-mllib" % "1.2.1",
