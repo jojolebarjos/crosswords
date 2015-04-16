@@ -21,21 +21,20 @@ object Graph {
 
   def main(args: Array[String]) {
     // Open context
-    val context = new SparkContext("local", "shell")
+    val context = new SparkContext()
 
     // Hadoop is buggy on Windows, comment/uncomment the next line of code if it causes trouble
     // See also this: http://qnalist.com/questions/4994960/run-spark-unit-test-on-windows-7
     // System.setProperty("hadoop.home.dir", "C:/winutils/")
 
-    val words = context.jsObjectFile("../data/wiki/*.bz2").map(_._2).cache()
-    val defs = Bags.definitions(words)
-    val examples = Bags.examples(words)
-    val equivs = Bags.equivalents(words)
-    val assos = Bags.associated(words)
+    val words = context.jsObjectFile("hdfs:///projects/crosswords/data/definitions/*.bz2").map(_._2).cache()
+    val groupedWords = Bags.definitions(words) ++ Bags.examples(words) ++ Bags.equivalents(words) ++ Bags.associated(words)
     words.unpersist()
+    val bags = groupedWords.map(bag => (bag._1.toUpperCase, bag._2.toUpperCase.split("\\s+").filter(!_.equals("")).toSeq))
 
     // Compute bags as (word: String, any: Seq[String]) in upper case
-    val bags = defs.union(examples).union(equivs).union(assos).map(bag => (bag._1.toUpperCase, bag._2.toUpperCase.split("\\s+").filter(!_.equals("")).toSeq))
+    // val crosswords = Bags.clues(context.jsObjectFile("hdfs:///projects/crosswords/data/crosswords/*.bz2").map(_._2))
+    // val bags = crosswords.map(bag => (bag._1.toUpperCase, bag._2.toUpperCase.split("\\s+").filter(!_.equals("")).toSeq))
 
     // Group all the definitions for the same word and compute the normalized TF-IDF
     val groupedBags = bags.reduceByKey((def1, def2) => def1 ++ def2).cache()
@@ -69,7 +68,8 @@ object Graph {
     }, true).collect()
     val topK = partialTopK.sortBy(-_._1).take(k)
 
-    topK.foreach { case (rank, id) => println(wordsUnique(id.toInt), rank) }
+    val results = topK.map { case (rank, id) => (wordsUnique(id.toInt), rank) }
+    context.parallelize(results).saveAsTextFile("hdfs:///projects/crosswords/results/apple")
 
     context.stop()
   }
