@@ -74,6 +74,62 @@ object Vec {
   }
   def normSparse(v: SparseVector): Double = Math.sqrt(v.values.foldLeft(0.0){case (accu, value) => accu + value * value})
   def cosSimilaritySparse(v1: SparseVector, v2: SparseVector): Double = dotProductSparse(v1, v2) / (normSparse(v1) * normSparse(v2))
+  def multiplySparse(s: Float, v: SparseVector): SparseVector = new SparseVector(v.size, v.indices, v.values.map(value => value * s))
+  def addSparse(v1: SparseVector, v2: SparseVector): SparseVector = {
+    // Zip each value with its index
+    val indexedValues = v1.indices.zip(v1.values) ++ v2.indices.zip(v2.values)
+    // Reduce by index to compute the sum
+    val sumValues = indexedValues.groupBy(_._1).map{case (index, l) => l.reduce((accu, value) => (accu._1, accu._2 + value._2))}.toArray
+    // Sort to ensure that indexes are ordered
+    val sortedValues = sumValues.sortBy(indexedValue => indexedValue._1).unzip
+    new SparseVector(v1.size, sortedValues._1.toArray, sortedValues._2.toArray)
+
+    /*val indices: ArrayBuffer[Int] = ArrayBuffer()
+    val values: ArrayBuffer[Double] = ArrayBuffer()
+
+    var takeFrom1 = false
+    var takeFrom2 = false
+    val iter = v1.indices.iterator :: v2.indices.iterator :: Nil
+    var currentIndex = iter(0) :: iter(1) :: Nil
+    do {
+      // Add element with lowest index
+      if (currentIndex(0) == currentIndex(1)) {
+        indices.append(i1)
+        values.append(v1(i1) + v2(i2))
+        takeFrom1 = true
+        takeFrom2 = true
+      } else if (i1 < i2) {
+        indices.append(i1)
+        values.append(v1(i1))
+        takeFrom1 = true
+      } else if (i1 > i2) {
+        indices.append(i2)
+        values.append(v2(i2))
+        takeFrom2 = true
+      }
+
+      if (takeFrom1) {
+        if (it1.hasNext) {
+          i1 = it1.next()
+          takeFrom1 = false
+        } else {
+          // append rest of v2
+        }
+      }
+      if (takeFrom2) {
+        if (it2.hasNext) {
+          i2 = it2.next()
+          takeFrom2 = false
+        } else {
+
+        }
+      }
+    } while(true)
+
+    def consume(from: Int): Boolean = {
+      indices.append(currentIndex(from))
+    }*/
+  }
 
   def dotProduct(v1: Vector, v2: Vector): Double = v1.toArray.zip(v2.toArray).map(x => x._1 * x._2).sum
   def norm(v: Vector): Double = Math.sqrt(v.toArray.map(x => x*x).sum)
