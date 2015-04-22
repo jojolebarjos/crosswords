@@ -32,10 +32,14 @@ object Search extends Controller{
     "Scheme")
 
   def searching(searchText: String) = Action {
-    if (words.contains(searchText))
-      Ok(searchText)
-    else
-      Ok("Do not contain !")
+    val stems = Stem.clean(searchText)
+
+    if (stems.size != 0) {
+      val stemsString = stems.reduce(_ + " " + _)
+      Ok(stemsString)
+    } else {
+      Ok("&nbsp")
+    }
   }
 
   def javascriptRoutes = Action { implicit request =>

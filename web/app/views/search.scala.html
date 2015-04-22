@@ -3,8 +3,9 @@
 @main("Crosswords")("Search") {
 <script type="text/javascript">
     var successFn = function(data) {
-
-        $("#searchText2").append(data);
+        var div = document.getElementById("output");
+        //$("#output").append(data);
+        div.innerHTML = data;
 
     console.debug("Success of Ajax Call");
     console.debug(data);
@@ -35,6 +36,5 @@
     </div>
 
     <div id="output" class="ui-widget">
-        <input id="searchText2" type="text"  name="search2">
     </div>
 }

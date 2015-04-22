@@ -15,5 +15,6 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.18"
 
+libraryDependencies += "edu.mit" % "jwi" % "2.2.3"
 
 fork in run := true
