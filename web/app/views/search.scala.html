@@ -1,7 +1,40 @@
 @()
 
 @main("Crosswords")("Search") {
+<script type="text/javascript">
+    var successFn = function(data) {
+
+        $("#searchText2").append(data);
+
+    console.debug("Success of Ajax Call");
+    console.debug(data);
+    };
+    var errorFn = function(err) {
+    console.debug("Error of ajax Call");
+    console.debug(err);
+    }
+
+    ajax1 = {
+    success: successFn,
+    error: errorFn
+    }
+
+    function searching() {
+
+        var idToGet = $("#searchText").val();
+
+        jsRoutes.controllers.Search.searching(idToGet)
+        .ajax(ajax1);
+
+    }
+</script>
+
+
     <div class="ui-widget">
-        <input id="searchText" type="text" placeholder="Search" name="search">
+        <input id="searchText" type="text" placeholder="Search" name="search" onkeypress="if (event.keyCode==13){searching()}">
+    </div>
+
+    <div id="output" class="ui-widget">
+        <input id="searchText2" type="text"  name="search2">
     </div>
 }

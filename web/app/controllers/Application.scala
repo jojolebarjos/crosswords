@@ -11,7 +11,7 @@ object Application extends Controller {
 
   def index = Action {
     
-    val foo = DB.withConnection { connection =>
+    /*val foo = DB.withConnection { connection =>
         val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val result = statement.executeQuery("select * from testTable where id > 6")
         var text = ""
@@ -21,7 +21,9 @@ object Application extends Controller {
         text
     }
     
-    Ok(views.html.index(foo))
+    Ok(views.html.index(foo))*/
+
+    Ok(views.html.index("This is a temporary msg to avoid database settings!"))
   }
 
   def crosswordPage = Action {
