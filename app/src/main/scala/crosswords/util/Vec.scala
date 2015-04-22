@@ -59,5 +59,4 @@ object Vec {
     case South => Vec(0, 1)
     case West => Vec(-1, 0)
   }
-
 }
