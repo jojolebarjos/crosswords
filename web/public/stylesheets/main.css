@@ -56,3 +56,12 @@ input#searchText {
     font-size: 20px;
     font-family: "Times New Roman";
 }
+
+input#searchWord {
+	border: none;
+	border-color: transparent;
+	width: 660px;
+	height: 25px;
+	font-size: 20px;
+	font-family: "Times New Roman";
+}

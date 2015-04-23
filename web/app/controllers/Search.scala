@@ -22,28 +22,54 @@ object Search extends Controller{
     "Groovy",
     "Haskell",
     "Java",
+    "Jaba",
     "JavaScript",
     "Lisp",
     "Perl",
     "PHP",
     "Python",
     "Ruby",
+    "Ruba",
     "Scala",
+    "Scila",
     "Scheme")
 
-  def searching(searchText: String) = Action {
+  val numberOfResults = 3
+
+  def searching(searchText: String) = {
     val stems = Stem.clean(searchText)
 
     if (stems.size != 0) {
       val stemsString = stems.reduce(_ + " " + _)
-      Ok(stemsString)
+      stemsString
     } else {
-      Ok("&nbsp")
+      "&nbsp"
     }
   }
 
+  def searchWord(searchWord: String) = {
+    val searchClean = searchWord.toUpperCase().replaceAll("""[^A-Z\*\?]""", "").replaceAll("""\*""", """.*""").replaceAll("""\?""", """.""")
+    val listMatched = words.map(_.toUpperCase()).filter(_.matches(searchClean))
+
+    if (listMatched.size != 0) {
+      listMatched.take(numberOfResults).reduce(_ + "<br>" + _)
+    } else {
+      "No matching words!"
+    }
+  }
+
+  def searchWords(searchText: String, word: String) = Action {
+    var result = ""
+
+    result += searching(searchText)
+    result += "<br>"
+    result += searchWord(word)
+
+    Ok(result)
+  }
+
   def javascriptRoutes = Action { implicit request =>
-    Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searching)).as("text/javascript")
+    Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchWords)).as("text/javascript")
   }
 
 }

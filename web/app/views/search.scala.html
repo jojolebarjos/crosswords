@@ -23,8 +23,9 @@
     function searching() {
 
         var idToGet = $("#searchText").val();
+        var searchWord = $("#searchWord").val();
 
-        jsRoutes.controllers.Search.searching(idToGet)
+        jsRoutes.controllers.Search.searchWords(idToGet, searchWord)
         .ajax(ajax1);
 
     }
@@ -32,7 +33,8 @@
 
 
     <div class="ui-widget">
-        <input id="searchText" type="text" placeholder="Search" name="search" onkeypress="if (event.keyCode==13){searching()}">
+        <input id="searchText" type="text" placeholder="Search specific sentence" name="searchText" onkeypress="if (event.keyCode==13){searching()}">
+        <input id="searchWord" type="text" placeholder="Search specific word" name="searchWord" onkeypress="if (event.keyCode==13){searching()}">
     </div>
 
     <div id="output" class="ui-widget">
