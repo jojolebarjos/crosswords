@@ -61,6 +61,27 @@ object RetrieveCrosswords extends App {
       println("cwid:%d cid:%d".format(rs.getInt("cwid"),rs.getInt("cid")))
     }
     println("---------------------------------------")
+
+    // retrieve the query of word3 and word4 from the adjacency matrix
+    rs = statement.executeQuery("""select word, temp.sweight from
+                                  |	(select crossworddb.adjacencymatrix.widfrom as candwid, sum(weight) as sweight from crossworddb.adjacencymatrix, crossworddb.words
+                                  |			where (crossworddb.words.word = "come" or crossworddb.words.word = "justforadjacency") and
+                                  |					crossworddb.words.wid = crossworddb.adjacencymatrix.widto
+                                  |			group by crossworddb.adjacencymatrix.widfrom
+                                  |	) as temp, crossworddb.words
+                                  |	where words.wid = temp.candwid
+                                  |    order by sweight desc""".stripMargin)
+
+    // Iterate Over ResultSet
+    println("what we have in the adjacencymatrix table:")
+
+    while (rs.next) {
+      val we = rs.getDouble("sweight");
+      val wo = rs.getString("word")
+      println("word:%s weight:%f".format(wo,we));
+    }
+    println("---------------------------------------")
+
   }
   finally {
     conn.close
