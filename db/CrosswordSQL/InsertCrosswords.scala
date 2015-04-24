@@ -26,6 +26,9 @@ object InsertCrosswords extends App {
   prep.setString(2, "come")
   prep.executeUpdate
 
+  prep.setInt(1, 4)
+  prep.setString(2, "justforadjacency")
+  prep.executeUpdate
   // insert the attributes of the crossword:
   prep = conn.prepareStatement("insert into CrosswordAttributes (cwid,source,language,title,url,author,cwdate,difficulty) values " +
     "(?, ?, ?, ?, ?, ?, ?, ?)")
@@ -92,6 +95,34 @@ object InsertCrosswords extends App {
 
   prep.setInt(1, 1)
   prep.setInt(2, 3)
+  prep.executeUpdate
+
+  // insert into the AdjacencyMatrix
+  prep = conn.prepareStatement("insert into AdjacencyMatrix (widfrom, widto, weight) values (?, ?, ?)")
+
+  prep.setInt(1, 1)
+  prep.setInt(2, 2)
+  prep.setDouble(3,0.1)
+  prep.executeUpdate
+
+  prep.setInt(1, 1)
+  prep.setInt(2, 4)
+  prep.setDouble(3,0.2)
+  prep.executeUpdate
+
+  prep.setInt(1, 2)
+  prep.setInt(2, 1)
+  prep.setDouble(3,0.3)
+  prep.executeUpdate
+
+  prep.setInt(1, 2)
+  prep.setInt(2, 3)
+  prep.setDouble(3,0.7)
+  prep.executeUpdate
+
+  prep.setInt(1, 2)
+  prep.setInt(2, 4)
+  prep.setDouble(3,0.4)
   prep.executeUpdate
 
   // close the connection
