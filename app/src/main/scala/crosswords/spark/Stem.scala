@@ -59,7 +59,8 @@ object Stem {
   }
 
   private def initWordNetDictionary = {
-    val wordNetHome = System.getenv("WNHOME")
+    //val wordNetHome = System.getenv("WNHOME")
+    val wordNetHome = "hdfs:///projects/crosswords/wordnet"
     val path = wordNetHome + File.separator + "WordNet-3.0" + File.separator + "dict"
     val url = new URL("file",null,path)
 
