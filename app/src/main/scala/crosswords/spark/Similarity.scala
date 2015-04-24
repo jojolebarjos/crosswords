@@ -24,8 +24,8 @@ object Similarity {
 
     // System.setProperty("hadoop.home.dir", "C:/winutils/")
 
-    val crosswords = context.jsObjectFile("hdfs:///projects/crosswords/data/definitions/*.bz2").map(_._2)
-    val words = context.jsObjectFile("hdfs:///projects/crosswords/data/crosswords/*.bz2").map(_._2)
+    val crosswords = context.jsObjectFile("hdfs:///projects/crosswords/data/crosswords/*.bz2").map(_._2)
+    val words = context.jsObjectFile("hdfs:///projects/crosswords/data/definitions/*.bz2").map(_._2)
     clean(crosswords, words, "hdfs:///projects/crosswords/data/cleaned")
 
     //val test = loadCleaned("../data/tmp/cleaned", context)
