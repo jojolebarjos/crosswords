@@ -79,6 +79,19 @@ object CreateTables extends App {
                                                                           "on update cascade on delete cascade)")
   prep.executeUpdate
 
+  // create AdjacencyMatrix table
+  prep = conn.prepareStatement("create table AdjacencyMatrix (  widfrom int," +
+                                                                "widto int," +
+                                                                "weight double," +
+                                                                "primary key (widfrom,widto)," +
+                                                                "foreign key (widfrom) " +
+                                                                    "references Words(wid) " +
+                                                                    "on update cascade on delete cascade," +
+                                                                "foreign key (widto) " +
+                                                                    "references Words(wid) " +
+                                                                    "on update cascade on delete cascade)")
+  prep.executeUpdate
+
   // close the connection
   conn.close
 
