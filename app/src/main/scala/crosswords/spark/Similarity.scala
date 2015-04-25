@@ -9,16 +9,18 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsObject
 
+import scala.io.Source
+
 /**
  * @author Laurent Valette
  */
 object Similarity {
   // TODO: Use black magic to adjust the category weights
-  private val CLUES_WEIGHT = 0.6f
-  private val DEFS_WEIGHT = 0.6f
-  private val EXAMPLES_WEIGHT = 0.4f
-  private val EQUIV_WEIGHT = 0.4f
-  private val ASSO_WEIGHT = 0.2f
+  private val CLUES_WEIGHT = 1.0f
+  private val DEFS_WEIGHT = 0.0f
+  private val EXAMPLES_WEIGHT = 0.0f
+  private val EQUIV_WEIGHT = 0.0f
+  private val ASSO_WEIGHT = 0.0f
 
   private val CLEANED_PARTITIONS_COUNT = 20
 
@@ -33,20 +35,22 @@ object Similarity {
     val cleanData = loadCleaned("../data/cleaned", context)
     val weightedData = weightCategories(cleanData)
     val edges = buildEdges(weightedData)
-    val dict = createDictionary(edges)
+    val dict = createDictionary(edges).cache()
     val indexed = toIndex(edges, dict)
-    val result = combine(indexed)
+    val result = combine(indexed).cache()
 
-    val query = context.parallelize(Array("APPLE"))
-    val queryIndex = Dictionary.getID(dict)(query).first()._2
+    for (line <- Source.stdin.getLines()) {
+      val query = context.parallelize(Array(line))
+      val queryIndex = Dictionary.getID(dict)(query).first()._2
 
-    val queryResults = result.filter(t => t._1 == queryIndex)
-    val withWords = Dictionary.getWord(dict)(queryResults.map(_._2))
-    val res1 = queryResults.collect()
-    val res2 = withWords.collect()
-    val test = res1.zip(res2)
-    val top = test.map(t => (t._2._2, t._1._3)).sortBy(-_._2).take(10)
-    top.foreach(println)
+      val queryResults = result.filter(t => t._1 == queryIndex)
+      val withWords = Dictionary.getWord(dict)(queryResults.map(_._2))
+      val res1 = queryResults.collect()
+      val res2 = withWords.collect()
+      val test = res1.zip(res2)
+      val top = test.map(t => (t._2._2, t._1._3)).sortBy(-_._2)
+      top.foreach(println)
+    }
 
     context.stop()
   }
