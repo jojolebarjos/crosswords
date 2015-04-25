@@ -3,7 +3,6 @@ package crosswords.util
 
 import play.api.libs.json.{Json, JsObject}
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 
 /**
  * Helpers to convert between word-based and grid-based formats.

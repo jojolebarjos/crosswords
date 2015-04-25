@@ -87,6 +87,8 @@ object JsonInputFormat {
 
   implicit def extendSparkContext(context: SparkContext) = new {
 
+    // TODO should we use context.wholeTextFile instead?
+
     /**
      * Like <code>SparkContext.textFile</code>, open one or more JSON files, with one tuple per file.
      */

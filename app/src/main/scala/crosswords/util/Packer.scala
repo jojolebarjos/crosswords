@@ -2,7 +2,6 @@
 package crosswords.util
 
 import java.io._
-import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 import scala.io.Source
