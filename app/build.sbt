@@ -9,9 +9,10 @@ libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"
 // Use the cluster command to change the dependencies for the cluster: --> sbt cluster compile assembly <-- to create the jar
 // --> spark-submit --class package.MainClass --master yarn-cluster --num-executors 25 pathToJar.jar <-- to run on the cluster
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "1.2.1",
-  "org.apache.spark" %% "spark-mllib" % "1.2.1",
-  "org.apache.spark" %% "spark-graphx" % "1.2.1"
+  "org.apache.spark" %% "spark-core" % "1.3.0",
+  "org.apache.spark" %% "spark-mllib" % "1.3.0",
+  "org.apache.spark" %% "spark-graphx" % "1.3.0",
+  "org.apache.hadoop" % "hadoop-client" % "2.7.0"
 )
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.12"

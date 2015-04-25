@@ -4,8 +4,8 @@ import java.io.File
 
 import crosswords.spark.JsonInputFormat._
 import org.apache.hadoop.io.compress.BZip2Codec
-
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsObject
 
@@ -20,18 +20,33 @@ object Similarity {
   private val EQUIV_WEIGHT = 0.4f
   private val ASSO_WEIGHT = 0.2f
 
-  def main (args: Array[String]) {
-    val context = new SparkContext("local", "shell")
+  private val CLEANED_PARTITIONS_COUNT = 20
 
-    // System.setProperty("hadoop.home.dir", "C:/winutils/")
+  def main(args: Array[String]) {
+    System.setProperty("hadoop.home.dir", "C:/winutils/")
+    val context = new SparkContext("local[8]", "shell")
 
-    val crosswords = context.jsObjectFile("../data/tmp/crosswords/*.bz2").map(_._2)
-    val words = context.jsObjectFile("../data/tmp/definitions/*.bz2").map(_._2)
-    clean(crosswords, words, "../data/tmp/cleaned")
+    //val crosswords = context.jsObjectFile("../data/crosswords/*.bz2").map(_._2)
+    //val words = context.jsObjectFile("../data/definitions/*.bz2").map(_._2)
+    //clean(crosswords, words, "../data/cleaned")
 
-    //val test = loadCleaned("../data/tmp/cleaned", context)
-    //val first = test._1.first()
-    //println(first)
+    val cleanData = loadCleaned("../data/cleaned", context)
+    val weightedData = weightCategories(cleanData)
+    val edges = buildEdges(weightedData)
+    val dict = createDictionary(edges)
+    val indexed = toIndex(edges, dict)
+    val result = combine(indexed)
+
+    val query = context.parallelize(Array("APPLE"))
+    val queryIndex = Dictionary.getID(dict)(query).first()._2
+
+    val queryResults = result.filter(t => t._1 == queryIndex)
+    val withWords = Dictionary.getWord(dict)(queryResults.map(_._2))
+    val res1 = queryResults.collect()
+    val res2 = withWords.collect()
+    val test = res1.zip(res2)
+    val top = test.map(t => (t._2._2, t._1._3)).sortBy(-_._2).take(10)
+    top.foreach(println)
 
     context.stop()
   }
@@ -49,10 +64,10 @@ object Similarity {
 
     val clues = Bags.clues(crosswordEntries).map(cleanToCSV)
 
-    val defs = Bags.definitions(wikiEntries).map(cleanToCSV)
-    val examples = Bags.examples(wikiEntries).map(cleanToCSV)
-    val equiv = Bags.equivalents(wikiEntries).map(cleanToCSV)
-    val asso = Bags.associated(wikiEntries).map(cleanToCSV)
+    val defs = Bags.definitions(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
+    val examples = Bags.examples(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
+    val equiv = Bags.equivalents(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
+    val asso = Bags.associated(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
 
     clues.saveAsTextFile(outputDirectory + File.separator + "clues", classOf[BZip2Codec])
     defs.saveAsTextFile(outputDirectory + File.separator + "defs", classOf[BZip2Codec])
@@ -88,20 +103,21 @@ object Similarity {
    */
   def weightCategories(l: Seq[RDD[(String, Seq[String])]]): RDD[(String, Seq[String], Float)] = {
     l(0).map(t => (t._1, t._2, CLUES_WEIGHT)) ++
-    l(1).map(t => (t._1, t._2, DEFS_WEIGHT)) ++
-    l(2).map(t => (t._1, t._2, EXAMPLES_WEIGHT)) ++
-    l(3).map(t => (t._1, t._2, EQUIV_WEIGHT)) ++
-    l(4).map(t => (t._1, t._2, ASSO_WEIGHT))
+      l(1).map(t => (t._1, t._2, DEFS_WEIGHT)) ++
+      l(2).map(t => (t._1, t._2, EXAMPLES_WEIGHT)) ++
+      l(3).map(t => (t._1, t._2, EQUIV_WEIGHT)) ++
+      l(4).map(t => (t._1, t._2, ASSO_WEIGHT))
   }
 
   /**
    * Build an index of every word in the vocabulary.
    * @param edges A collection of edges between word/sentence and word
    * @return An RDD of unique index and word
-   * @see crosswords.spark.Dictionary
+   * @see crosswords.spark.Dictionary#build
    */
   def createDictionary(edges: RDD[(String, String, Float)]): RDD[(Long, String)] = {
-    ???
+    val flatten = edges.flatMap(t => Array(t._1, t._2))
+    Dictionary.build(flatten)
   }
 
   /**
@@ -110,8 +126,10 @@ object Similarity {
    * @return An RDD where each element represent an edge between the two words and the category weight
    */
   def buildEdges(extracted: RDD[(String, Seq[String], Float)]): RDD[(String, String, Float)] = {
+    val test = extracted.filter(t => t._2.nonEmpty && !t._1.contains(" "))
+    test.flatMap(t => t._2.map(s => (t._1, s, t._3)))
     // TODO: Do we split the argument 1 in case it is a sentence?
-    ???
+    // TODO: There are empty definitions, discard these?
   }
 
   /**
@@ -120,8 +138,9 @@ object Similarity {
    * @param dictionary A collection of all the vocabulary with a unique index
    * @return A collection of edges indexed by indexes
    */
-  def toIndex(edges: RDD[(String, String, Float)], dictionary: RDD[(Long, String)]): RDD[(Long, Long, Float)] = {
-    ???
+  def toIndex(edges: RDD[(String, String, Float)], dictionary: RDD[(Long, String)]): RDD[((Long, Long), Float)] = {
+    val dict = Dictionary.swap(dictionary).collectAsMap()
+    edges.map(t => ((dict(t._1), dict(t._2)), t._3))
   }
 
   /**
@@ -129,8 +148,8 @@ object Similarity {
    * @param edges A collection of edges with their category weights
    * @return A collection of edges with the similarity between the two words
    */
-  def combine(edges: RDD[(Long, Long, Float)]): RDD[(Long, Long, Float)] = {
+  def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
+    edges.reduceByKey { case (c1, c2) => c1 + c2 }.map(t => (t._1._1, t._1._2, t._2))
     // TODO: How do we compute the similarity
-    ???
   }
 }
