@@ -3,6 +3,7 @@ package crosswords.spark
 import java.io.File
 
 import crosswords.spark.JsonInputFormat._
+import org.apache.hadoop.io.compress.BZip2Codec
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
@@ -20,13 +21,13 @@ object Similarity {
   private val ASSO_WEIGHT = 0.2f
 
   def main (args: Array[String]) {
-    val context = new SparkContext()
+    val context = new SparkContext("local", "shell")
 
     // System.setProperty("hadoop.home.dir", "C:/winutils/")
 
-    val crosswords = context.jsObjectFile("hdfs:///projects/crosswords/data/crosswords/*.bz2").map(_._2)
-    val words = context.jsObjectFile("hdfs:///projects/crosswords/data/definitions/*.bz2").map(_._2)
-    clean(crosswords, words, "hdfs:///projects/crosswords/data/cleaned")
+    val crosswords = context.jsObjectFile("../data/tmp/crosswords/*.bz2").map(_._2)
+    val words = context.jsObjectFile("../data/tmp/definitions/*.bz2").map(_._2)
+    clean(crosswords, words, "../data/tmp/cleaned")
 
     //val test = loadCleaned("../data/tmp/cleaned", context)
     //val first = test._1.first()
@@ -53,20 +54,20 @@ object Similarity {
     val equiv = Bags.equivalents(wikiEntries).map(cleanToCSV)
     val asso = Bags.associated(wikiEntries).map(cleanToCSV)
 
-    clues.saveAsTextFile(outputDirectory + File.separator + "clues")
-    defs.saveAsTextFile(outputDirectory + File.separator + "defs")
-    examples.saveAsTextFile(outputDirectory + File.separator + "examples")
-    equiv.saveAsTextFile(outputDirectory + File.separator + "equiv")
-    asso.saveAsTextFile(outputDirectory + File.separator + "asso")
+    clues.saveAsTextFile(outputDirectory + File.separator + "clues", classOf[BZip2Codec])
+    defs.saveAsTextFile(outputDirectory + File.separator + "defs", classOf[BZip2Codec])
+    examples.saveAsTextFile(outputDirectory + File.separator + "examples", classOf[BZip2Codec])
+    equiv.saveAsTextFile(outputDirectory + File.separator + "equiv", classOf[BZip2Codec])
+    asso.saveAsTextFile(outputDirectory + File.separator + "asso", classOf[BZip2Codec])
   }
 
   /**
    * Load the cleaned crosswords and wiktionary entries
    * @param inputDirectory The path (with no ending file separator) where to read the previous results
    * @param context The Spark context
-   * @return A tuple containing the data from the clues, definitions, examples, equivalents and associated
+   * @return A sequence of RDD containing the cleaned data from the clues, definitions, examples, equivalents and associated
    */
-  def loadCleaned(inputDirectory: String, context: SparkContext) = {
+  def loadCleaned(inputDirectory: String, context: SparkContext): Seq[RDD[(String, Seq[String])]] = {
     def parseCSV(s: String): (String, Seq[String]) = {
       val args = s.split(",")
       (args.head, args.tail)
@@ -77,25 +78,20 @@ object Similarity {
     val examples = context.textFile(inputDirectory + File.separator + "examples/part-*").map(parseCSV)
     val equiv = context.textFile(inputDirectory + File.separator + "equiv/part-*").map(parseCSV)
     val asso = context.textFile(inputDirectory + File.separator + "asso/part-*").map(parseCSV)
-    (clues, defs, examples, equiv, asso)
+    Seq(clues, defs, examples, equiv, asso)
   }
 
   /**
-   * Extract clues from crosswords, definitions, examples, equivalents and associated from wiki.
-   * Weight each category and clean the definitions.
-   * @param crosswordEntries A collection of crosswords
-   * @param wikiEntries A collection of wiktionary articles
-   * @return An RDD where each element is a word/sentence, its cleaned definition and a category weight
+   * Weight each category and group all the collections together.
+   * @param l A sequence of RDD containing the cleaned data from the clues, definitions, examples, equivalents and associated
+   * @return A union of all the collections after adding the category weights.
    */
-  def extract(crosswordEntries: RDD[JsObject], wikiEntries: RDD[JsObject]): RDD[(String, Seq[String], Float)] = {
-    val clues = Bags.clues(crosswordEntries).map(t => (t._1, t._2, CLUES_WEIGHT))
-
-    val defs = Bags.definitions(wikiEntries).map(t => (t._1, t._2, DEFS_WEIGHT))
-    val examples = Bags.examples(wikiEntries).map(t => (t._1, t._2, EXAMPLES_WEIGHT))
-    val equiv = Bags.equivalents(wikiEntries).map(t => (t._1, t._2, EQUIV_WEIGHT))
-    val asso = Bags.associated(wikiEntries).map(t => (t._1, t._2, ASSO_WEIGHT))
-
-    (clues ++ defs ++ examples ++ equiv ++ asso).map(t => (t._1, Stem.clean(t._2), t._3))
+  def weightCategories(l: Seq[RDD[(String, Seq[String])]]): RDD[(String, Seq[String], Float)] = {
+    l(0).map(t => (t._1, t._2, CLUES_WEIGHT)) ++
+    l(1).map(t => (t._1, t._2, DEFS_WEIGHT)) ++
+    l(2).map(t => (t._1, t._2, EXAMPLES_WEIGHT)) ++
+    l(3).map(t => (t._1, t._2, EQUIV_WEIGHT)) ++
+    l(4).map(t => (t._1, t._2, ASSO_WEIGHT))
   }
 
   /**
