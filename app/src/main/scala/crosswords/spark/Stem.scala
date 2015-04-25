@@ -60,7 +60,7 @@ object Stem {
 
   private def initWordNetDictionary = {
     //val wordNetHome = System.getenv("WNHOME")
-    val wordNetHome = "hdfs:///projects/crosswords/wordnet"
+    val wordNetHome = "../data/wordnet"
     val path = wordNetHome + File.separator + "WordNet-3.0" + File.separator + "dict"
     val url = new URL("file",null,path)
 
@@ -71,7 +71,7 @@ object Stem {
 
   private def getStem(word : String) ={
     if (word.matches("""\s*""")) Nil
-    else wordnetStemmer.findStems(word, null).asScala.toList
+    else try {wordnetStemmer.findStems(word, null).asScala.toList} catch {case e: IllegalArgumentException => Nil}
   }
 
   def main(args: Array[String]) {
