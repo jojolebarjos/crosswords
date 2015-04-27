@@ -75,6 +75,7 @@ object Stem {
   }
 
   def main(args: Array[String]) {
+    println(clean("Yes, we 5 across ____s"))
     for (line <- Source.stdin.getLines()) {
       println(clean(line))
     }
@@ -83,7 +84,7 @@ object Stem {
   ///TODO : check for ligature. Ask if they have to be split. ex : Æ is considered a letter in its own right
   def normalize(word : String) : String ={
     Normalizer.normalize(removeEscapes(word), Normalizer.Form.NFKD)
-          .replaceAll("""[^\p{ASCII}]""", "").replaceAll("""[^_\w]""", " ")
+          .replaceAll("""[^\p{ASCII}]""", "").replaceAll("""[^\w]""", " ").replaceAll("""_""", "")
   }
 
   def reduce(word : String) : String = {
