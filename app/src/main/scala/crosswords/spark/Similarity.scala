@@ -38,46 +38,57 @@ object Similarity {
     val dict = createDictionary(edges).cache()
     val indexed = toIndex(edges, dict)
     val result = combine(indexed).cache()
-
-    for (line <- Source.stdin.getLines()) {
-      val query = context.parallelize(Array(line))
-      val queryIndex = Dictionary.getID(dict)(query).first()._2
-
-      val queryResults = result.filter(t => t._1 == queryIndex)
-      val withWords = Dictionary.getWord(dict)(queryResults.map(_._2))
-      val res1 = queryResults.collect()
-      val res2 = withWords.collect()
-      val test = res1.zip(res2)
-      val top = test.map(t => (t._2._2, t._1._3)).sortBy(-_._2)
-      top.foreach(println)
-    }
+    // TODO: Normalizing (it might be done in the combine function)
 
     context.stop()
   }
 
   /**
+   * WARNING: This function takes a lot of time to execute! It also does not support multiple workers due to a limitation
+   * of the Stemmer.
    * Clean the crossword and wiktionary definitions and save the results in the specified directory.
-   * The results are saved in csv where the first element of each line is the word
+   * The results are saved in csv-like format where all the elements before the dash '-' compose the expression and all the
+   * elements after it compose the definition.
    * @param crosswordEntries A collection of crosswords
    * @param wikiEntries A collection of wiktionary articles
    * @param outputDirectory The path (with no ending file separator) where to write the results
    * @see crosswords.spark.Stem
    */
   def clean(crosswordEntries: RDD[JsObject], wikiEntries: RDD[JsObject], outputDirectory: String): Unit = {
-    def cleanToCSV(t: (String, String)): String = (t._1 +: Stem.clean(t._2)).mkString(",")
+    def cleanToCSV(t: (String, String)): String = {
+      val words = Stem.clean(t._1).mkString(",")
+      val defs = Stem.clean(t._2).mkString(",")
+      if (words.equals("") || defs.equals("")) {
+        ""
+      } else {
+        words + "-" + defs
+      }
+    }
 
-    val clues = Bags.clues(crosswordEntries).map(cleanToCSV)
+    val clues = Bags.clues(crosswordEntries).cache()
+    val defs = Bags.definitions(wikiEntries).cache()
+    val examples = Bags.examples(wikiEntries).cache()
+    val equiv = Bags.equivalents(wikiEntries).cache()
+    val asso = Bags.associated(wikiEntries).cache()
 
-    val defs = Bags.definitions(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
-    val examples = Bags.examples(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
-    val equiv = Bags.equivalents(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
-    val asso = Bags.associated(wikiEntries).map(cleanToCSV).coalesce(CLEANED_PARTITIONS_COUNT)
+    // Build stem to unstem index
+    val unstemVocabulary = (clues ++ defs ++ examples ++ equiv ++ asso).flatMap(t => t._1.split(" +") ++ t._2.split(" +"))
+    val distinctUnstem = unstemVocabulary.distinct().coalesce(CLEANED_PARTITIONS_COUNT)
+    val stem2Unstem = distinctUnstem.map(word => Stem.reduce(Stem.normalize(word)) + "," + word)
+    stem2Unstem.saveAsTextFile(outputDirectory + File.separator + "stem2unstem", classOf[BZip2Codec])
 
-    clues.saveAsTextFile(outputDirectory + File.separator + "clues", classOf[BZip2Codec])
-    defs.saveAsTextFile(outputDirectory + File.separator + "defs", classOf[BZip2Codec])
-    examples.saveAsTextFile(outputDirectory + File.separator + "examples", classOf[BZip2Codec])
-    equiv.saveAsTextFile(outputDirectory + File.separator + "equiv", classOf[BZip2Codec])
-    asso.saveAsTextFile(outputDirectory + File.separator + "asso", classOf[BZip2Codec])
+    // Clean data
+    val cleanClues = clues.map(cleanToCSV).filter(s => !s.equals(""))
+    val cleanDefs = defs.map(cleanToCSV).filter(s => !s.equals("")).coalesce(CLEANED_PARTITIONS_COUNT)
+    val cleanExamples = examples.map(cleanToCSV).filter(s => !s.equals("")).coalesce(CLEANED_PARTITIONS_COUNT)
+    val cleanEquiv = equiv.map(cleanToCSV).filter(s => !s.equals("")).coalesce(CLEANED_PARTITIONS_COUNT)
+    val cleanAsso = asso.map(cleanToCSV).filter(s => !s.equals("")).coalesce(CLEANED_PARTITIONS_COUNT)
+
+    cleanClues.saveAsTextFile(outputDirectory + File.separator + "clues", classOf[BZip2Codec])
+    cleanDefs.saveAsTextFile(outputDirectory + File.separator + "defs", classOf[BZip2Codec])
+    cleanExamples.saveAsTextFile(outputDirectory + File.separator + "examples", classOf[BZip2Codec])
+    cleanEquiv.saveAsTextFile(outputDirectory + File.separator + "equiv", classOf[BZip2Codec])
+    cleanAsso.saveAsTextFile(outputDirectory + File.separator + "asso", classOf[BZip2Codec])
   }
 
   /**
@@ -86,10 +97,10 @@ object Similarity {
    * @param context The Spark context
    * @return A sequence of RDD containing the cleaned data from the clues, definitions, examples, equivalents and associated
    */
-  def loadCleaned(inputDirectory: String, context: SparkContext): Seq[RDD[(String, Seq[String])]] = {
-    def parseCSV(s: String): (String, Seq[String]) = {
-      val args = s.split(",")
-      (args.head, args.tail)
+  def loadCleaned(inputDirectory: String, context: SparkContext): Seq[RDD[(Seq[String], Seq[String])]] = {
+    def parseCSV(s: String): (Seq[String], Seq[String]) = {
+      val args = s.split("-")
+      (args(0).split(","), args(1).split(","))
     }
 
     val clues = context.textFile(inputDirectory + File.separator + "clues/part-*").map(parseCSV)
@@ -105,7 +116,7 @@ object Similarity {
    * @param l A sequence of RDD containing the cleaned data from the clues, definitions, examples, equivalents and associated
    * @return A union of all the collections after adding the category weights.
    */
-  def weightCategories(l: Seq[RDD[(String, Seq[String])]]): RDD[(String, Seq[String], Float)] = {
+  def weightCategories(l: Seq[RDD[(Seq[String], Seq[String])]]): RDD[(Seq[String], Seq[String], Float)] = {
     l(0).map(t => (t._1, t._2, CLUES_WEIGHT)) ++
       l(1).map(t => (t._1, t._2, DEFS_WEIGHT)) ++
       l(2).map(t => (t._1, t._2, EXAMPLES_WEIGHT)) ++
@@ -115,7 +126,7 @@ object Similarity {
 
   /**
    * Build an index of every word in the vocabulary.
-   * @param edges A collection of edges between word/sentence and word
+   * @param edges A collection of edges between a word and another word
    * @return An RDD of unique index and word
    * @see crosswords.spark.Dictionary#build
    */
@@ -129,11 +140,9 @@ object Similarity {
    * @param extracted An RDD where each element is a word/sentence, its definition and the category weight
    * @return An RDD where each element represent an edge between the two words and the category weight
    */
-  def buildEdges(extracted: RDD[(String, Seq[String], Float)]): RDD[(String, String, Float)] = {
-    val test = extracted.filter(t => t._2.nonEmpty && !t._1.contains(" "))
-    test.flatMap(t => t._2.map(s => (t._1, s, t._3)))
-    // TODO: Do we split the argument 1 in case it is a sentence?
-    // TODO: There are empty definitions, discard these?
+  def buildEdges(extracted: RDD[(Seq[String], Seq[String], Float)]): RDD[(String, String, Float)] = {
+    // Flattens the content of the tuples: foreach tuple, foreach word w1, foreach word w2, we yield (w1, w2, weight)
+    extracted.flatMap(t => t._1.flatMap(w1 => t._2.map(w2 => (w1, w2, t._3))))
   }
 
   /**
@@ -148,12 +157,11 @@ object Similarity {
   }
 
   /**
-   * Compute the similarity between words
+   * Compute the similarity between words.
    * @param edges A collection of edges with their category weights
    * @return A collection of edges with the similarity between the two words
    */
   def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
     edges.reduceByKey { case (c1, c2) => c1 + c2 }.map(t => (t._1._1, t._1._2, t._2))
-    // TODO: How do we compute the similarity
   }
 }
