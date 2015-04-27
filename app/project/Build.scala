@@ -13,7 +13,7 @@ object Build extends Build
   val cluster = Command.command("cluster") { state =>
     val extracted = Project.extract(state)
     val dependencies = extracted.get(libraryDependencies)
-    val newDependencies = dependencies.map(module => if (module.name.contains("spark")) module % "provided" else module)
+    val newDependencies = dependencies.map(module => if (module.name.contains("spark") || module.name.contains("hadoop")) module % "provided" else module)
     extracted.append(Seq(libraryDependencies := newDependencies), state)
   }
 }
