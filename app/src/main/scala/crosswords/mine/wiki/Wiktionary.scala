@@ -79,7 +79,7 @@ object Wiktionary {
 
       // Clean undesired symbols and tags
       def clean(ref: Reference) = {
-        var result = ref.ref
+        var result = ref.link
         if (result.contains("//"))
           result = ""
         val colon = result.lastIndexOf(':')

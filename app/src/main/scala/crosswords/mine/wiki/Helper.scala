@@ -16,8 +16,6 @@ object Helper {
       Seq(h) ++ headers(h.content)
     case i: Items =>
       i.items.flatMap(headers)
-    case m: MacroGroup =>
-      headers(m.group)
     case _ =>
       Seq.empty
   }
@@ -46,8 +44,6 @@ object Helper {
       i.items.flatMap(i => references(i, subheader))
     case h: Header if subheader =>
       references(h.title, subheader) ++ references(h.content, subheader)
-    case m: MacroGroup =>
-      references(m.group, subheader)
     case d: Definition =>
       references(d.paragraph, subheader)
     case _ =>
@@ -70,8 +66,6 @@ object Helper {
       i.items.flatMap(i => definitions(i, subheader))
     case h: Header if subheader =>
       definitions(h.content, subheader)
-    case m: MacroGroup =>
-      definitions(m.group, subheader)
     case _ =>
       Seq.empty
   }
