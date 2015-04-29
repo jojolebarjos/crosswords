@@ -50,59 +50,6 @@ object Markup {
     listener.build()
   }
 
-  def prettyPrint(param: (String, String)): String =
-    param._1 + "='" + param._2 + "'"
-  
-  def prettyPrint(params: List[(String, String)]): String =
-    params.map(prettyPrint).mkString(" ")
-
-  def prettyPrint(markup: Content): String = markup match {
-    case Text(text) =>
-      text
-    case Reference(link, "", Nil) =>
-      "[[" + link + "]]"
-    case Reference(link, label, Nil) =>
-      "[[" + link + "(" + label + ")]]"
-    case Reference(link, "", params) =>
-      "[[" + link + " " + prettyPrint(params) + "]]"
-    case Reference(link, label, params) =>
-      "[[" + link + " (" + label + ") " + prettyPrint(params) + "]]"
-    case Macro(name, Nil) =>
-      "{{" + name + "}}"
-    case Macro(name, params) =>
-      "{{" + name + " " + prettyPrint(params) + "}}"
-    case _ =>
-      throw new IllegalArgumentException()
-  }
-
-  def prettyPrint(markup: Container, level: Int): String = markup match {
-    case Header(lvl, title, content) =>
-      val text = prettyPrint(content, level)
-      val header = "\t" * level + "=" * lvl + prettyPrint(title) + "=" * lvl
-      if (text.isEmpty) header else header + "\r\n" + text
-    case Items(items) =>
-      items.map(prettyPrint(_, level + 1)).mkString("\r\n")
-    case Paragraph(content) =>
-      "\t" * level + content.map(prettyPrint).mkString
-    case Definition(paragraph) =>
-      "\t" * level + "> " + prettyPrint(paragraph, 0)
-    case Quotation(paragraph) =>
-      "\t" * level + ">> " + prettyPrint(paragraph, 0)
-    case MacroBlock(mac) =>
-      "\t" * level + "{" + prettyPrint(mac) + "}"
-    case _ =>
-      throw new IllegalArgumentException()
-  }
-
-  def prettyPrint(markup: Markup): String = markup match {
-    case content: Content =>
-      prettyPrint(content)
-    case container: Container =>
-      prettyPrint(container, 0)
-    case _ =>
-      throw new IllegalArgumentException()
-  }
-
 }
 
 /**
