@@ -15,13 +15,26 @@ import play.api.libs.json.{Json, JsObject}
  */
 object Wiktionary {
 
+  // Clean title
   private def clean(title: String) =
     title.toLowerCase.filter(c => c >= 'a' && c <= 'z').trim
 
-  /**
-   * Abbreviations, alternate forms, alternate spelling, symbols...
-   */
-  def isEquivalent(title: String): Boolean = {
+  // Clean reference
+  private def clean(ref: Reference) = {
+    var result = ref.link
+    if (result.contains("//"))
+      result = ""
+    val colon = result.lastIndexOf(':')
+    if (colon >= 0)
+      result = result.substring(colon + 1)
+    val hash = result.indexOf('#')
+    if (hash >= 0)
+      result = result.substring(0, hash)
+    result
+  }
+
+  // Abbreviations, alternate forms, alternate spelling, symbols...
+  private def isEquivalent(title: String): Boolean = {
     val t = clean(title)
     if (t.contains("abbreviation"))
       return true
@@ -32,13 +45,11 @@ object Wiktionary {
     false
   }
 
-  /**
-   * Hyperonyms, hyponyms, holonyms, synonyms, antonyms,
-   * related terms/forms, derived terms, see also,
-   * homographs, homonyms, homophones, anagrams,
-   * etymology...
-   */
-  def isAssociated(title: String): Boolean = {
+  // Hyperonyms, hyponyms, holonyms, synonyms, antonyms,
+  // related terms/forms, derived terms, see also,
+  // homographs, homonyms, homophones, anagrams,
+  // etymology...
+  private def isAssociated(title: String): Boolean = {
     val t = clean(title)
     if (t.contains("ym") && (t.contains("hyper") || t.contains("hypo") || t.contains("holo") || t.contains("sy") ||
         t.contains("anto") || t.contains("acro") || t.contains("paro")))
@@ -58,10 +69,8 @@ object Wiktionary {
     false
   }
 
-  /**
-   * Adjective, verb, adverb, noun, pronouns...
-   */
-  def isDefinition(title: String): Boolean = {
+  // Adjective, verb, adverb, noun, pronouns...
+  private def isDefinition(title: String): Boolean = {
     val t = clean(title)
     if (t.contains("adjectiv") || t.contains("verb") || t.contains("parti") || t.contains("noun"))
       return true
@@ -71,51 +80,39 @@ object Wiktionary {
     false
   }
 
+  // Get all headers, according to predicate
+  private def headers(root: Markup, predicate: String => Boolean): Seq[Header] =
+    Helper.headers(root).filter(h => predicate(Helper.toString(h.title)))
+
+  // Get all references, in specified headers
+  private def references(headers: Seq[Header]): Seq[String] =
+    headers.flatMap(h => Helper.references(h)).map(clean).distinct.filter(_.nonEmpty).sorted
+
+  /**
+   * Generate JSON structures from specified page.
+   */
   def extract(title: String, page: String): Seq[JsObject] = {
 
     // Get english section
     val markup = Markup(page)
-    for (english <- Helper.headers(markup, "English", 2)) yield {
+    for (english <- headers(markup, _ == "English").filter(_.lvl == 2)) yield {
 
-      // Clean undesired symbols and tags
-      def clean(ref: Reference) = {
-        var result = ref.ref
-        if (result.contains("//"))
-          result = ""
-        val colon = result.lastIndexOf(':')
-        if (colon >= 0)
-          result = result.substring(colon + 1)
-        val hash = result.indexOf('#')
-        if (hash >= 0)
-          result = result.substring(0, hash)
-        result
-      }
-
-      // Filter headers
-      def headers(pred: String => Boolean) =
-        Helper.headers(english, h => pred(h.title.toString))
-
-      // Enumerate and clean references
-      def refs(pred: String => Boolean) =
-        headers(pred).flatMap(Helper.references).map(clean).distinct.filter(_.nonEmpty).sorted
-      val equivalents = refs(isEquivalent).filter(w => w.toLowerCase != title.toLowerCase)
-      val associated = refs(isAssociated).filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
-      val other = refs(_ => true).filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
-
-      // TODO macro expansion
+      // Get interesting references
+      val equivalents = references(headers(english, isEquivalent)).
+        filter(w => w.toLowerCase != title.toLowerCase)
+      val associated = references(headers(english, isAssociated)).
+        filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
+      val other = references(Seq(english)).
+        filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
+      // TODO expand noun/verb/... inline macros for word variations (-> equivalents)
 
       // Extract definitions
-      val definitions = Helper.headers(english, !_.title.toString.toLowerCase.contains("translat")).
-        flatMap(h => Helper.definitions(h, false).map(_.paragraph.toString))
-      // TODO use some translation categories as definition
-      // TODO get definitions from paragraphs, and filter header (noun, adverb...)
-
-      // Extract examples
+      val definitions = Helper.macroBlocks(english).filter(_.mac.name == "trans-top").map(_.mac.params.head._2).toVector
       val examples = Seq.empty[String]
-      // TODO extract definitions and examples sentences
+      // TODO extract definitions, quotations and examples sentences
 
       // Create JSON object
-      var obj =  Json.obj("word" -> title)
+      var obj = Json.obj("word" -> title)
       if (equivalents.nonEmpty)
         obj += "equivalents" -> Json.toJson(equivalents)
       if (associated.nonEmpty)

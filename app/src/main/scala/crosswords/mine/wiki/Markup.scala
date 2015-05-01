@@ -2,12 +2,10 @@
 package crosswords.mine.wiki
 
 import java.io.StringReader
-
 import org.wikimodel.wem.mediawiki.MediaWikiParser
-import org.wikimodel.wem.{WikiParameters, EmptyWemListener, WikiReference}
-import scala.collection.convert.WrapAsScala
-import scala.collection.immutable.TreeMap
-import scala.collection.{SortedMap, mutable}
+import org.wikimodel.wem.{WikiParameter, WikiParameters, EmptyWemListener, WikiReference}
+import scala.collection.convert.WrapAsScala._
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -18,72 +16,57 @@ import scala.collection.mutable.ArrayBuffer
  */
 trait Markup
 
-// TODO improve this model, to handle all markup structures
+/**
+ * Content represents inline data (i.e. text, links and scripted elements).
+ */
+trait Content extends Markup
+case class Text(text: String) extends Content
+case class Reference(link: String, label: String = "", params: List[(String, String)] = Nil) extends Content
+case class Macro(name: String, params: List[(String, String)] = Nil) extends Content
 
+/**
+ * Container represents structured data (i.e. sections, paragraphs, lists).
+ */
+trait Container extends Markup
+case class Header(lvl: Int, title: Paragraph, content: Items) extends Container
+case class Items(items: List[Container]) extends Container
+case class Paragraph(content: List[Content]) extends Container
+case class Definition(paragraph: Paragraph) extends Container
+case class Quotation(paragraph: Paragraph) extends Container
+case class MacroBlock(mac: Macro) extends Container
+
+/**
+ * Helper to create and print markup objects.
+ */
 object Markup {
 
-  def apply(str: String): Group = {
+  /**
+   * Parse specified text into markup structures.
+   */
+  def apply(str: String): Container = {
     val listener = new MarkupWemListener()
     val parser = new MediaWikiParser()
     parser.parse(new StringReader(str), listener)
     listener.build()
   }
 
-  def prettyPrint(markup: Content): String = markup.toString
-
-  def prettyPrint(markup: Group, level: Int): String = markup match {
-    case Paragraph(content) =>
-      "\t" * level + content.map(prettyPrint).mkString
-    case Items(items) =>
-      items.map(prettyPrint(_, level + 1)).mkString("\r\n")
-    case Header(lvl, title, content) =>
-      val text = prettyPrint(content, level)
-      val header = "\t" * level + "=" * lvl + prettyPrint(title) + "=" * lvl
-      if (text.isEmpty) header else header + "\r\n" + text
-    case MacroGroup(mac, group) =>
-      "\t" * level + "{" + prettyPrint(mac) + "}\r\n" + prettyPrint(group, level + 1)
-    case Definition(paragraph) =>
-      "\t" * level + ">" + prettyPrint(paragraph, 0)
-    case _ =>
-      throw new IllegalArgumentException()
-  }
-
-  def prettyPrint(markup: Markup): String = markup match {
-    case content: Content => prettyPrint(content)
-    case group: Group => prettyPrint(group, 0)
-    case _ => throw new IllegalArgumentException()
-  }
-
 }
 
-trait Content extends Markup
-case class Text(text: String) extends Content {
-  override def toString = text
-}
-case class Reference(ref: String) extends Content {
-  override def toString = "[[" + ref + "]]"
-}
-case class Macro(name: String, args: SortedMap[String, String]) extends Content {
-  override def toString = (name :: args.map(a => a._1 + "=" + a._2).toList).mkString("{{", "|", "}}")
-}
-
-trait Group extends Markup
-case class Paragraph(content: List[Content]) extends Group {
-  override def toString = content.mkString
-}
-case class Items(items: List[Group]) extends Group
-case class Header(lvl: Int, title: Paragraph, content: Items) extends Group
-case class MacroGroup(mac: Macro, group: Group) extends Group
-case class Definition(paragraph: Paragraph) extends Group
-
+/**
+ * Builder for Markup structures.
+ */
 class MarkupBuilder {
 
+  // Prepare accumulators
   private val textBuffer = new StringBuilder()
   private val contentBuffer = new ArrayBuffer[Content]()
-  private val stack = new mutable.Stack[(Int, Paragraph, ArrayBuffer[Group])]()
+  private val stack = new mutable.Stack[(Int, Paragraph, ArrayBuffer[Container])]()
   private var inHeader = 0
-  stack.push((0, null, new ArrayBuffer[Group]()))
 
+  // Add root object
+  stack.push((0, null, new ArrayBuffer[Container]()))
+
+  // Use (and clear) text accumulator to create a text content
   private def flushText() {
     if (textBuffer.nonEmpty) {
       contentBuffer += Text(textBuffer.toString())
@@ -91,20 +74,7 @@ class MarkupBuilder {
     }
   }
 
-  def addText(text: String) {
-    textBuffer.append(text)
-  }
-
-  def addReference(ref: String) { // TODO how to store reference?
-    flushText()
-    contentBuffer += Reference(ref)
-  }
-
-  def addMacro(name: String, args: SortedMap[String, String]) {
-    flushText()
-    contentBuffer += Macro(name, args)
-  }
-
+  // Use (and clear) content accumulator to create a paragraph
   private def finalizeParagraph() = {
     flushText()
     val result = Paragraph(contentBuffer.toList)
@@ -112,7 +82,8 @@ class MarkupBuilder {
     result
   }
 
-  private def compute(elem: (Int, Paragraph, ArrayBuffer[Group])): Group = {
+  // Convert specified triplet into a container
+  private def compute(elem: (Int, Paragraph, ArrayBuffer[Container])): Container = {
     if (elem._1 >= 0)
       Header(elem._1, elem._2, Items(elem._3.toList))
     else if (elem._1 == -1)
@@ -121,20 +92,55 @@ class MarkupBuilder {
       throw new IllegalArgumentException()
   }
 
+  // Get current level (lists do not affect level)
   private def level =
     stack.find(_._1 >= 0).get._1
 
+  // Close one container
   private def close() {
     val elem = compute(stack.pop())
     stack.top._3 += elem
   }
 
+  // Close until specified level is reached
   private def close(lvl: Int) {
     require(lvl > 0)
     while (lvl <= level)
       close()
   }
 
+  /**
+   * Add specified text to current accumulator.
+   */
+  def addContent(text: String) {
+    textBuffer.append(text)
+  }
+
+  /**
+   * Add specified content to current accumulator.
+   */
+  def addContent(content: Content) {
+    content match {
+      case Text(text) =>
+        addContent(text)
+      case _ =>
+        flushText()
+        contentBuffer += content
+    }
+  }
+
+  /**
+   * Add specified container as a child of current container.
+   */
+  def addContainer(container: Container) {
+    require(inHeader == 0)
+    flushAsParagraph()
+    stack.top._3 += container
+  }
+
+  /**
+   * Start a new header with specified level.
+   */
   def beginHeader(lvl: Int) {
     require(inHeader == 0)
     require(lvl > 0)
@@ -143,19 +149,29 @@ class MarkupBuilder {
     inHeader = lvl
   }
 
+  /**
+   * End current header and begin associated content.
+   */
   def endHeader() {
     require(inHeader > 0)
-    val elem = (inHeader, finalizeParagraph(), new ArrayBuffer[Group]())
+    val elem = (inHeader, finalizeParagraph(), new ArrayBuffer[Container]())
     stack.push(elem)
     inHeader = 0
   }
 
+  /**
+   * Begin a sequence of <code>Container</code>.
+   */
   def beginItems() {
     require(inHeader == 0)
-    val elem = (-1, null, new ArrayBuffer[Group]())
+    flushAsParagraph()
+    val elem = (-1, null, new ArrayBuffer[Container]())
     stack.push(elem)
   }
 
+  /**
+   * End a sequence of <code>Container</code>.
+   */
   def endItems() {
     require(inHeader == 0)
     require(stack.top._1 == -1)
@@ -163,6 +179,9 @@ class MarkupBuilder {
     close()
   }
 
+  /**
+   * Finalize current sequence of <code>Content</code> as a <code>Paragraph</code>.
+   */
   def flushAsParagraph() {
     require(inHeader == 0)
     val paragraph = finalizeParagraph()
@@ -170,6 +189,9 @@ class MarkupBuilder {
       stack.top._3 += paragraph
   }
 
+  /**
+   * Finalize current sequence of <code>Content</code> as a <code>Definition</code>.
+   */
   def flushAsDefinition() {
     require(inHeader == 0)
     val paragraph = finalizeParagraph()
@@ -177,12 +199,21 @@ class MarkupBuilder {
       stack.top._3 += Definition(paragraph)
   }
 
-  def openMacro(name: String, args: SortedMap[String, String]) {
+  /**
+   * Finalize current sequence of <code>Content</code> as a <code>Quotation</code>.
+   */
+  def flushAsQuotation() {
     require(inHeader == 0)
-    // TODO macro blocks
+    val paragraph = finalizeParagraph()
+    if (paragraph.content.nonEmpty)
+      stack.top._3 += Quotation(paragraph)
   }
 
-  def build(): Group = {
+  /**
+   * Finalize current object. This builder is not longer valid.
+   */
+  def build(): Container = {
+    require(inHeader == 0)
     flushAsParagraph()
     while (stack.size > 1)
       close()
@@ -191,100 +222,84 @@ class MarkupBuilder {
 
 }
 
+/**
+ * This Wikimedia listener build a Markup hierarchy.
+ */
 class MarkupWemListener extends EmptyWemListener {
 
+  // Use builder to ease the construction
   private val builder = new MarkupBuilder()
 
-  protected def toSortedMap(params: WikiParameters): SortedMap[String, String] =
-    TreeMap.empty[String, String] ++ WrapAsScala.asScalaIterator(params.iterator()).map(p => p.getKey -> p.getValue)
-
-  override def onSpace(str: String) {
-    builder.addText(str)
+  // Handle text
+  override def onSpace(str: String) = builder.addContent(str)
+  override def onEscape(str: String) = builder.addContent(str)
+  override def onSpecialSymbol(str: String) = builder.addContent(str)
+  override def onWord(str: String) = builder.addContent(str)
+  override def onLineBreak() = builder.addContent("\r\n")
+  override def onNewLine() = builder.addContent("\r\n")
+  override def onEmptyLines(count: Int) = builder.addContent("\r\n" * count)
+  // TODO verbatim
+  override def onVerbatimBlock(str: String, params: WikiParameters) {
+    // This method is called to notify about not-interpreted in-line sequence of
+    // characters which should be represented in the final text "as is".
+  }
+  override def onVerbatimInline(str: String, params: WikiParameters) {
+    // This method notifies about a verbatim (pre-formatted) block defined in the text
   }
 
-  override def onEscape(str: String) {
-    builder.addText(str)
-  }
+  // Handle references
+  override def onReference(ref: WikiReference) =
+    builder.addContent(Reference(ref.getLink, if (ref.getLabel != null) ref.getLabel else "", toScala(ref.getParameters)))
+  override def onReference(ref: String) =
+    builder.addContent(Reference(ref))
 
-  override def onSpecialSymbol(str: String) {
-    builder.addText(str)
-  }
+  // Handle macros, extensions and properties
+  override def onMacroInline(name: String, params: WikiParameters, content: String) =
+    builder.addContent(Macro(name, toScala(params)))
+  override def onMacroBlock(name: String, params: WikiParameters, content: String) =
+    builder.addContainer(MacroBlock(Macro(name, toScala(params))))
+  override def onExtensionInline(name: String, params: WikiParameters) = onMacroInline(name, params, "")
+  override def onExtensionBlock(name: String, params: WikiParameters) = onMacroBlock(name, params, "")
+  // TODO is it correct to handle extensions like macros?
+  // TODO properties?
 
-  override def onWord(str: String) {
-    builder.addText(str)
-  }
+  // Handle headers
+  override def beginHeader(level: Int, params: WikiParameters) = builder.beginHeader(level)
+  override def endHeader(level: Int, params: WikiParameters) = builder.endHeader()
 
-  override def onLineBreak() {
-    builder.addText("\r\n")
-  }
+  // Handle lists
+  override def beginList(params: WikiParameters, ordered: Boolean) = builder.beginItems()
+  override def endList(params: WikiParameters, ordered: Boolean) = builder.endItems()
+  override def beginDefinitionList(params: WikiParameters) = builder.beginItems()
+  override def endDefinitionList(params: WikiParameters) = builder.endItems()
+  override def beginQuotation(params: WikiParameters) = builder.beginItems()
+  override def endQuotation(params: WikiParameters) = builder.endItems()
 
-  override def onNewLine() {
-    builder.addText("\r\n")
-  }
+  // Handle end of contexts
+  override def endParagraph(params: WikiParameters) = builder.flushAsParagraph()
+  override def endInfoBlock(infoType: String, params: WikiParameters) = builder.flushAsParagraph() // TODO info blocks?
+  override def endListItem() = builder.flushAsParagraph()
+  override def endDefinitionDescription() = builder.flushAsDefinition()
+  override def endDefinitionTerm() = builder.flushAsDefinition()
+  override def endQuotationLine() = builder.flushAsQuotation()
 
-  override def onEmptyLines(count: Int) {
-    builder.addText("\r\n" * count)
-  }
+  // Handle tables
+  // TODO handle tables
+  override def beginTable(params: WikiParameters) {}
+  override def endTable(params: WikiParameters) {}
+  override def beginTableRow(params: WikiParameters) {}
+  override def endTableRow(params: WikiParameters) {}
+  override def beginTableCell(tableHead: Boolean, params: WikiParameters) {}
+  override def endTableCell(tableHead: Boolean, params: WikiParameters) {}
+  override def onTableCaption(str: String) {}
 
-  override def onReference(ref: WikiReference) {
-    builder.addReference(ref.getLink)
-  }
+  // Convert Wikimodel structures to Scala types
+  def toScala(param: WikiParameter): (String, String) =
+    param.getKey -> param.getValue
+  def toScala(params: WikiParameters): List[(String, String)] =
+    if (params == null) Nil else asScalaIterator(params.iterator()).map(toScala).toList
 
-  override def onReference(ref: String) {
-    // TODO not sure if this kind of reference is relevant, seems to be images and external links...
-    builder.addReference(ref)
-  }
-
-  override def onMacroInline(name: String, params: WikiParameters, content: String) {
-    builder.addMacro(name, toSortedMap(params))
-  }
-
-  override def beginHeader(level: Int, params: WikiParameters) {
-    builder.beginHeader(level)
-  }
-
-  override def endHeader(level: Int, params: WikiParameters) {
-    builder.endHeader()
-  }
-
-  override def beginList(params: WikiParameters, ordered: Boolean) {
-    builder.beginItems()
-  }
-
-  override def endList(params: WikiParameters, ordered: Boolean) {
-    builder.endItems()
-  }
-
-  override def beginDefinitionList(params: WikiParameters) {
-    builder.beginItems()
-  }
-
-  override def endDefinitionList(params: WikiParameters) {
-    builder.endItems()
-  }
-
-  override def endParagraph(params: WikiParameters) {
-    builder.flushAsParagraph()
-  }
-
-  override def endListItem() {
-    builder.flushAsParagraph()
-  }
-
-  override def endDefinitionDescription() {
-    builder.flushAsDefinition()
-  }
-
-  override def onMacroBlock(name: String, params: WikiParameters, content: String) {
-    builder.openMacro(name, toSortedMap(params))
-  }
-
-  // TODO verbatim?
-  // TODO tables?
-  // TODO quotations?
-  // TODO definition terms?
-  // TODO info block? property block? extension?
-
+  // Finalize construction
   def build() = builder.build()
 
 }
