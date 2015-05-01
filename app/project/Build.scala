@@ -13,7 +13,16 @@ object Build extends Build
   val cluster = Command.command("cluster") { state =>
     val extracted = Project.extract(state)
     val dependencies = extracted.get(libraryDependencies)
-    val newDependencies = dependencies.map(module => if (module.name.contains("spark") || module.name.contains("hadoop")) module % "provided" else module)
+    val newDependencies = dependencies.flatMap(module =>
+      if (module.name.contains("spark")) {
+        // Force Spark 1.2.1 on the cluster
+        module.organization %% module.name % "1.2.1" % "provided" :: Nil
+      } else if (module.name.contains("hadoop")) {
+        // No need to force a hadoop version
+        Nil
+      } else {
+        module :: Nil
+      })
     extracted.append(Seq(libraryDependencies := newDependencies), state)
   }
 }
