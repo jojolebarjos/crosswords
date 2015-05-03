@@ -40,7 +40,6 @@ object Similarity {
     val dict = createDictionary(edges).cache()
     val indexed = toIndex(edges, dict)
     val result = combine(indexed).cache()
-    // TODO: Normalizing (it might be done in the combine function)
 
     context.stop()
   }
@@ -144,7 +143,7 @@ object Similarity {
    */
   def buildEdges(extracted: RDD[(Seq[String], Seq[String], Float)]): RDD[(String, String, Float)] = {
     // Flattens the content of the tuples: foreach tuple, foreach word w1, foreach word w2, we yield (w1, w2, weight)
-    extracted.flatMap(t => t._1.flatMap(w1 => t._2.map(w2 => (w1, w2, t._3))))
+    extracted.flatMap(t => t._1.flatMap(w1 => t._2.map(w2 => (w1, w2, t._3)))).filter(_._3 != 0)
   }
 
   /**
@@ -159,7 +158,7 @@ object Similarity {
   }
 
   /**
-   * Compute the similarity between words. The similarity is between 0 (inclusive) and 1 (inclusive).
+   * Compute and normalize the similarity between words. The similarity is between 0 (inclusive) and 1 (inclusive).
    * @param edges A collection of edges with their category weights
    * @return A collection of edges with the similarity between the two words
    */
