@@ -70,7 +70,7 @@ object Wiktionary {
   }
 
   // Adjective, verb, adverb, noun, pronouns...
-  private def isDefinition(title: String): Boolean = {
+  private def isCategory(title: String): Boolean = {
     val t = clean(title)
     if (t.contains("adjectiv") || t.contains("verb") || t.contains("parti") || t.contains("noun"))
       return true
@@ -97,6 +97,21 @@ object Wiktionary {
     val markup = Markup(page)
     for (english <- headers(markup, _ == "English").filter(_.lvl == 2)) yield {
 
+      // Get definitions and examples
+      val categories = headers(english, isCategory)
+      val definitions =
+        // From categories
+        categories.flatMap(c => Helper.paragraphs(Helper.limitItemsDepth(c.content, 2), false)).
+        map(p => Helper.toRawString(p.content)).filter(_.nonEmpty) ++
+        // From translations
+        Helper.macroBlocks(english).filter(_.mac.name == "trans-top").
+        flatMap(_.mac.params.headOption).map(_._2).toVector
+      val examples =
+        // From categories
+        (categories.flatMap(c => Helper.definitions(c.content, false)) ++
+        categories.flatMap(c => Helper.quotations(c.content, false))).
+        map(p => Helper.toRawString(p.content)).filter(_.nonEmpty)
+
       // Get interesting references
       val equivalents = references(headers(english, isEquivalent)).
         filter(w => w.toLowerCase != title.toLowerCase)
@@ -104,12 +119,11 @@ object Wiktionary {
         filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
       val other = references(Seq(english)).
         filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
-      // TODO expand noun/verb/... inline macros for word variations (-> equivalents)
+      // TODO also fix refs in these categories (they go in "other")
 
-      // Extract definitions
-      val definitions = Helper.macroBlocks(english).filter(_.mac.name == "trans-top").map(_.mac.params.head._2).toVector
-      val examples = Seq.empty[String]
-      // TODO extract definitions, quotations and examples sentences
+      // Get additional alternate spelling from templates
+      // alternative spelling of
+      val macros = categories.flatMap(c => Helper.macroBlocks(c.content, false))
 
       // Create JSON object
       var obj = Json.obj("word" -> title)

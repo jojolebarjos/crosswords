@@ -54,6 +54,63 @@ object Helper {
       Seq.empty
   }
 
+  /**
+   * Get all paragraphs, except the ones from definitions and quotations.
+   */
+  def paragraphs(markup: Markup, subheader: Boolean = true): Seq[Paragraph] = markup match {
+    case Header(_, _, content) if subheader =>
+      paragraphs(content, subheader)
+    case Items(items) =>
+      items.flatMap(paragraphs(_, subheader))
+    case p: Paragraph =>
+      Seq(p)
+    case Definition(p) =>
+      Seq(p)
+    case Quotation(p) =>
+      Seq(p)
+    case _ =>
+      Seq.empty
+  }
+
+  /**
+   * Get all definitions.
+   */
+  def definitions(markup: Markup, subheader: Boolean = true): Seq[Paragraph] = markup match {
+    case Header(_, _, content) if subheader =>
+      definitions(content, subheader)
+    case Items(items) =>
+      items.flatMap(definitions(_, subheader))
+    case Definition(p) =>
+      Seq(p)
+    case _ =>
+      Seq.empty
+  }
+
+  /**
+   * Get all quotations.
+   */
+  def quotations(markup: Markup, subheader: Boolean = true): Seq[Paragraph] = markup match {
+    case Header(_, _, content) if subheader =>
+      quotations(content, subheader)
+    case Items(items) =>
+      items.flatMap(quotations(_, subheader))
+    case Quotation(p) =>
+      Seq(p)
+    case _ =>
+      Seq.empty
+  }
+
+  /**
+   * Remove items of depth larger than threshold.
+   */
+  def limitItemsDepth[A <: Markup](markup: A, depth: Int): A = markup match {
+    case Items(_) if depth > 0 =>
+      Items(Nil).asInstanceOf[A]
+    case Items(items) =>
+      Items(items.map(limitItemsDepth(_, depth - 1))).asInstanceOf[A]
+    case _ =>
+      markup
+  }
 
   /**
    * Convert this parameter to string.
@@ -122,5 +179,12 @@ object Helper {
     case _ =>
       throw new IllegalArgumentException()
   }
+
+  def toRawString(content: List[Content]): String =
+    content.map{
+      case Macro(_, _) => ""
+      case Reference(link, _, _) => link
+      case Text(text) => text
+    }.mkString.trim
 
 }
