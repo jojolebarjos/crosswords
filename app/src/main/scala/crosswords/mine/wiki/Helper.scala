@@ -41,15 +41,35 @@ object Helper {
   }
 
   /**
+   * Get all macros (excluding macro blocks).
+   */
+  def macros(markup: Markup, subheader: Boolean = true): Seq[Macro] = markup match {
+    case m: Macro =>
+      Seq(m)
+    case h: Header if subheader =>
+      macros(h.title, subheader) ++ macros(h.content, subheader)
+    case i: Items =>
+      i.items.flatMap(i => macros(i, subheader))
+    case p: Paragraph =>
+      p.content.flatMap(i => macros(i, subheader))
+    case d: Definition =>
+      macros(d.paragraph, subheader)
+    case q: Quotation =>
+      macros(q.paragraph, subheader)
+    case _ =>
+      Seq.empty
+  }
+
+  /**
    * Get all macro blocks.
    */
-  def macroBlocks(markup: Markup, subheader: Boolean = true): Seq[MacroBlock] = markup match {
+  def macroBlocks(markup: Markup, subheader: Boolean = true): Seq[Macro] = markup match {
     case Header(_, _, content) if subheader =>
       macroBlocks(content, subheader)
     case Items(items) =>
       items.flatMap(macroBlocks(_, subheader))
-    case m: MacroBlock =>
-      Seq(m)
+    case MacroBlock(mac) =>
+      Seq(mac)
     case _ =>
       Seq.empty
   }

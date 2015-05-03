@@ -88,6 +88,17 @@ object Wiktionary {
   private def references(headers: Seq[Header]): Seq[String] =
     headers.flatMap(h => Helper.references(h)).map(clean).distinct.filter(_.nonEmpty).sorted
 
+  // Handle special macros that defines additional content
+  private def expandEquivalents(mac: Macro): Seq[String] = {
+    if (mac.name == "alternative spelling of")
+      return mac.params.find(_._1 == "1").map(_._2).toSeq
+    if (mac.name == "en-noun") {
+      // TODO handle plurals... (http://en.wiktionary.org/wiki/Template:en-noun)
+    }
+    // TODO verb conjugation
+    Nil
+  }
+
   /**
    * Generate JSON structures from specified page.
    */
@@ -96,34 +107,41 @@ object Wiktionary {
     // Get english section
     val markup = Markup(page)
     for (english <- headers(markup, _ == "English").filter(_.lvl == 2)) yield {
-
-      // Get definitions and examples
       val categories = headers(english, isCategory)
+      // Get definitions
       val definitions =
         // From categories
         categories.flatMap(c => Helper.paragraphs(Helper.limitItemsDepth(c.content, 2), false)).
         map(p => Helper.toRawString(p.content)).filter(_.nonEmpty) ++
         // From translations
-        Helper.macroBlocks(english).filter(_.mac.name == "trans-top").
-        flatMap(_.mac.params.headOption).map(_._2).toVector
+        Helper.macroBlocks(english).filter(_.name == "trans-top").
+        flatMap(_.params.headOption).map(_._2).toVector
+
+      // Get examples
       val examples =
         // From categories
         (categories.flatMap(c => Helper.definitions(c.content, false)) ++
         categories.flatMap(c => Helper.quotations(c.content, false))).
         map(p => Helper.toRawString(p.content)).filter(_.nonEmpty)
 
-      // Get interesting references
-      val equivalents = references(headers(english, isEquivalent)).
-        filter(w => w.toLowerCase != title.toLowerCase)
-      val associated = references(headers(english, isAssociated)).
-        filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
-      val other = references(Seq(english)).
-        filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
-      // TODO also fix refs in these categories (they go in "other")
+      // Get equivalents terms
+      val equivalents =
+        // From references
+        references(headers(english, isEquivalent)).
+        filter(w => w.toLowerCase != title.toLowerCase) ++
+        // From macro expansion
+        categories.flatMap(c => Helper.macros(c.content, false) ++ Helper.macroBlocks(c.content, false)).flatMap(expandEquivalents)
 
-      // Get additional alternate spelling from templates
-      // alternative spelling of
-      val macros = categories.flatMap(c => Helper.macroBlocks(c.content, false))
+      // Get associated terms
+      val associated =
+        // From references
+        references(headers(english, isAssociated)).
+        filter(w => !equivalents.contains(w) && w.toLowerCase != title.toLowerCase)
+
+      // Get additional terms
+      val other =
+        references(Seq(english)).
+        filter(w => !equivalents.contains(w) && !associated.contains(w) && w.toLowerCase != title.toLowerCase)
 
       // Create JSON object
       var obj = Json.obj("word" -> title)
