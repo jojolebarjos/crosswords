@@ -93,13 +93,13 @@ object Stem {
         .toSet
         .filter(w => !bad_cases.contains(w))
 
-    if (!stems.isEmpty) stems.minBy(_.length) else word
+    if (!stems.isEmpty) stems.minBy(_.length) else ""
   }
 
   /**
    * Clean and simplify text.
    */
   def clean(sentence: String): Seq[String] = {
-    normalize(sentence).split("\\s+").map(reduce).filter(_ != "")
+    normalize(sentence).split(" ").map(reduce(_)).filter(_ != "")
   }
 }

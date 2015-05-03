@@ -12,8 +12,6 @@ import play.api.libs.json.JsObject
 import scala.io.Source
 
 /**
- * @author Matteo Filipponi
- * @author Utku Sirin
  * @author Laurent Valette
  */
 object Similarity {
@@ -40,6 +38,7 @@ object Similarity {
     val dict = createDictionary(edges).cache()
     val indexed = toIndex(edges, dict)
     val result = combine(indexed).cache()
+    // TODO: Normalizing (it might be done in the combine function)
 
     context.stop()
   }
@@ -143,7 +142,7 @@ object Similarity {
    */
   def buildEdges(extracted: RDD[(Seq[String], Seq[String], Float)]): RDD[(String, String, Float)] = {
     // Flattens the content of the tuples: foreach tuple, foreach word w1, foreach word w2, we yield (w1, w2, weight)
-    extracted.flatMap(t => t._1.flatMap(w1 => t._2.map(w2 => (w1, w2, t._3)))).filter(_._3 != 0)
+    extracted.flatMap(t => t._1.flatMap(w1 => t._2.map(w2 => (w1, w2, t._3))))
   }
 
   /**
@@ -158,17 +157,11 @@ object Similarity {
   }
 
   /**
-   * Compute and normalize the similarity between words. The similarity is between 0 (inclusive) and 1 (inclusive).
+   * Compute the similarity between words.
    * @param edges A collection of edges with their category weights
    * @return A collection of edges with the similarity between the two words
    */
   def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
-    val combined = edges.reduceByKey((c1, c2) => c1 + c2)
-    // Group by row, then normalize each line by dividing by its maximum value
-    val rowIndexed = combined.map(t => (t._1._1, (t._1._2, t._2))).groupByKey()
-    rowIndexed.flatMap { row =>
-      val maxValue = row._2.maxBy(t => t._2)._2
-      row._2.map(t => (row._1, t._1, t._2 / maxValue))
-    }
+    edges.reduceByKey { case (c1, c2) => c1 + c2 }.map(t => (t._1._1, t._1._2, t._2))
   }
 }
