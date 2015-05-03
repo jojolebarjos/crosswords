@@ -29,9 +29,9 @@ object Application extends Controller {
   def getRandomCrossword(): Crossword = {
     val crossword = DB.withConnection { connection =>
       val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-      val result = statement.executeQuery("""SELECT * FROM crosswords.crosswords c ORDER BY RAND() LIMIT 1""")
+      val result = statement.executeQuery("""SELECT * FROM crosswords c ORDER BY RAND() LIMIT 1""")
 
-      var generalFormat = """["""
+      var generalFormat = """{ """
 
       var id = 0;
 
@@ -47,31 +47,33 @@ object Application extends Controller {
           title + """", "url" : """" + url + """", "date" : """" + date + """", """
       }
 
-      val words = statement.executeQuery("""SELECT * FROM items, words WHERE items.cwid=""" + id + """ AND items.wid=words.wid""")
+	  val statement2 = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+      val words = statement2.executeQuery("""SELECT xcoord, ycoord, clue, direction, word FROM items, words WHERE items.cwid=""" + id + """ AND items.wid=words.wid""")
       var wordsFormat = """ "words" : ["""
       while (words.next()) {
-        val word = result.getString("word")
-        val clue = result.getString("clue")
-        val x = result.getInt("xcoord")
-        val y = result.getInt("ycoord")
-        val dir = result.getString("direction")
+        val word = words.getString("word")
+        val clue = words.getString("clue")
+        val x = words.getInt("xcoord")
+        val y = words.getInt("ycoord")
+        val dir = words.getString("direction")
 
 
-        wordsFormat += """ { "word" : """" + word + """", "clue" : """" + clue + """", "x" : """" + x +
-          """", "y" : """" + y + """", "dir" : """" + dir + """"},"""
+        wordsFormat += """ { "word" : """" + word + """", "clue" : """" + clue + """", "x" : """ + x +
+          """, "y" : """ + y + """, "dir" : """" + dir + """"}, """
         }
 
-      wordsFormat = wordsFormat.substring(0, wordsFormat.length - 1) + """]"""
+      wordsFormat = wordsFormat.substring(0, wordsFormat.length - 2) + """ ] """
 
-      generalFormat += wordsFormat + """]""";
+      generalFormat += wordsFormat + """ }""";
       generalFormat
 
     }
-
+	println(crossword)
     new Crossword(Json.parse(crossword))
   }
 
   def crosswordPage = Action {
+
     Ok(views.html.crossword(getRandomCrossword()))//crossword(0)))
   }
 
