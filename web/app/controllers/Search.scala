@@ -1,6 +1,7 @@
 package controllers
 
 import controllers.Application._
+import play.api.Play.current
 import play.api.Routes
 import play.api.mvc._
 import routes.javascript._
@@ -36,22 +37,43 @@ object Search extends Controller{
     "Scila",
     "Scheme")
 
-  val sqlQueryBegin = "select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ("
-  val sqlQueryEnd = ") Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"
+  val sqlQueryBegin = """select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ("""
+  val sqlQueryEnd = """)) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"""
+  val qqq = """select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ('E')) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"""
   val numberOfResults = 3
 
-  def getWordsFromDB(stems: Seq[String]): Unit = {
+  def getWordsFromDB(stems: Seq[String]): String = {
     if (stems.isEmpty) {
       ""
     } else {
-      val foo = DB.withConnection { connection =>
+      DB.withConnection { connection =>
         val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        val result = statement.executeQuery(sqlQueryBegin + stems + sqlQueryEnd)
+		
+		val words = stems.map(word => """'""" + word + """'""")
+		var wordsSearched = "";
+		if (stems.size == 1) {
+			wordsSearched = words(0)
+		} else {
+			wordsSearched = words.reduce(_ + """", """ + _)
+		}
+  
+		println(sqlQueryBegin + wordsSearched + sqlQueryEnd)
+        val result = statement.executeQuery(sqlQueryBegin + wordsSearched + sqlQueryEnd)
         var resultWords: List[String] = List()
         while (result.next()) {
-          resultWords = "word:%s score:%f".format(result.getString("word"), result.getFloat("score")) :: resultWords
+			val word = result.getString("word")
+			val score = result.getFloat("score")
+          resultWords = ("word:" + word + " score:" + score) :: resultWords
         }
-        resultWords.reduce(_ + ", " + _)
+		
+		if (resultWords.size == 0) {
+			""
+		} else if (resultWords.size == 1) {
+			resultWords(0)
+		} else {
+		println("3")
+			resultWords.reduce(_ + ", " + _)
+		}
       }
     }
 }
@@ -66,9 +88,7 @@ if (stems.size != 0) {
   "&nbsp"
 }*/
 
-  getWordsFromDB(stems.map(word =>
-    """'""" + word + """'"""
-  ))
+  getWordsFromDB(stems)
 }
 
 def searchWord(searchWord: String) = {
