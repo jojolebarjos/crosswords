@@ -10,7 +10,7 @@ import play.api.Play.current
 object Application extends Controller {
 
   def index = Action {
-    
+
     /*val foo = DB.withConnection { connection =>
         val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val result = statement.executeQuery("select * from testTable where id > 6")
@@ -20,14 +20,59 @@ object Application extends Controller {
         }
         text
     }
-    
+
     Ok(views.html.index(foo))*/
 
     Ok(views.html.index("This is a temporary msg to avoid database settings!"))
   }
 
+  def getRandomCrossword(): Crossword = {
+    val crossword = DB.withConnection { connection =>
+      val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+      val result = statement.executeQuery("""SELECT * FROM crosswords.crosswords c ORDER BY RAND() LIMIT 1""")
+
+      var generalFormat = """["""
+
+      var id = 0;
+
+      while (result.next()) {
+        id = result.getInt("cwid")
+        val source = result.getString("source")
+        val language = result.getString("lang")
+        val title = result.getString("title")
+        val url = result.getString("url")
+        val date = result.getDate("cwdate")
+
+        generalFormat += """"source" : """" + source + """", "language" : """" + language + """", "title" : """" +
+          title + """", "url" : """" + url + """", "date" : """" + date + """", """
+      }
+
+      val words = statement.executeQuery("""SELECT * FROM items, words WHERE items.cwid=""" + id + """ AND items.wid=words.wid""")
+      var wordsFormat = """ "words" : ["""
+      while (words.next()) {
+        val word = result.getString("word")
+        val clue = result.getString("clue")
+        val x = result.getInt("xcoord")
+        val y = result.getInt("ycoord")
+        val dir = result.getString("direction")
+
+
+        wordsFormat += """ { "word" : """" + word + """", "clue" : """" + clue + """", "x" : """" + x +
+          """", "y" : """" + y + """", "dir" : """" + dir + """"},"""
+        }
+
+      wordsFormat = wordsFormat.substring(0, wordsFormat.length - 1) + """]"""
+
+      generalFormat += wordsFormat + """]""";
+      generalFormat
+
+    }
+
+    new Crossword(Json.parse(crossword))
+  }
+
   def crosswordPage = Action {
-    Ok(views.html.crossword(crossword(0)))
+    Ok(views.html.crossword(getRandomCrossword()))//crossword(0)))
   }
 
   def search = Action {
@@ -37,9 +82,9 @@ object Application extends Controller {
   def contact = Action {
     Ok(views.html.contact())
   }
-  
+
   def crossword(id: Int): Crossword = {
-      
+
       val text = """{
           "source" : "The Guardian",
           "language" : "eng",
@@ -203,12 +248,12 @@ object Application extends Controller {
             "y" : 5,
             "dir" : "South"
           } ]
-              
+
         }"""
-  
+
     new Crossword(Json.parse(text))
-    
+
   }
-    
+
 
 }
