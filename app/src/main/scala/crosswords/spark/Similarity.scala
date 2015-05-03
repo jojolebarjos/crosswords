@@ -12,6 +12,8 @@ import play.api.libs.json.JsObject
 import scala.io.Source
 
 /**
+ * @author Matteo Filipponi
+ * @author Utku Sirin
  * @author Laurent Valette
  */
 object Similarity {
@@ -157,11 +159,17 @@ object Similarity {
   }
 
   /**
-   * Compute the similarity between words.
+   * Compute the similarity between words. The similarity is between 0 (inclusive) and 1 (inclusive).
    * @param edges A collection of edges with their category weights
    * @return A collection of edges with the similarity between the two words
    */
   def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
-    edges.reduceByKey { case (c1, c2) => c1 + c2 }.map(t => (t._1._1, t._1._2, t._2))
+    val combined = edges.reduceByKey((c1, c2) => c1 + c2)
+    // Group by row, then normalize each line by dividing by its maximum value
+    val rowIndexed = combined.map(t => (t._1._1, (t._1._2, t._2))).groupByKey()
+    rowIndexed.flatMap { row =>
+      val maxValue = row._2.maxBy(t => t._2)._2
+      row._2.map(t => (row._1, t._1, t._2 / maxValue))
+    }
   }
 }
