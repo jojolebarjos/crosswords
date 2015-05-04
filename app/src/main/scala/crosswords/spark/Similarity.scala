@@ -19,15 +19,15 @@ import scala.io.Source
 object Similarity {
   // TODO: Use black magic to adjust the category weights
   private val CLUES_WEIGHT = 1.0f
-  private val DEFS_WEIGHT = 0.0f
-  private val EXAMPLES_WEIGHT = 0.0f
-  private val EQUIV_WEIGHT = 0.0f
-  private val ASSO_WEIGHT = 0.0f
+  private val DEFS_WEIGHT = 0.6f
+  private val EXAMPLES_WEIGHT = 0.6f
+  private val EQUIV_WEIGHT = 0.4f
+  private val ASSO_WEIGHT = 0.1f
 
   private val CLEANED_PARTITIONS_COUNT = 20
 
   def main(args: Array[String]) {
-    System.setProperty("hadoop.home.dir", "C:/winutils/")
+    //System.setProperty("hadoop.home.dir", "C:/winutils/")
     val context = new SparkContext("local[8]", "shell")
 
     //val crosswords = context.jsObjectFile("../data/crosswords/*.bz2").map(_._2)
@@ -36,10 +36,16 @@ object Similarity {
 
     val cleanData = loadCleaned("../data/cleaned", context)
     val weightedData = weightCategories(cleanData)
-    val edges = buildEdges(weightedData)
-    val dict = createDictionary(edges).cache()
+    val edges = buildEdges(weightedData).cache()
+    val dict = createDictionary(edges)
     val indexed = toIndex(edges, dict)
-    val result = combine(indexed).cache()
+    val result = combine(indexed)
+
+    val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3).coalesce(CLEANED_PARTITIONS_COUNT)
+    csvResult.saveAsTextFile("../data/matrix/adjacency", classOf[BZip2Codec])
+
+    val csvDict = dict.map(t => t._1 + "," + t._2).coalesce(CLEANED_PARTITIONS_COUNT)
+    csvDict.saveAsTextFile("../data/matrix/index2word", classOf[BZip2Codec])
 
     context.stop()
   }
