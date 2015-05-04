@@ -37,8 +37,8 @@ object Search extends Controller{
     "Scila",
     "Scheme")
 
-  val sqlQueryBegin = """select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ("""
-  val sqlQueryEnd = """)) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"""
+  val sqlQueryBegin = """select word, score from (select widfrom, sum(weight) as score from ( select wid from Words where word in ("""
+  val sqlQueryEnd = """)) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc ) Outputs inner join Words on wid = widfrom"""
   val qqq = """select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ('E')) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"""
   val numberOfResults = 3
 
@@ -54,7 +54,7 @@ object Search extends Controller{
 		if (stems.size == 1) {
 			wordsSearched = words(0)
 		} else {
-			wordsSearched = words.reduce(_ + """", """ + _)
+			wordsSearched = words.reduce(_ + """, """ + _)
 		}
   
 		println(sqlQueryBegin + wordsSearched + sqlQueryEnd)
@@ -66,12 +66,12 @@ object Search extends Controller{
           resultWords = ("word:" + word + " score:" + score) :: resultWords
         }
 		
+		
 		if (resultWords.size == 0) {
 			""
 		} else if (resultWords.size == 1) {
 			resultWords(0)
 		} else {
-		println("3")
 			resultWords.reduce(_ + ", " + _)
 		}
       }
@@ -88,7 +88,7 @@ if (stems.size != 0) {
   "&nbsp"
 }*/
 
-  getWordsFromDB(stems)
+	getWordsFromDB(stems)
 }
 
 def searchWord(searchWord: String) = {

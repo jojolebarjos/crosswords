@@ -27,7 +27,7 @@ object Similarity {
   private val CLEANED_PARTITIONS_COUNT = 20
 
   def main(args: Array[String]) {
-    //System.setProperty("hadoop.home.dir", "C:/winutils/")
+    System.setProperty("hadoop.home.dir", "C:/winutils/")
     val context = new SparkContext("local[8]", "shell")
 
     //val crosswords = context.jsObjectFile("../data/crosswords/*.bz2").map(_._2)
