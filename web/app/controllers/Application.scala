@@ -1,11 +1,14 @@
 package controllers
 
+import javax.swing.text.html.HTML
+
 import play.api._
 import play.api.db._
 import play.api.mvc._
 import play.api.libs.json.{Json, JsObject, JsValue}
 import java.sql.ResultSet
 import play.api.Play.current
+import play.twirl.api.Html
 
 object Application extends Controller {
 
@@ -83,6 +86,32 @@ object Application extends Controller {
 
   def contact = Action {
     Ok(views.html.contact())
+  }
+
+  def createCrossword = Action {
+    Ok(views.html.createCrossword())
+  }
+
+  def getCrosswordFromSubject(subject: String, number: String): Html = {
+    var n = number.toInt
+    if (n <= 0) {
+      n = 1
+    }
+
+    val words = Search.getWordsFromDB(subject).slice(0, n)
+    val clues = Search.getCluesFromWords(words)
+
+    var htmlResult: Html = views.html.crossword(new Crossword(CrosswordBuilder.generateCrossword(words, clues)))
+
+    if (words.isEmpty) {
+      htmlResult = views.html.crossword(getRandomCrossword())
+    }
+
+    htmlResult
+  }
+
+  def createCrosswords(subject: String, number: String): Result = {
+    Ok(getCrosswordFromSubject(subject, number))
   }
 
   def crossword(id: Int): Crossword = {

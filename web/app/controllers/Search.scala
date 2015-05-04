@@ -42,6 +42,46 @@ object Search extends Controller{
   val qqq = """select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ('E')) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"""
   val numberOfResults = 3
 
+  def getWordsFromDB(word: String): List[String] = {
+    if (word.isEmpty) {
+      List()
+    } else {
+      DB.withConnection { connection =>
+        val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+
+        val result = statement.executeQuery(sqlQueryBegin + """"""" + word + """"""" + sqlQueryEnd)
+        var resultWords: List[String] = List()
+        while (result.next()) {
+          val word = result.getString("word")
+          resultWords = word :: resultWords
+        }
+
+        resultWords
+      }
+    }
+  }
+
+  def getCluesFromWords(words: List[String]): List[String] = {
+    if (words.isEmpty) {
+      List()
+    } else {
+      DB.withConnection { connection =>
+
+        words.map(word => {
+
+          var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+
+          val result = statement.executeQuery( """select clue from words, items where words.word = '""" + word + """' and words.wid = items.wid)""")
+          if (result.next()) {
+            result.getString("clue")
+          }
+          "No clue found"
+        }
+        )
+      }
+    }
+  }
+
   def getWordsFromDB(stems: Seq[String]): String = {
     if (stems.isEmpty) {
       ""
