@@ -2,7 +2,7 @@
 -- Dictionary
 create table Words (
 	wid int not null,
-	word varchar(50) not null,
+	word varchar(200) not null,
 	primary key (wid),
 	unique index (word)
 );
