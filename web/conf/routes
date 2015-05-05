@@ -8,7 +8,7 @@ GET        /crossword                          controllers.Application.crossword
 GET        /search                             controllers.Application.search
 GET        /contact                            controllers.Application.contact
 GET        /createCrossword                    controllers.Application.createCrossword
-GET        /createCrossword/:subject/:number   controllers.Application.createCrosswords(subject, number)
+GET        /createCrossword/:subject/:number  controllers.Application.createCrossword(subject: String, number: String)
 
 
 

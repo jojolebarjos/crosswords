@@ -92,6 +92,10 @@ object Application extends Controller {
     Ok(views.html.createCrossword())
   }
 
+  def createCrossword(subject: String, number: String) = Action {
+    Ok(getCrosswordFromSubject(subject, number))
+  }
+
   def getCrosswordFromSubject(subject: String, number: String): Html = {
     var n = number.toInt
     if (n <= 0) {
@@ -110,9 +114,7 @@ object Application extends Controller {
     htmlResult
   }
 
-  def createCrosswords(subject: String, number: String): Result = {
-    Ok(getCrosswordFromSubject(subject, number))
-  }
+
 
   def crossword(id: Int): Crossword = {
 
