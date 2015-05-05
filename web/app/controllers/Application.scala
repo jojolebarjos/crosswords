@@ -88,32 +88,6 @@ object Application extends Controller {
     Ok(views.html.contact())
   }
 
-  def createCrossword = Action {
-    Ok(views.html.createCrossword())
-  }
-
-  def createCrossword(subject: String, number: String) = Action {
-    Ok(getCrosswordFromSubject(subject, number))
-  }
-
-  def getCrosswordFromSubject(subject: String, number: String): Html = {
-    var n = number.toInt
-    if (n <= 0) {
-      n = 1
-    }
-
-    val words = Search.getWordsFromDB(subject).slice(0, n)
-    val clues = Search.getCluesFromWords(words)
-
-    var htmlResult: Html = views.html.crossword(new Crossword(CrosswordBuilder.generateCrossword(words, clues)))
-
-    if (words.isEmpty) {
-      htmlResult = views.html.crossword(getRandomCrossword())
-    }
-
-    htmlResult
-  }
-
 
 
   def crossword(id: Int): Crossword = {
