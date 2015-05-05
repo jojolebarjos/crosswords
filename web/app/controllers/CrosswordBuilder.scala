@@ -40,7 +40,7 @@ object CrosswordBuilder {
             nextWord.setCoord(intersection._1, intersection._2 - t._1, "South")
           }
 
-          placed = placed || nextWord.placeInBoard(board)
+          placed = placed || nextWord.placeInBoard(board, intersection)
           if (placed) {
             break
           }
@@ -75,7 +75,7 @@ object CrosswordBuilder {
 
     //2 step
     wordsSorted(0).setCoord(0, board.size / 2, "East")
-    wordsSorted(0).placeInBoard(board)
+    wordsSorted(0).placeInBoard(board, (0, board.size / 2))
     wordsPlaced = (wordsSorted(0) :: wordsPlaced).reverse
     crosswordWords = wordsSorted(0) :: crosswordWords
     var remainingWords = wordsSorted
@@ -129,10 +129,12 @@ class Word(val word: String, val clue: String) {
     }
   }
 
-  def placeInBoard(board: Array[Array[Char]]): Boolean = {
-    if (((direction == "South") && ((ycoord + word.size) > board(0).size)
-      || ((direction == "East") && ((xcoord + word.size) > board.size)))) {
-      false
+  def placeInBoard(board: Array[Array[Char]], intersection: (Int, Int)): Boolean = {
+    var placed = true
+    if (((direction == "South") && ((ycoord + word.size) > board(0).size))
+      || ((direction == "East") && ((xcoord + word.size) > board.size))
+    || (xcoord < 0) || (ycoord < 0)) {
+      placed = false
     } else {
 
       println(board.deep.mkString("\n"))
@@ -141,24 +143,34 @@ class Word(val word: String, val clue: String) {
 
       if (direction == "South") {
         for (i <- 0 to word.size - 1) {
-          if ((board(xcoord)(ycoord + i).isLetter) && (board(xcoord)(ycoord + i) != word(i))) {
-            false
+          if (((board(xcoord)(ycoord + i).isLetter) && (board(xcoord)(ycoord + i) != word(i)))
+          || (((xcoord + 1) < board.size) && ((ycoord + i) != intersection._2) && ((board(xcoord + 1)(ycoord + i).isLetter)))
+            || (((xcoord - 1) >= 0) && ((ycoord + i) != intersection._2) && ((board(xcoord - 1)(ycoord + i).isLetter)))) {
+            placed = false
           }
         }
-        for (i <- 0 to word.size - 1) {
-          board(xcoord)(ycoord + i) = word(i)
+
+        if(placed) {
+          for (i <- 0 to word.size - 1) {
+            board(xcoord)(ycoord + i) = word(i)
+          }
         }
       } else {
         for (i <- 0 to word.size - 1) {
-          if ((board(xcoord + i)(ycoord).isLetter) && (board(xcoord + i)(ycoord) != word(i))) {
-            false
+          if (((board(xcoord + i)(ycoord).isLetter) && (board(xcoord + i)(ycoord) != word(i)))
+            || (((ycoord + 1) < board(0).size) && ((xcoord + i) != intersection._1) && ((board(xcoord + i)(ycoord + 1).isLetter)))
+            || (((ycoord - 1) >= 0) && ((xcoord + i) != intersection._1) && ((board(xcoord + i)(ycoord - 1).isLetter)))) {
+            placed = false
           }
         }
-        for (i <- 0 to word.size - 1) {
-          board(xcoord + i)(ycoord) = word(i)
+        if (placed) {
+          for (i <- 0 to word.size - 1) {
+            board(xcoord + i)(ycoord) = word(i)
+          }
         }
       }
-      true
     }
+
+    placed
   }
 }
