@@ -12,6 +12,8 @@ create table Neighbors (
 	widfrom int not null,
 	widto int not null,
 	weight float not null,
+	index (widfrom),
+	index (widto),
 	primary key (widfrom, widto),
 	foreign key (widfrom)
 		references Words(wid)
