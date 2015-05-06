@@ -133,7 +133,26 @@ object Search extends Controller{
 		}
       }
     }
-}
+  }
+
+  def getRandomWordsFromDB(numberWords: Int): List[(Int, String)] = {
+    DB.withConnection { connection =>
+      val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+
+      val result = statement.executeQuery("""SELECT * FROM words order by RAND() LIMIT """ + numberWords)
+      var resultWords: List[(Int, String)] = List()
+      while (result.next()) {
+        val word = result.getString("word")
+        val wid = result.getInt("wid")
+
+        if (word.matches("^[a-zA-Z]*$") && (word.length > 0)) {
+          resultWords = (wid, word) :: resultWords
+        }
+      }
+
+      resultWords
+    }
+  }
 
 def searching(searchText: String) = {
 val stems = Stem.clean(searchText)

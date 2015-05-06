@@ -1,6 +1,8 @@
 package controllers
 
-import play.api.libs.json.{JsValue, Json}
+import crosswords.util.Packer
+import play.api.libs.json.{JsString, JsArray, JsValue, Json}
+import scala.util.Random
 import scala.util.control.Breaks._
 
 object CrosswordBuilder {
@@ -17,7 +19,6 @@ object CrosswordBuilder {
   "on"
 
   )
-
 
   val jsonTextBegin = """{
       "source" : "The CrossWord User",
@@ -54,10 +55,6 @@ object CrosswordBuilder {
     }
 
     placed
-  }
-
-  def main(args: Array[String]) {
-    generateCrossword(wordsTest, definitionsTest)
   }
 
   // Check http://stackoverflow.com/questions/943113/algorithm-to-generate-a-crossword
@@ -104,8 +101,52 @@ object CrosswordBuilder {
     val jsonText: String = if (crosswordWords.size == 1) { crosswordWords(0).toJson() } else {
       crosswordWords.map(_.toJson()).reduce(_ + ", " + _)
     }
+
+    println(board.deep.mkString("\n"))
     println(jsonTextBegin + jsonText + jsonTextEnd)
     Json.parse(jsonTextBegin + jsonText + jsonTextEnd)
+  }
+
+  //Create random crosswords
+  val allWiktionary = Packer.read("""/home/tux/Desktop/wiktionary""")
+
+  val allWordsDefinitions: Map[String, Option[JsArray]] = allWiktionary.flatMap(jsonFile => jsonFile.asInstanceOf[JsArray].value.map(json => {
+    val word = (json \ "word").asInstanceOf[JsString]
+    val definitions = (json \ "definitions").asOpt[JsArray]
+    (word, definitions)
+  })).map(t => (t._1.value, t._2)).toMap
+
+  def generateCrosswordsAndPushToTheDatabase(numberCrosswords: Int) = {
+    val wordsList = Search.getRandomWordsFromDB(100)
+    val wordsWithDefinitions = wordsList.filter(w => allWordsDefinitions(w._2) match {
+      case Some(jsArray) =>
+        !jsArray.value.isEmpty
+      case None =>
+        false
+    })
+
+    // (Index word, word, definition)
+    val wordsDefinition: List[(Int, String, String)] = wordsWithDefinitions.map(t => {
+      (t._1, t._2, allWordsDefinitions(t._2) match {
+        case Some(jsArray) => {
+          val rand = new Random(System.currentTimeMillis())
+          val random_index = rand.nextInt(jsArray.value.length)
+          (jsArray.value(random_index)).asInstanceOf[String]
+        }
+        case None =>
+          ""
+      })
+    })
+
+
+    val wordIndexMap = wordsDefinition.map(t => (t._1, t._2)).toMap
+    val crossword = generateCrossword(wordsDefinition.map(_._2), wordsDefinition.map(_._3))
+  }
+
+
+  def main(args: Array[String]) {
+    //generateCrossword(wordsTest, definitionsTest)
+    generateCrosswordsAndPushToTheDatabase(1)
   }
 }
 
@@ -230,12 +271,6 @@ class Word(val word: String, val clue: String) {
             board(xcoord + i)(ycoord) = word(i)
           }
         }
-      }
-
-      if (placed) {
-        println(board.deep.mkString("\n"))
-        println(word)
-        println(xcoord + "; " + ycoord)
       }
     }
 
