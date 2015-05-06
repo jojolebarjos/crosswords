@@ -40,7 +40,7 @@ object Search extends Controller{
   val sqlQueryBegin = """select word, score from (select widfrom, sum(weight) as score from ( select wid from Words where word in ("""
   val sqlQueryEnd = """)) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc ) Outputs inner join Words on wid = widfrom"""
   val qqq = """select word, score from (select widfrom, sum(weight) as score from (select wid from Words where word in ('E')) Inputs inner join Neighbors on wid = widto group by widfrom order by score desc) Outputs inner join Words on wid = widfrom"""
-  val numberOfResults = 3
+  val numberOfResults = 20
 
   def getWordsFromDB(word: String): List[String] = {
     if (word.isEmpty) {
@@ -50,6 +50,25 @@ object Search extends Controller{
         val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
         val result = statement.executeQuery(sqlQueryBegin + """"""" + word + """"""" + sqlQueryEnd)
+        var resultWords: List[String] = List()
+        while (result.next()) {
+          val word = result.getString("word")
+          resultWords = word :: resultWords
+        }
+
+        resultWords
+      }
+    }
+  }
+  
+  def retrieveWordFromPattern(pattern: String): List[String] = {
+	if (pattern.isEmpty) {
+      List()
+    } else {
+      DB.withConnection { connection =>
+        val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+
+        val result = statement.executeQuery("""select words.word from words where words.word like '""" + pattern + """'""")
         var resultWords: List[String] = List()
         while (result.next()) {
           val word = result.getString("word")
@@ -97,22 +116,20 @@ object Search extends Controller{
 			wordsSearched = words.reduce(_ + """, """ + _)
 		}
   
-		println(sqlQueryBegin + wordsSearched + sqlQueryEnd)
         val result = statement.executeQuery(sqlQueryBegin + wordsSearched + sqlQueryEnd)
-        var resultWords: List[String] = List()
+        var resultWords: List[(String, Float)] = List()
         while (result.next()) {
 			val word = result.getString("word")
 			val score = result.getFloat("score")
-          resultWords = ("word:" + word + " score:" + score) :: resultWords
+          resultWords = (word, score) :: resultWords
         }
-		
 		
 		if (resultWords.size == 0) {
 			""
 		} else if (resultWords.size == 1) {
-			resultWords(0)
+			resultWords(0)._1
 		} else {
-			resultWords.reduce(_ + ", " + _)
+			resultWords.sortBy(_._2).reverse.map(_._1).take(numberOfResults).reduce(_ + "<br>" + _)
 		}
       }
     }
@@ -133,7 +150,8 @@ if (stems.size != 0) {
 
 def searchWord(searchWord: String) = {
 val searchClean = searchWord.toUpperCase().replaceAll("""[^A-Z\*\?]""", "").replaceAll("""\*""", """.*""").replaceAll("""\?""", """.""")
-val listMatched = words.map(_.toUpperCase()).filter(_.matches(searchClean))
+println(searchClean)
+val listMatched = retrieveWordFromPattern(searchClean.replaceAll("""\.\*""", """%""").replaceAll("""\.""", """\_""")).map(_.toUpperCase()).filter(_.matches(searchClean))
 
 if (listMatched.size != 0) {
   listMatched.take(numberOfResults).reduce(_ + "<br>" + _)
@@ -145,8 +163,9 @@ if (listMatched.size != 0) {
 def searchWords(searchText: String, word: String) = Action {
 var result = ""
 
+result += "Result similiarity: <br>"
 result += searching(searchText)
-result += "<br>"
+result += "<br>Result matching: <br>"
 result += searchWord(word)
 
 Ok(result)
