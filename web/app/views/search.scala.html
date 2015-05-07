@@ -20,12 +20,20 @@
     error: errorFn
     }
 
-    function searching() {
+    function searchingAssociate() {
 
         var idToGet = $("#searchText").val();
+
+        jsRoutes.controllers.Search.searchAssociate(idToGet, searchWord)
+        .ajax(ajax1);
+
+    }
+
+    function searchingMatched() {
+
         var searchWord = $("#searchWord").val();
 
-        jsRoutes.controllers.Search.searchWords(idToGet, searchWord)
+        jsRoutes.controllers.Search.searchMatching(idToGet, searchWord)
         .ajax(ajax1);
 
     }
@@ -33,8 +41,8 @@
 
 
     <div class="ui-widget">
-        <input id="searchText" type="text" placeholder="Search specific sentence" name="searchText" onkeypress="if (event.keyCode==13){searching()}">
-        <input id="searchWord" type="text" placeholder="Search specific word" name="searchWord" onkeypress="if (event.keyCode==13){searching()}">
+        Search for associate words : <input id="searchText" type="text" placeholder="Search specific sentence" name="searchText" onkeypress="if (event.keyCode==13){searchingAssociate()}">
+        Search for matched words   : <input id="searchWord" type="text" placeholder="Search specific word" name="searchWord" onkeypress="if (event.keyCode==13){searchingMatched()}">
     </div>
 
     <div id="output" class="ui-widget">

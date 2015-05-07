@@ -7,7 +7,7 @@ import play.api.mvc._
 import routes.javascript._
 import play.api._
 import play.api.db._
-import java.sql.ResultSet
+import java.sql.{DriverManager, ResultSet}
 
 object Search extends Controller{
   //TODO
@@ -116,26 +116,29 @@ object Search extends Controller{
 			wordsSearched = words.reduce(_ + """, """ + _)
 		}
   
-        val result = statement.executeQuery(sqlQueryBegin + wordsSearched + sqlQueryEnd)
-        var resultWords: List[(String, Float)] = List()
-        while (result.next()) {
-			val word = result.getString("word")
-			val score = result.getFloat("score")
-          resultWords = (word, score) :: resultWords
-        }
+    val result = statement.executeQuery(sqlQueryBegin + wordsSearched + sqlQueryEnd)
+    var resultWords: List[(String, Float)] = List()
+    while (result.next()) {
+      val word = result.getString("word")
+      val score = result.getFloat("score")
+      resultWords = (word, score) :: resultWords
+    }
 		
 		if (resultWords.size == 0) {
 			""
 		} else if (resultWords.size == 1) {
 			resultWords(0)._1
 		} else {
-			resultWords.sortBy(_._2).reverse.map(_._1).take(numberOfResults).reduce(_ + "<br>" + _)
+			resultWords.sortBy(_._2).take(numberOfResults).reverse.map(w => "<li>" + w._1 + "with a weight of " + w._2 +
+        " (see in <a href=en.wiktionary.org/wiki/" + w + ">wiktionary</a></li>")
+        .reduce(_ + "<br>" + _)
 		}
       }
     }
   }
 
   def getRandomWordsFromDB(numberWords: Int): List[(Int, String)] = {
+    /*
     DB.withConnection { connection =>
       val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
@@ -152,46 +155,79 @@ object Search extends Controller{
 
       resultWords
     }
+    */
+
+    val dbc = "jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+    var conn = DriverManager.getConnection(dbc)
+    var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+    var resultWords: List[(Int, String)] = List()
+
+    try {
+      // select the tuples (7,14) and (8,16)
+      val rs = statement.executeQuery("""SELECT * FROM words order by RAND() LIMIT """ + numberWords)
+
+      // Iterate Over ResultSet
+      while (rs.next) {
+        val word = rs.getString("word")
+        val wid = rs.getInt("wid")
+
+        if (word.matches("^[a-zA-Z]*$") && (word.length > 0)) {
+          resultWords = (wid, word) :: resultWords
+        }
+      }
+    }
+    finally {
+      conn.close
+    }
+    resultWords
   }
 
 def searching(searchText: String) = {
-val stems = Stem.clean(searchText)
-/*
-if (stems.size != 0) {
-  val stemsString = stems.reduce(_ + " " + _)
-  stemsString
-} else {
-  "&nbsp"
-}*/
+  val stems = Stem.clean(searchText)
+  /*
+  if (stems.size != 0) {
+    val stemsString = stems.reduce(_ + " " + _)
+    stemsString
+  } else {
+    "&nbsp"
+  }*/
 
-	getWordsFromDB(stems)
+  "<ul>" + getWordsFromDB(stems) + "</ul>"
 }
 
 def searchWord(searchWord: String) = {
-val searchClean = searchWord.toUpperCase().replaceAll("""[^A-Z\*\?]""", "").replaceAll("""\*""", """.*""").replaceAll("""\?""", """.""")
-println(searchClean)
-val listMatched = retrieveWordFromPattern(searchClean.replaceAll("""\.\*""", """%""").replaceAll("""\.""", """\_""")).map(_.toUpperCase()).filter(_.matches(searchClean))
+  val searchClean = searchWord.toUpperCase().replaceAll("""[^A-Z\*\?]""", "").replaceAll("""\*""", """.*""").replaceAll("""\?""", """.""")
+  println(searchClean)
+  val listMatched = retrieveWordFromPattern(searchClean.replaceAll("""\.\*""", """%""").replaceAll("""\.""", """\_""")).map(_.toUpperCase()).filter(_.matches(searchClean))
 
-if (listMatched.size != 0) {
-  listMatched.take(numberOfResults).reduce(_ + "<br>" + _)
-} else {
-  "No matching words!"
-}
+  if (listMatched.size != 0) {
+    "<ul>" + listMatched.take(numberOfResults).map(w => "<li>" + w + " (see in <a href=en.wiktionary.org/wiki/" + w + ">wiktionary</a></li>").reduce(_ + "<br>" + _) + "</ul>"
+  } else {
+    "No matching words!"
+  }
 }
 
 def searchWords(searchText: String, word: String) = Action {
-var result = ""
+  var result = ""
 
-result += "Result similiarity: <br>"
-result += searching(searchText)
-result += "<br>Result matching: <br>"
-result += searchWord(word)
+  result += "Result similiarity: <br>"
+  result += searching(searchText)
+  result += "<br>Result matching: <br>"
+  result += searchWord(word)
 
-Ok(result)
+  Ok(result)
 }
 
+  def searchMatching(searchText: String) = Action {
+    Ok(searchWord(searchText))
+  }
+
+  def searchAssociate(searchText: String) = Action {
+    Ok(searching(searchText))
+  }
+
 def javascriptRoutes = Action { implicit request =>
-Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchWords)).as("text/javascript")
+  Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchWordHtml, routes.javascript.Search.searchingHtml)).as("text/javascript")
 }
 
 }

@@ -1,5 +1,7 @@
 package controllers
 
+import java.sql.{ResultSet, DriverManager}
+
 import crosswords.util.Packer
 import play.api.libs.json.{JsString, JsArray, JsValue, Json}
 import scala.util.Random
@@ -19,15 +21,6 @@ object CrosswordBuilder {
   "on"
 
   )
-
-  val jsonTextBegin = """{
-      "source" : "The CrossWord User",
-      "language" : "eng",
-      "title" : "New crossword",
-      "url" : "http://wiki.epfl.ch/bigdata2015-crosswords",
-      "date" : "2015-03-10",
-       "words" : [ """
-  val jsonTextEnd = """]}"""
 
   def tryToPlace(matchedWords: List[Word], nextWord: Word, board: Array[Array[Char]], alreadyPlaced: List[Word]): Boolean = {
     //5 step
@@ -59,6 +52,17 @@ object CrosswordBuilder {
 
   // Check http://stackoverflow.com/questions/943113/algorithm-to-generate-a-crossword
   def generateCrossword(words: List[String], clue: List[String]): JsValue =  {
+
+    val jsonTextBegin = """{
+      "source" : "The CrossWord Generator",
+      "language" : "eng",
+      "title" : "New crossword """ + crosswordNumber + """",
+      "url" : "http://wiki.epfl.ch/bigdata2015-crosswords",
+      "date" : "2015-05-07",
+      "author" : "The CrossWord Team",
+       "words" : [ """
+    val jsonTextEnd = """]}"""
+
     var crosswordWords: List[Word] = List()
 
     // Transform words and clue into Word
@@ -108,45 +112,78 @@ object CrosswordBuilder {
   }
 
   //Create random crosswords
+  var crosswordNumber = 1
   val allWiktionary = Packer.read("""/home/tux/Desktop/wiktionary""")
 
   val allWordsDefinitions: Map[String, Option[JsArray]] = allWiktionary.flatMap(jsonFile => jsonFile.asInstanceOf[JsArray].value.map(json => {
     val word = (json \ "word").asInstanceOf[JsString]
     val definitions = (json \ "definitions").asOpt[JsArray]
     (word, definitions)
-  })).map(t => (t._1.value, t._2)).toMap
+  })).map(t => (t._1.value.toUpperCase(), t._2)).toMap
 
-  def generateCrosswordsAndPushToTheDatabase(numberCrosswords: Int) = {
-    val wordsList = Search.getRandomWordsFromDB(100)
-    val wordsWithDefinitions = wordsList.filter(w => allWordsDefinitions(w._2) match {
-      case Some(jsArray) =>
-        !jsArray.value.isEmpty
-      case None =>
-        false
-    })
-
-    // (Index word, word, definition)
-    val wordsDefinition: List[(Int, String, String)] = wordsWithDefinitions.map(t => {
-      (t._1, t._2, allWordsDefinitions(t._2) match {
-        case Some(jsArray) => {
-          val rand = new Random(System.currentTimeMillis())
-          val random_index = rand.nextInt(jsArray.value.length)
-          (jsArray.value(random_index)).asInstanceOf[String]
+  def generateCrosswordsAndPushToTheDatabase(maxNumberCrosswords: Int) = {
+    while (crosswordNumber <= maxNumberCrosswords) {
+      val wordsList = Search.getRandomWordsFromDB(10000).filter(t => (t._2.size >= 2) && (t._2.size <= 20))
+      val wordsWithDefinitions = wordsList.filter(w => if (allWordsDefinitions.contains(w._2)) {
+        allWordsDefinitions(w._2) match {
+          case Some(jsArray) =>
+            !jsArray.value.filter(_.asInstanceOf[JsString].value.length < 100).isEmpty
+          case None =>
+            false
         }
-        case None =>
-          ""
+      } else {
+        false
       })
-    })
+
+      // (Index word, word, definition)
+      val wordsDefinition: List[(Int, String, String)] = wordsWithDefinitions.map(t => {
+        (t._1, t._2, allWordsDefinitions(t._2) match {
+          case Some(jsArray) => {
+            val rand = new Random(System.currentTimeMillis())
+            val random_index = rand.nextInt(jsArray.value.length)
+            (jsArray.value(random_index)).asInstanceOf[JsString].value
+          }
+          case None =>
+            ""
+        })
+      })
 
 
-    val wordIndexMap = wordsDefinition.map(t => (t._1, t._2)).toMap
-    val crossword = generateCrossword(wordsDefinition.map(_._2), wordsDefinition.map(_._3))
+      val wordIndexMap = wordsDefinition.map(t => (t._2, t._1)).toMap
+      val crossword = new Crossword(generateCrossword(wordsDefinition.map(_._2), wordsDefinition.map(_._3.replaceAll("""[^A-Za-z0-9 ]""", " "))))
+
+      insertCrosswordIntoDB(crossword, wordIndexMap)
+      crosswordNumber += 1
+    }
+  }
+
+  def insertCrosswordIntoDB(crossword: Crossword, wordIndex: Map[String, Int]) = {
+    val dbc = "jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+    var conn = DriverManager.getConnection(dbc)
+    var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)
+    // create the table
+
+    var prep = conn.prepareStatement("INSERT INTO crosswords (cwid,source,lang,title,url,author,cwdate,difficulty) " +
+      """VALUES ('""" + crosswordNumber + """','""" + crossword.source.get + """','eng','""" +
+      crossword.title.get + """','""" + crossword.url.get +
+    """','""" + crossword.author.get + """','2015/05/07',1);""")
+
+    prep.executeUpdate
+
+    for (wordTuple <- crossword.words) {
+
+      prep = conn.prepareStatement("INSERT INTO items (cwid,wid,xcoord,ycoord,clue,direction) " +
+        "VALUES (" + crosswordNumber + "," + wordIndex(wordTuple._1) + "," + wordTuple._3.x + "," + wordTuple._3.y +
+        """,'""" + wordTuple._2 + """','""" + wordTuple._4 + """');""")
+
+      prep.executeUpdate
+    }
   }
 
 
   def main(args: Array[String]) {
     //generateCrossword(wordsTest, definitionsTest)
-    generateCrosswordsAndPushToTheDatabase(1)
+    generateCrosswordsAndPushToTheDatabase(10000)
   }
 }
 
