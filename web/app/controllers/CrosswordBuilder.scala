@@ -7,21 +7,19 @@ import play.api.libs.json.{JsString, JsArray, JsValue, Json}
 import scala.util.Random
 import scala.util.control.Breaks._
 
+/**
+ * Build a crossword with a list of words and a list of clues
+ */
 object CrosswordBuilder {
-  
-  //Sample test
-  val wordsTest = List("chocolat", "chien", "chat", "oiseau", "maison", "maisons", "on")
-  val definitionsTest = List(
-    "Substance alimentaire à base de cacao et de sucre.",
-    "sous-espèce domestique de Canis lupus",
-    "mammifère carnivore de la famille des félidés",
-    "vertébrés tétrapodes ailés appartenant au clade des dinosaures",
-    "Famille appartenant à la noblesse",
-    "famille",
-  "on"
 
-  )
-
+  /**
+   * Try to place the nextword in the board with an intersection with a word in matchedWords and with respect of words alreadyPlaced
+   * @param matchedWords the words that match the nextword
+   * @param nextWord the next word to place
+   * @param board the crossword board
+   * @param alreadyPlaced the words already placed
+   * @return true if the word can be placed in the board
+   */
   def tryToPlace(matchedWords: List[Word], nextWord: Word, board: Array[Array[Char]], alreadyPlaced: List[Word]): Boolean = {
     //5 step
     var placed = false
@@ -50,6 +48,12 @@ object CrosswordBuilder {
     placed
   }
 
+  /**
+   * Implement an algorithm to build a crossword based on a list of words and a list of clues
+   * @param words list of words
+   * @param clue list of clues
+   * @return a json represnetation of a crossword
+   */
   // Check http://stackoverflow.com/questions/943113/algorithm-to-generate-a-crossword
   def generateCrossword(words: List[String], clue: List[String]): JsValue =  {
 
@@ -106,8 +110,10 @@ object CrosswordBuilder {
       crosswordWords.map(_.toJson()).reduce(_ + ", " + _)
     }
 
+    // print the result
     println(board.deep.mkString("\n"))
     println(jsonTextBegin + jsonText + jsonTextEnd)
+
     Json.parse(jsonTextBegin + jsonText + jsonTextEnd)
   }
 
@@ -121,6 +127,10 @@ object CrosswordBuilder {
     (word, definitions)
   })).map(t => (t._1.value.toUpperCase(), t._2)).toMap
 
+  /**
+   * Generate maxNumberCrossword crossword
+   * @param maxNumberCrosswords the max number of crossword needed
+   */
   def generateCrosswordsAndPushToTheDatabase(maxNumberCrosswords: Int) = {
     while (crosswordNumber <= maxNumberCrosswords) {
       val wordsList = Search.getRandomWordsFromDB(10000).filter(t => (t._2.size >= 2) && (t._2.size <= 20))
@@ -157,6 +167,11 @@ object CrosswordBuilder {
     }
   }
 
+  /**
+   * Insert a crossword into the database with respect of words index
+   * @param crossword the crossword
+   * @param wordIndex the words indexes
+   */
   def insertCrosswordIntoDB(crossword: Crossword, wordIndex: Map[String, Int]) = {
     val dbc = "jdbc:mysql://localhost:3306/testDatabase?user=root&password=Root2015"//"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
     var conn = DriverManager.getConnection(dbc)
@@ -187,20 +202,40 @@ object CrosswordBuilder {
   }
 }
 
+/**
+ * Represent a word in the CrosswordBuilder context
+ * @param word the word
+ * @param clue the clue
+ */
 class Word(val word: String, val clue: String) {
   var xcoord: Int = 0
   var ycoord: Int = 0
   var direction: String = ""
 
+  /**
+   * Convert the word into json format
+   * @return a string representation of the json
+   */
   def toJson(): String =
     """{ "word" : """" + word + """", "clue" : """" + clue + """", "x" : """ + xcoord + """, "y" : """ + ycoord + """, "dir" : """" + direction + """" }"""
 
+  /**
+   * Set the new position and diretion of the word
+   * @param x the x coordinate
+   * @param y the y coordinate
+   * @param dir the direction
+   */
   def setCoord(x: Int, y: Int, dir: String): Unit = {
     xcoord = x
     ycoord = y
     direction = dir
   }
 
+  /**
+   * Get the coordinate of the i char
+   * @param i the index of the char of the word
+   * @return
+   */
   def getCharCoord(i: Int): (Int, Int) = {
     if (direction == "South") {
       (xcoord, ycoord + i)
@@ -209,6 +244,11 @@ class Word(val word: String, val clue: String) {
     }
   }
 
+  /**
+   * Check if the word is not in conflict with the words already placed
+   * @param alreadyPlaced the words already placed
+   * @return true if the word could be placed at its position
+   */
   def isConsitent(alreadyPlaced: List[Word]): Boolean = {
     var allPosition: List[(Int, Int)] = List()
     var badPosition: List[(Int, Int)] = List()
@@ -258,6 +298,10 @@ class Word(val word: String, val clue: String) {
     containsWord && boundaryCases
   }
 
+  /**
+   * Get the position of all chars in the word
+   * @return a lst of (char, position)
+   */
   def getCharsPosition = {
     var res: List[(Char, (Int, Int), Int)] = List()
 
@@ -272,6 +316,12 @@ class Word(val word: String, val clue: String) {
     res
   }
 
+  /**
+   * Place the word in the board at the specific intersection with additionnal check
+   * @param board the board
+   * @param intersection the intersection point
+   * @return true if the word can be placed
+   */
   def placeInBoard(board: Array[Array[Char]], intersection: (Int, Int)): Boolean = {
     var placed = true
     if (((direction == "South") && ((ycoord + word.size) > board(0).size))

@@ -101,6 +101,4 @@ object Packer {
     writer.close()
   }
 
-  // TODO write multiple values to specified folder
-
 }
