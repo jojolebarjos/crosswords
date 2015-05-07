@@ -158,7 +158,7 @@ object CrosswordBuilder {
   }
 
   def insertCrosswordIntoDB(crossword: Crossword, wordIndex: Map[String, Int]) = {
-    val dbc = "jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+    val dbc = "jdbc:mysql://localhost:3306/testDatabase?user=root&password=Root2015"//"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
     var conn = DriverManager.getConnection(dbc)
     var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)
     // create the table

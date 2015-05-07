@@ -101,9 +101,9 @@ object Search extends Controller{
     }
   }
 
-  def getWordsFromDB(stems: Seq[String]): String = {
+  def getWordsFromDB(stems: Seq[String]): List[(String, Float)] = {
     if (stems.isEmpty) {
-      ""
+      List()
     } else {
       DB.withConnection { connection =>
         val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
@@ -116,23 +116,16 @@ object Search extends Controller{
 			wordsSearched = words.reduce(_ + """, """ + _)
 		}
   
-    val result = statement.executeQuery(sqlQueryBegin + wordsSearched + sqlQueryEnd)
-    var resultWords: List[(String, Float)] = List()
-    while (result.next()) {
-      val word = result.getString("word")
-      val score = result.getFloat("score")
-      resultWords = (word, score) :: resultWords
-    }
-		
-		if (resultWords.size == 0) {
-			""
-		} else if (resultWords.size == 1) {
-			resultWords(0)._1
-		} else {
-			resultWords.sortBy(_._2).take(numberOfResults).reverse.map(w => "<li>" + w._1 + "with a weight of " + w._2 +
-        " (see in <a href=en.wiktionary.org/wiki/" + w + ">wiktionary</a></li>")
-        .reduce(_ + "<br>" + _)
+		val result = statement.executeQuery(sqlQueryBegin + wordsSearched + sqlQueryEnd)
+		var resultWords: List[(String, Float)] = List()
+		while (result.next()) {
+		  val word = result.getString("word")
+		  val score = result.getFloat("score")
+		  resultWords = (word, score) :: resultWords
 		}
+		
+		
+		resultWords.sortBy(_._2).reverse.take(numberOfResults)
       }
     }
   }
@@ -157,7 +150,7 @@ object Search extends Controller{
     }
     */
 
-    val dbc = "jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+    val dbc = "jdbc:mysql://localhost:3306/testDatabase?user=root&password=Root2015"//"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
     var conn = DriverManager.getConnection(dbc)
     var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
     var resultWords: List[(Int, String)] = List()
@@ -192,16 +185,23 @@ def searching(searchText: String) = {
     "&nbsp"
   }*/
 
-  "<ul>" + getWordsFromDB(stems) + "</ul>"
+  val wordsWeight = getWordsFromDB(stems)
+  
+  if (wordsWeight.isEmpty) {
+	"No associate words found"
+  } else {
+	"Similar results with " + searchText + ": <br><ul>" + wordsWeight.map(w => "<li>" + w._1 + " with a weight of " + w._2 +
+        """ (see in <a href="https://en.wiktionary.org/wiki/""" + w._1.toLowerCase() + """" target="_blank">wiktionary</a>)</li>""")
+        .reduce(_ + "<br>" + _) + "</ul>"
+  }
 }
 
 def searchWord(searchWord: String) = {
   val searchClean = searchWord.toUpperCase().replaceAll("""[^A-Z\*\?]""", "").replaceAll("""\*""", """.*""").replaceAll("""\?""", """.""")
-  println(searchClean)
   val listMatched = retrieveWordFromPattern(searchClean.replaceAll("""\.\*""", """%""").replaceAll("""\.""", """\_""")).map(_.toUpperCase()).filter(_.matches(searchClean))
 
   if (listMatched.size != 0) {
-    "<ul>" + listMatched.take(numberOfResults).map(w => "<li>" + w + " (see in <a href=en.wiktionary.org/wiki/" + w + ">wiktionary</a></li>").reduce(_ + "<br>" + _) + "</ul>"
+    "Matched results with " + searchWord + ":" + "<ul>" + listMatched.take(numberOfResults).map(w => "<li>" + w + """ (see in <a href="https://en.wiktionary.org/wiki/""" + w.toLowerCase() + """" target="_blank">wiktionary</a>)</li>""").reduce(_ + "<br>" + _) + "</ul>"
   } else {
     "No matching words!"
   }
@@ -227,7 +227,7 @@ def searchWords(searchText: String, word: String) = Action {
   }
 
 def javascriptRoutes = Action { implicit request =>
-  Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchWordHtml, routes.javascript.Search.searchingHtml)).as("text/javascript")
+  Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchMatching, routes.javascript.Search.searchAssociate)).as("text/javascript")
 }
 
 }

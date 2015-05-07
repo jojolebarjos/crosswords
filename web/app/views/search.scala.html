@@ -22,9 +22,9 @@
 
     function searchingAssociate() {
 
-        var idToGet = $("#searchText").val();
+        var searchWord = $("#searchText").val();
 
-        jsRoutes.controllers.Search.searchAssociate(idToGet, searchWord)
+        jsRoutes.controllers.Search.searchAssociate(searchWord)
         .ajax(ajax1);
 
     }
@@ -33,7 +33,7 @@
 
         var searchWord = $("#searchWord").val();
 
-        jsRoutes.controllers.Search.searchMatching(idToGet, searchWord)
+        jsRoutes.controllers.Search.searchMatching(searchWord)
         .ajax(ajax1);
 
     }
