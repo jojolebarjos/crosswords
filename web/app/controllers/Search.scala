@@ -208,7 +208,7 @@ object Search extends Controller {
 	
 	val matchClean = matching.toUpperCase().replaceAll( """[^A-Z\*\?]""", "").replaceAll( """\*""", """.*""").replaceAll( """\?""", """.""")
 	
-	val filteredWordsWeight = wordsWeight.map(t => (t._1.toUpperCase(), t._2)).filter(_._1.matches(matchClean))
+	val filteredWordsWeight = wordsWeight.map(t => (t._1.toUpperCase(), t._2)).filter(_._1.matches(matchClean)).take(numberOfResults)
 
     if (wordsWeight.isEmpty) {
       result = "No associate words found"
