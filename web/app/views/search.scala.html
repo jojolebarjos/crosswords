@@ -1,10 +1,18 @@
 @()
 
 @main("Crosswords")("Search") {
+
+<div class="ui-widget">
+        Search for associate words : <input id="searchText" type="text" placeholder="Search specific sentence" name="searchText" onkeypress="if (event.keyCode==13){chooseSearchMethod()}">
+        Search for matched words   : <input id="searchWord" type="text" placeholder="Search specific word" name="searchWord" onkeypress="if (event.keyCode==13){chooseSearchMethod()}">
+    </div>
+
+    <div id="output" class="ui-widget">
+</div>
+	
 <script type="text/javascript">
     var successFn = function(data) {
         var div = document.getElementById("output");
-        //$("#output").append(data);
         div.innerHTML = data;
 
     console.debug("Success of Ajax Call");
@@ -37,14 +45,18 @@
         .ajax(ajax1);
 
     }
+	
+	function chooseSearchMethod() {
+		var searchText = $("#searchText").val();
+		var searchWord = $("#searchWord").val();
+		
+		if (searchText && searchWord) {
+			jsRoutes.controllers.Search.searchAssociateMatching(searchText, searchWord).ajax(ajax1);
+		} else if (searchText) {
+			jsRoutes.controllers.Search.searchAssociate(searchText).ajax(ajax1);
+		} else if (searchWord){
+			jsRoutes.controllers.Search.searchMatching(searchWord).ajax(ajax1);
+		}
+	}
 </script>
-
-
-    <div class="ui-widget">
-        Search for associate words : <input id="searchText" type="text" placeholder="Search specific sentence" name="searchText" onkeypress="if (event.keyCode==13){searchingAssociate()}">
-        Search for matched words   : <input id="searchWord" type="text" placeholder="Search specific word" name="searchWord" onkeypress="if (event.keyCode==13){searchingMatched()}">
-    </div>
-
-    <div id="output" class="ui-widget">
-    </div>
 }

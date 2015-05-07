@@ -15,8 +15,7 @@ GET        /contact                       controllers.Application.contact
 
 # Javascript routing
 GET        /javascriptRoutes              controllers.Search.javascriptRoutes
-#GET        /searching/:searchText/:word        controllers.Search.searchWords(searchText: String, word: String)
-#GET        /searchWord/:searchText        controllers.Search.searchWord(searchText: String)
+GET        /searchAssociateMatching/:words/:matching        controllers.Search.searchAssociateMatching(words: String, matching: String)
 GET        /searchAssociate/:searchText        controllers.Search.searchAssociate(searchText: String)
 GET        /searchMatching/:searchText        controllers.Search.searchMatching(searchText: String)
 

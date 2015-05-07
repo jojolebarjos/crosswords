@@ -122,7 +122,7 @@ object Search extends Controller {
         }
 
 
-        resultWords.sortBy(_._2).reverse.take(numberOfResults)
+        resultWords.sortBy(_._2).reverse
       }
     }
   }
@@ -168,7 +168,7 @@ object Search extends Controller {
   def searching(searchText: String) = {
     val stems = Stem.clean(searchText)
 
-    val wordsWeight = getWordsFromDB(stems)
+    val wordsWeight = getWordsFromDB(stems).take(numberOfResults)
 
     if (wordsWeight.isEmpty) {
       "No associate words found"
@@ -196,18 +196,27 @@ object Search extends Controller {
   }
 
   /**
-   * Used with ajax if we want to print all in one call
+   * Used with ajax if we want to print all similarities with a pattern
    * @param searchText the word for similarity test
    * @param word the word for matching test
    * @return an action
    */
-  def searchWords(searchText: String, word: String) = Action {
-    var result = ""
+  def searchAssociateMatching(words: String, matching: String) = Action {
+	var result = ""
+    val stems = Stem.clean(words)
+    val wordsWeight = getWordsFromDB(stems)
+	
+	val matchClean = matching.toUpperCase().replaceAll( """[^A-Z\*\?]""", "").replaceAll( """\*""", """.*""").replaceAll( """\?""", """.""")
+	
+	val filteredWordsWeight = wordsWeight.map(t => (t._1.toUpperCase(), t._2)).filter(_._1.matches(matchClean))
 
-    result += "Result similiarity: <br>"
-    result += searching(searchText)
-    result += "<br>Result matching: <br>"
-    result += searchWord(word)
+    if (wordsWeight.isEmpty) {
+      result = "No associate words found"
+    } else {
+      result = "Similar results with " + words + " and matched " + matching + ": <br><ul>" + filteredWordsWeight.map(w => "<li>" + w._1 + " with a weight of " + w._2 +
+        """ (see in <a href="https://en.wiktionary.org/wiki/""" + w._1.toLowerCase() + """" target="_blank">wiktionary</a>)</li>""")
+        .reduce(_ + "<br>" + _) + "</ul>"
+    }
 
     Ok(result)
   }
@@ -235,7 +244,7 @@ object Search extends Controller {
    * @return an action
    */
   def javascriptRoutes = Action { implicit request =>
-    Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchMatching, routes.javascript.Search.searchAssociate)).as("text/javascript")
+    Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchMatching, routes.javascript.Search.searchAssociate, routes.javascript.Search.searchAssociateMatching)).as("text/javascript")
   }
 
 }
