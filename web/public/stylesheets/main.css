@@ -15,6 +15,22 @@
 	border-top: #111111 solid 1px;
 }
 
+.red {
+	width: 32pt;
+	height: 32pt;
+	background-color: #FF0000;
+	border-left: #111111 solid 1px;
+	border-top: #111111 solid 1px;
+}
+
+.green {
+	width: 32pt;
+	height: 32pt;
+	background-color: #ADFF2F;
+	border-left: #111111 solid 1px;
+	border-top: #111111 solid 1px;
+}
+
 .black {
 	width: 32pt;
 	height: 32pt;
