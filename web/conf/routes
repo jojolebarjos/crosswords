@@ -3,11 +3,11 @@
 # ~~~~
 
 # Home page
-GET        /                              controllers.Application.index
-GET        /crossword                     controllers.Application.crosswordPage
-GET        /search                        controllers.Application.search
-GET        /contact                       controllers.Application.contact
-GET        /solver                       controllers.Application.solver
+GET        /                                                controllers.Application.index
+GET        /crossword                                       controllers.Application.crosswordPage
+GET        /search                                          controllers.Application.search
+GET        /contact                                         controllers.Application.contact
+GET        /solver                                          controllers.Application.solver
 #GET        /createCrossword                    controllers.Application.createCrossword
 #GET        /createCrossword/:subject/:number  controllers.Application.createCrossword(subject: String, number: String)
 
@@ -15,10 +15,11 @@ GET        /solver                       controllers.Application.solver
 
 
 # Javascript routing
-GET        /javascriptRoutes              controllers.Search.javascriptRoutes
+GET        /javascriptRoutes                                controllers.Search.javascriptRoutes
 GET        /searchAssociateMatching/:words/:matching        controllers.Search.searchAssociateMatching(words: String, matching: String)
-GET        /searchAssociate/:searchText        controllers.Search.searchAssociate(searchText: String)
-GET        /searchMatching/:searchText        controllers.Search.searchMatching(searchText: String)
+GET        /searchAssociate/:searchText                     controllers.Search.searchAssociate(searchText: String)
+GET        /searchMatching/:searchText                      controllers.Search.searchMatching(searchText: String)
+GET        /searchSolver/:crosswordEntry                    controllers.Search.searchSolver(crosswordEntry: String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file                  controllers.Assets.at(path="/public", file)
+GET        /assets/*file                                    controllers.Assets.at(path="/public", file)

@@ -239,12 +239,42 @@ object Search extends Controller {
     Ok(searching(searchText))
   }
 
+  def searchSolver(crosswordEntry: String) = Action {
+
+    val positionWordClue = crosswordEntry.split(";").map(w => {
+      val l = w.split("-")
+      (l(0), l(1), l(2))
+    }).flatMap(t => {
+      var result = List((t._1, ""))
+      val stems = Stem.clean(t._3)
+      val wordsWeight = getWordsFromDB(stems)
+
+      val matchClean = t._2.toUpperCase().replaceAll( """[^A-Z\*\?]""", "").replaceAll( """\*""", """.*""").replaceAll( """\?""", """.""")
+
+      val filteredWordsWeight = wordsWeight.map(k => (k._1.toUpperCase(), k._2)).filter(_._1.matches(matchClean)).take(numberOfResults)
+
+      if (!filteredWordsWeight.isEmpty) {
+        result = filteredWordsWeight.map(w => (t._1, w._1))
+      }
+
+      result
+    })
+
+    var result = ""
+    if (!positionWordClue.isEmpty) {
+      result = positionWordClue.map(t => t._1 + "-" + t._2).reduce(_ + ";" + _)
+    }
+
+    Ok(result)
+  }
+
   /**
    * Enable to use ajax
    * @return an action
    */
   def javascriptRoutes = Action { implicit request =>
-    Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchMatching, routes.javascript.Search.searchAssociate, routes.javascript.Search.searchAssociateMatching)).as("text/javascript")
+    Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchMatching, routes.javascript.Search.searchAssociate, routes.javascript.Search.searchAssociateMatching,
+      routes.javascript.Search.searchSolver)).as("text/javascript")
   }
 
 }
