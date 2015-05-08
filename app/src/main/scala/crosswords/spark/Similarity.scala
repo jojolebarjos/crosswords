@@ -36,16 +36,21 @@ object Similarity {
 
     val cleanData = loadCleaned("../data/cleaned", context)
     val weightedData = weightCategories(cleanData)
-    val edges = buildEdges(weightedData).cache()
-    val dict = createDictionary(edges)
+    val edges = buildEdges(weightedData)
+    val dict = createDictionary(edges).cache()
     val indexed = toIndex(edges, dict)
-    val result = combine(indexed)
+    val result = combine(indexed).cache()
 
-    val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3).coalesce(CLEANED_PARTITIONS_COUNT)
+    for (line <- Source.stdin.getLines()) {
+      val top = search(result, Stem.clean(line), dict)
+      top.foreach(println)
+    }
+
+    /*val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3).coalesce(CLEANED_PARTITIONS_COUNT)
     csvResult.saveAsTextFile("../data/matrix/adjacency", classOf[BZip2Codec])
 
     val csvDict = dict.map(t => t._1 + "," + t._2).coalesce(CLEANED_PARTITIONS_COUNT)
-    csvDict.saveAsTextFile("../data/matrix/index2word", classOf[BZip2Codec])
+    csvDict.saveAsTextFile("../data/matrix/index2word", classOf[BZip2Codec])*/
 
     context.stop()
   }
@@ -118,6 +123,15 @@ object Similarity {
     Seq(clues, defs, examples, equiv, asso)
   }
 
+  def loadStem2Unstem(inputDirectory: String, context: SparkContext): RDD[(String, String)] = {
+    def parseCSV(s: String): (String, String) = {
+      val sep = s.indexOf(",")
+      (s.take(sep), s.drop(sep + 1))
+    }
+
+    context.textFile(inputDirectory + File.separator + "stem2unstem/part-*").map(parseCSV)
+  }
+
   /**
    * Weight each category and group all the collections together.
    * @param l A sequence of RDD containing the cleaned data from the clues, definitions, examples, equivalents and associated
@@ -172,9 +186,19 @@ object Similarity {
     val combined = edges.reduceByKey((c1, c2) => c1 + c2)
     // Group by row, then normalize each line by dividing by its maximum value
     val rowIndexed = combined.map(t => (t._1._1, (t._1._2, t._2))).groupByKey()
-    rowIndexed.flatMap { row =>
+    val normalized = rowIndexed.flatMap { row =>
       val maxValue = row._2.maxBy(t => t._2)._2
       row._2.map(t => (row._1, t._1, t._2 / maxValue))
     }
+
+    normalized.filter(_._3 >= ASSO_WEIGHT)
+  }
+
+  def search(edges: RDD[(Long, Long, Float)], query: Seq[String], dictionary: RDD[(Long, String)]): Seq[(String, Float)] = {
+    val word2Index = Dictionary.swap(dictionary).collectAsMap()
+    val index2Word = dictionary.collectAsMap()
+    val queryIndex = query.map(word2Index)
+    val test = edges.filter(t => queryIndex.contains(t._2)).map(t => (t._1, t._3)).reduceByKey((t1, t2) => t1 + t2)
+    test.sortBy(-_._2).take(10).map(t => (index2Word(t._1), t._2))
   }
 }
