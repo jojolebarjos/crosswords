@@ -49,39 +49,6 @@ class Crossword(val json: JsValue) {
     val across = locations.flatMap(l => words.find(w => w._4 == East && w._3 == l._1).map(w => (l._2, w._2)))
     val down = locations.flatMap(l => words.find(w => w._4 == South && w._3 == l._1).map(w => (l._2, w._2)))
     
-	val coordinatesDirection = {
-        var res: List[((Int, Int), String)] = List()
-
-        for (w <- words) {
-            for (i <- 0 until w._1.length) {
-                if (w._4.toString == "South") {
-                    if (i != w._1.length - 1) {
-                        res = ((w._3.x, w._3.y + i), "South") :: res
-                    } else {
-						res = ((w._3.x, w._3.y + i), "None") :: res
-					}
-                } else {
-                    if (i == w._1.length - 1) {
-                        res = ((w._3.x + i, w._3.y), "East") :: res
-                    } else {
-						res = ((w._3.x, w._3.y + i), "Nope") :: res
-					}
-                }
-            }
-        }
-
-        res.toMap
-    }
-
-    val firstCoordinatesDirection = {
-        var res: List[((Int, Int), String)] = List()
-
-        for (w <- words) {
-            res = ((w._3.x, w._3.y), w._4.toString) :: res
-        }
-
-        res.toMap
-    }
 }
 
 /**

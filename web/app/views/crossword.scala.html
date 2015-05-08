@@ -24,19 +24,46 @@
     			        
     			        case (c, 0) => {
     			            <td class="white">
-    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}" onkeypress="getNextCell(@{x}, @{y})">
+    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}" onkeypress="getNextCell@{x}@{y}()">
+								
+								<script>									
+									function getNextCell@{x}@{y}() {
+										var autoMoveNone = document.getElementById("None");
+										var autoMoveRight = document.getElementById("Right");
+										var autoMoveDown = document.getElementById("Down");
+										
+										if (autoMoveRight.checked && document.getElementById("c-@{(x+1) + "-" + y}")) {
+											document.getElementById("c-@{(x+1) + "-" + y}").select();
+										} else if (autoMoveDown.checked && document.getElementById("c-@{x + "-" + (y+1)}")) {
+											document.getElementById("c-@{x + "-" + (y+1)}").select();
+										}
+									}
+								</script>
     			            </td>
     			        }
     			        
     			        case (c, i) => {
     			            <td class="white">
     			                <span class="number">@i</span>
-    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}" onkeypress="getNextCell(@{x}, @{y})">
+    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}" onkeypress="getNextCell@{x}@{y}()">
+								
+								<script>									
+									function getNextCell@{x}@{y}() {
+										var autoMoveNone = document.getElementById("None");
+										var autoMoveRight = document.getElementById("Right");
+										var autoMoveDown = document.getElementById("Down");
+										
+										if (autoMoveRight.checked && document.getElementById("c-@{(x+1) + "-" + y}")) {
+											document.getElementById("c-@{(x+1) + "-" + y}").select();
+										} else if (autoMoveDown.checked && document.getElementById("c-@{x + "-" + (y+1)}")) {
+											document.getElementById("c-@{x + "-" + (y+1)}").select();
+										}
+									}
+								</script>
     			            </td>
     			        }
     			        
     			    }
-    			    
     			}
     			</tr>
 		    }
@@ -54,6 +81,12 @@
 }
 
 @main("Crosswords")("Crosswords"){
+	<h3>Options: </h3>
+	<b>Automovement : </b>
+	<input type="radio" name="group1" value="None" id="None"> None
+	<input type="radio" name="group1" value="Right" id="Right" checked> Right
+	<input type="radio" name="group1" value="Down" id="Down"> Down
+	
     @grid()
     @list("Across", crossword.across)
     @list("Down", crossword.down)
@@ -61,24 +94,6 @@
 	<button type="button" onclick="correctCrossword()">Correct!</button>
 	
 	<script>
-	
-		var direction = "None";
-		
-		@for(word <- crossword.words) {
-			@for(i <- 0 until word._1.length) {
-				@if(word._4.toString == "South") {
-					document.getElementById("c-" + @{word._3.x + "-" + (word._3.y + i)}).setAttribute("direction", "South");
-				}
-				@if(word._4.toString == "East") {
-					document.getElementById("c-" + @{word._3.x + "-" + (word._3.y + i)}).setAttribute("direction", "East");
-				}
-			}
-		}
-		
-		function getNextCell(x, y) {
-		
-		}
-		
 		function correctCrossword() {
 		
 			var correct = true;
