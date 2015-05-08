@@ -8,6 +8,7 @@
 <html>
     <head>
         <title>@title</title>
+		<meta charset="UTF-8" />
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/style.css")" />
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.ico")">
@@ -29,11 +30,12 @@
             <div class="link"><a href="/">Home</a></div>
             <div class="link"><a href="crossword">Crosswords</a></div>
             <div class="link"><a href="search">Search</a></div>
+			<div class="link"><a href="solver">Solver</a></div>
             <div class="link"><a href="contact">Contact</a></div>
         </div>
         <div class="contentTitle"><h1>@contentTitle</h1></div>
         <div class="contentText">
-            <div>@content</div>
+            <div id="contentDiv">@content</div>
             <p>&nbsp;</p>
         </div>
     </div>

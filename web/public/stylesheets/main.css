@@ -35,6 +35,7 @@
 	width: 32pt;
 	height: 32pt;
 	background-color: #111111;
+	border: solid 1px #EEEEEE;
 	border-left: #111111 solid 1px;
 	border-top: #111111 solid 1px;
 }
@@ -62,6 +63,16 @@
 
 .clues {
     list-style: none;
+}
+
+.highlighted {
+	background-color: #FFFF00;
+}
+
+.deletion {
+	width: 20pt;
+	height: 20pt;
+	background-color: red;
 }
 
 input#searchText {

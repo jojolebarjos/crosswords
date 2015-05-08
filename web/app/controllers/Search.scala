@@ -210,7 +210,7 @@ object Search extends Controller {
 	
 	val filteredWordsWeight = wordsWeight.map(t => (t._1.toUpperCase(), t._2)).filter(_._1.matches(matchClean)).take(numberOfResults)
 
-    if (wordsWeight.isEmpty) {
+    if (filteredWordsWeight.isEmpty) {
       result = "No associate words found"
     } else {
       result = "Similar results with " + words + " and matched " + matching + ": <br><ul>" + filteredWordsWeight.map(w => "<li>" + w._1 + " with a weight of " + w._2 +

@@ -96,4 +96,12 @@ object Application extends Controller {
   def contact = Action {
     Ok(views.html.contact())
   }
+  
+  /**
+   * Serves the solver page
+   * @return the contact page
+   */
+  def solver = Action {
+    Ok(views.html.solver())
+  }
 }

@@ -1,0 +1,571 @@
+@()
+
+@main("Crosswords")("Crossword Solver") {
+
+	<h2>Complete the grid ans ask for solutions.</h2>
+	<p>
+	To define new words you can click and drag the grid you have to follow the following rules:<br>
+	&nbsp&nbsp&nbsp A word cannot overlap another word in the same direction.<br>
+	&nbsp&nbsp&nbsp A word has to be surrounded by black squares according to its direction(doesn't apply to the end of the table).<br>
+	You can add letter in white squares that you already know, otherwise just keep blank (space or nothing).<br>
+	You can also informe the word's clue in the box below the grid.</p>
+	<h3>Options: </h3>
+	<b>Automovement : </b>
+	<input type="radio" name="group1" value="None" id="None"> None
+	<input type="radio" name="group1" value="Right" id="Right" checked> Right
+	<input type="radio" name="group1" value="Down" id="Down"> Down
+
+	<script>
+
+	//Interpréter le résultat, proposer une solution
+
+	/* Some issues:
+		-Id won't be updated while there's a deletion
+		-Don't enforce a word every time there is 2 squares next to each other.
+	*/
+
+	//Move the focus automatically when completing a square.
+	autoMoveNone = document.getElementById("None");
+	autoMoveRight = document.getElementById("Right");
+	autoMoveDown = document.getElementById("Down");
+
+	//Size of the crossword drew
+	var size = 12;
+
+	//Create the HTML table
+	tableCreate();
+	defCreate();
+
+	//A simple counter for linking word to definition.
+	var id = 1;
+
+	//Starting and ending point "global" variables
+	var startingPoint = new Coordinate (0,0);
+	var endingPoint = new Coordinate (0,0);
+
+	//Maps
+	var acrossMap = new Map();
+	var downMap = new Map();
+
+	//Sets (Every square which is a part of a word in the given direction)
+	var acrossSet = new Set();
+	var downSet = new Set();
+
+	//Object to describe a coordinate
+	function Coordinate(x, y) {
+		this.x = x;
+		this.y = y;
+	} 
+
+	Coordinate.prototype.toString = function coordinateToString() {
+		var ret = '(' + this.x + "," + this.y + ')'
+		return ret
+	}
+
+
+	//Object to describe a word
+	function Word(startingPoint, endingPoint) {
+	  this.startingPoint = new Coordinate(startingPoint.x,startingPoint.y);
+	  this.endingPoint= new Coordinate(endingPoint.x,endingPoint.y);
+	  
+	  this.length = wordLength;
+	}
+
+	function wordLength(){
+		if(this.startingPoint.x != this.endingPoint.x){
+			console.log("Length = " + ((this.endingPoint.x - this.startingPoint.x) + 1));
+		}
+		else{
+			console.log("Length = " + ((this.endingPoint.y - this.startingPoint.y) + 1));
+		}
+	}
+
+
+	//The table
+	var tab = document.getElementById("table");
+
+	//The definitions
+	var ulAcross = document.getElementsByTagName('ul')[0];
+	var ulDown = document.getElementsByTagName('ul')[1];
+
+	/*
+	var t = document.getElementById("table");
+		d = t.getElementsByTagName("tr")[0];
+		r = d.getElementsByTagName("td")[0];
+		ipt = r.getElementsByTagName("input")[0];
+		
+		if(!ipt){
+			console.log('?');
+		}
+		else if(ipt.value == ' '){
+			console.log('?');
+		}
+		else{
+			console.log(ipt.value);
+		}
+
+	*/
+
+	//Obtaining cell from coordinate
+	function getCell(coordinate){
+		var row = tab.getElementsByTagName("tr")[coordinate.y];
+		return row.getElementsByTagName("td")[coordinate.x];
+	}
+
+	//LeftToRight : Apply the given function to each cell from the startingPoint from left to right
+	function leftToRight(word, apply){
+		var success = true
+		
+		//Ugly tweak to verify validity of a word placement (black square between word)
+		if(apply == checkingHorizontal){
+			if(word.startingPoint.x != 0){
+				if(getCell(new Coordinate(word.startingPoint.x - 1, word.startingPoint.y)).classList.contains("white")){
+					success = false;
+				}
+			}
+			if(word.endingPoint.x != size-1){
+				if(getCell(new Coordinate(word.endingPoint.x + 1, word.endingPoint.y)).classList.contains("white")){
+					success = false;
+				}
+			}	
+		}
+		
+		//Another ugly tweak
+		if(apply == transformingToBlackHorizontal){
+			var cellCoordinate = new Coordinate(word.startingPoint.x,word.startingPoint.y);
+			var cell = getCell(cellCoordinate);
+			var index = cell.getElementsByTagName('span')[0];
+			
+			if(index && !downMap.has(parseInt(index.innerHTML))){
+				cell.removeChild(cell.getElementsByTagName('span')[0]);
+			}
+		}
+		
+		for (i = -1; i < word.endingPoint.x-word.startingPoint.x; i++) { 
+				var cellCoordinate = new Coordinate(word.startingPoint.x + i + 1,word.startingPoint.y);
+				var cell = getCell(cellCoordinate);
+			
+				if(!apply(cell, cellCoordinate)){
+					success = false
+				}
+		}
+		
+		return success
+	}
+
+	//The same but from top to bottom
+	function topToBottom(word, apply){
+		var success = true
+		
+		//Ugly tweak to verify validity of a word placement (black square between word)
+		if(apply == checkingVertical){
+			if(word.startingPoint.y != 0){
+				if(getCell(new Coordinate(word.startingPoint.x, word.startingPoint.y - 1)).classList.contains("white")){
+					success = false;
+				}
+			}
+			if(word.endingPoint.y != size-1){
+				if(getCell(new Coordinate(word.endingPoint.x, word.endingPoint.y + 1)).classList.contains("white")){
+					success = false;
+				}
+			}	
+		}
+		
+		//Another ugly tweak
+		if(apply == transformingToBlackVertical){
+			var cellCoordinate = new Coordinate(word.startingPoint.x,word.startingPoint.y);
+			var cell = getCell(cellCoordinate);
+			var index = cell.getElementsByTagName('span')[0];
+			
+			if(index && !acrossMap.has(parseInt(index.innerHTML))){
+				cell.removeChild(cell.getElementsByTagName('span')[0]);
+			}
+		}
+		
+		
+		for (i = -1; i < word.endingPoint.y-word.startingPoint.y; i++) { 
+				var cellCoordinate = new Coordinate(word.startingPoint.x,word.startingPoint.y + i + 1);
+				var cell = getCell(cellCoordinate);
+				
+				if(!apply(cell, cellCoordinate)){
+					success = false
+				}
+		}
+
+		return success
+	}
+
+	//Given a cell from a vertical word, change it from white to black.
+	//Adding the cell to the downSet.
+	function transformingToWhiteVertical(cell, cellCoordinate){
+		blackToWhite(cell);
+		downSet.add(Coordinate.prototype.toString.call(cellCoordinate));
+		
+		return true;
+	}
+
+	//The same for horizontal word
+	function transformingToWhiteHorizontal(cell, cellCoordinate){
+		blackToWhite(cell);
+		acrossSet.add(Coordinate.prototype.toString.call(cellCoordinate));
+
+		return true;
+	}
+
+	//Used for deletion of a word without altering the other direction words
+	//Removing these squares to the corresponding set
+	function transformingToBlackVertical(cell, cellCoordinate){
+		if(!acrossSet.has(Coordinate.prototype.toString.call(cellCoordinate))){
+			whiteToBlack(cell);
+		}
+
+		downSet.delete(Coordinate.prototype.toString.call(cellCoordinate));
+		
+		return true;
+	}	
+
+	//The same for horizontal word
+	function transformingToBlackHorizontal(cell, cellCoordinate){
+		if(!downSet.has(Coordinate.prototype.toString.call(cellCoordinate))){
+			whiteToBlack(cell);
+		}
+		
+		acrossSet.delete(Coordinate.prototype.toString.call(cellCoordinate));
+		
+		return true;
+	}	
+
+	//Checking if there is an overlap of two vertical words.
+	function checkingVertical(cell, cellCoordinate){
+		result = true;
+		
+		//Overlapping
+		if(downSet.has(Coordinate.prototype.toString.call(cellCoordinate))){
+			result = false;
+		}
+		
+		if(!cell.classList.contains("white")){
+			//Neighbour of the other direction right
+			rightNeigbourCoordinate = new Coordinate(cellCoordinate.x+1, cellCoordinate.y);
+			if(acrossSet.has(Coordinate.prototype.toString.call(rightNeigbourCoordinate))){
+				result = false;
+			}
+		
+			//Neighbour of the other direction left
+			leftNeigbourCoordinate = new Coordinate(cellCoordinate.x-1, cellCoordinate.y);
+			if(acrossSet.has(Coordinate.prototype.toString.call(leftNeigbourCoordinate))){
+				result = false;
+			}
+		}
+		
+		return result;
+	}
+
+	//The same for horizontal words.
+	function checkingHorizontal(cell, cellCoordinate){
+		result = true;
+		
+		//Overlapping
+		if(acrossSet.has(Coordinate.prototype.toString.call(cellCoordinate))){
+			result = false;
+		}
+		
+		if(!cell.classList.contains("white")){
+			//Neighbour of the other direction above
+			aboveNeigbourCoordinate = new Coordinate(cellCoordinate.x, cellCoordinate.y-1);
+			if(downSet.has(Coordinate.prototype.toString.call(aboveNeigbourCoordinate))){
+				result = false;
+			}
+		
+			//Neighbour of the other direction below
+			belowNeigbourCoordinate = new Coordinate(cellCoordinate.x, cellCoordinate.y+1);
+			if(downSet.has(Coordinate.prototype.toString.call(belowNeigbourCoordinate))){
+				result = false;
+			}
+		}
+		
+		return result;
+	}
+
+	//Create the html table
+	function tableCreate(){
+		var body=document.getElementById('contentDiv');
+		var tbl=document.createElement('table');
+		tbl.style.width='600px';
+		tbl.style.height='600px';
+		tbl.setAttribute('border','1');
+		tbl.setAttribute('id','table');
+		tbl.setAttribute('class','grid');
+		var tbdy=document.createElement('tbody');
+		for(var i=0;i<size;i++){
+			var tr=document.createElement('tr');
+			for(var j=0;j<size;j++){
+				var td=document.createElement('td');
+				td.setAttribute('class', 'black');
+				//td.setAttribute('class', 'cell');
+				//td.classList.add("black");
+				//td.classList.add("black");
+				//td.setAttribute('class', 'black');
+				//td.classList.add("black");
+			
+				td.setAttribute('onmousedown', 'down(this)');
+				td.setAttribute('onmouseup', 'up(this)');
+
+				tr.appendChild(td);
+				}
+		tbdy.appendChild(tr);
+		}
+	tbl.appendChild(tbdy);
+	body.appendChild(tbl);
+	}
+
+	//Create the place for future definitions
+	function defCreate(){
+		var body=document.getElementById('contentDiv');
+		
+		var acrossTitle = document.createElement("h2");
+		acrossTitle.appendChild(document.createTextNode("Across"));
+		var ulA = document.createElement("ul");
+		ulA.setAttribute('class','clues');
+		acrossTitle.appendChild(ulA);
+		body.appendChild(acrossTitle);
+		
+		var downTitle = document.createElement("h2");
+		downTitle.appendChild(document.createTextNode("Down"));
+		var ulD = document.createElement("ul");
+		ulD.setAttribute('class','clues');
+		downTitle.appendChild(ulD);
+		body.appendChild(downTitle);
+	}
+
+	//Highlight the cell
+	function highlight(cell){
+		cell.classList.add('highlighted');
+	}
+
+	function backFromHighlight(cell){
+		cell.classList.remove('highlighted');
+	}
+
+	//Transform black square to blank square
+	function blackToWhite(cell) {
+			if (cell.classList.contains("black")) {
+				cell.setAttribute('class', 'white');
+				
+				var ipt = document.createElement("input");
+				ipt.setAttribute('oninput',"automove(this.parentNode)");
+				ipt.setAttribute('autocomplete', 'off');
+				ipt.setAttribute('maxlength', '1');
+				ipt.setAttribute('class', 'cell');
+				cell.appendChild(ipt);
+		   }
+	}
+
+	function whiteToBlack(cell){
+		if (cell.classList.contains("white")) {
+				cell.setAttribute('class', 'black');
+				if(cell.getElementsByTagName('span')[0]){
+					cell.removeChild(cell.getElementsByTagName('span')[0]);
+				}
+				cell.removeChild(cell.getElementsByTagName('input')[0]);
+		  }
+	}
+
+	//Add the id
+	function addingIndex(cell) {
+		var index = document.createElement("span");
+		index.setAttribute('class', 'number');
+		index.appendChild( document.createTextNode(id) );
+		cell.appendChild(index);
+	}
+
+	// Is executed when the mouse is pressed down to know the startingPoint in case of a click-and-drag
+	function down(cell) {
+		startingPoint.x = cell.cellIndex
+		startingPoint.y = cell.parentNode.rowIndex 
+		
+		//Avoiding issue mentioned at the start of the file
+		document.getSelection().removeAllRanges();
+		
+		console.log( "Mouse Down on : (" + startingPoint.x + ";" + startingPoint.y + ")");
+	}
+
+	// Is executed when the mouse is released to know the endingPoint in case of a click-and-drag
+	function up(cell) {
+		endingPoint.x = cell.cellIndex
+		endingPoint.y = cell.parentNode.rowIndex 
+			
+		console.log( "Mouse Up on : (" + endingPoint.x + ";" + endingPoint.y + ")");
+		
+		//Resolving action:
+		var word = new Word(startingPoint, endingPoint);
+		
+		//Vertical, Horizontal or Diagonal
+		if(word.startingPoint.x == word.endingPoint.x && word.startingPoint.y < word.endingPoint.y){
+			//Checking if the word has a valid position
+			if(topToBottom(word,checkingVertical)){
+				//Transforming every square composing that word from black to white
+				//Adding them to the related Set too
+				topToBottom(word,transformingToWhiteVertical)
+				
+				//Putting the id into the span of the startingPoint
+				var cell = getCell(new Coordinate(startingPoint.x,startingPoint.y));
+				var spans = cell.getElementsByTagName('span');		
+				
+				if(!spans[0]){
+					addingIndex(cell)
+					downMap.set(id, word)
+					addDef(id,ulDown)
+					id++
+				} else {
+					addDef(spans[0].innerHTML, ulDown)
+					downMap.set(parseInt(spans[0].innerHTML), word)
+				}
+				
+				getCell(new Coordinate(startingPoint.x, startingPoint.y)).getElementsByTagName("input")[0].select();
+				if(!autoMoveNone.checked){
+					autoMoveDown.checked = true;
+				}
+			}
+		}
+		else if (word.startingPoint.y == word.endingPoint.y  && word.startingPoint.x < word.endingPoint.x){
+		
+			if(leftToRight(word,checkingHorizontal)){
+				//Transforming every square composing that word from black to white
+				//Adding them to the related Set too
+				leftToRight(word,transformingToWhiteHorizontal)
+				
+				//Putting the id into the span of the startingPoint
+				var cell = getCell(new Coordinate(startingPoint.x,startingPoint.y));
+				var spans = cell.getElementsByTagName('span');
+				
+				if(!spans[0]){
+					addingIndex(cell)
+					acrossMap.set(id, word)
+					addDef(id, ulAcross)
+					id++
+				} else {
+					addDef(spans[0].innerHTML, ulAcross)
+					acrossMap.set(parseInt(spans[0].innerHTML), word)
+				}
+				getCell(new Coordinate(startingPoint.x, startingPoint.y)).getElementsByTagName("input")[0].select();
+				if(!autoMoveNone.checked){
+					autoMoveRight.checked = true;
+				}
+			}	
+		}
+		else{
+			console.log("Rule for describing a new word: A word is at least of length 2 and is either horizontal(left to right) or vertical(top to bottom) but cannot be diagonal");
+		}
+		/*
+		var t = document.getElementById("table");
+		d = t.getElementsByTagName("tr")[0];
+		r = d.getElementsByTagName("td")[0];
+		ipt = r.getElementsByTagName("input")[0];
+		
+		if(!ipt){
+			console.log('?');
+		}
+		else if(!ipt.value){
+			console.log('?');
+		}
+		else if(ipt.value == ' '){
+			console.log('?');
+		}
+		else{
+			console.log(ipt.value);
+		}
+		*/
+	}
+
+	//Add a li with an input into acrossUl
+	function addDef(idToAdd,ul){
+		li = document.createElement('li');
+		
+		if(ul == ulAcross){
+			li.setAttribute('id', "a" + idToAdd);
+		}else{
+			li.setAttribute('id', "d" + idToAdd);
+		}
+
+		deletionButton = document.createElement("button");
+		deletionButton.innerHTML = "<b>X</b>";
+		deletionButton.setAttribute('class','deletion');
+		deletionButton.setAttribute('associateId', idToAdd);
+
+		if(ul == ulAcross){
+			deletionButton.setAttribute('onClick','deleteId(this,acrossMap)');
+		}else{
+			deletionButton.setAttribute('onClick','deleteId(this,downMap)');
+		}
+		
+		li.appendChild(deletionButton); 
+		
+		textBold = document.createElement("b");
+		textBold.innerHTML = " " + idToAdd + " ";
+		
+		li.appendChild(textBold);
+		
+		ipt = document.createElement('input');
+		ipt.setAttribute('size', '60px');
+		
+		if(ul == ulAcross){
+			ipt.setAttribute('id', idToAdd);
+			ipt.setAttribute('onfocus','leftToRight(acrossMap.get(parseInt(this.getAttribute(\'id\'))),highlight)');
+			ipt.setAttribute('onblur','leftToRight(acrossMap.get(parseInt(this.getAttribute(\'id\'))),backFromHighlight)');
+		}else{
+			ipt.setAttribute('id', idToAdd);
+			ipt.setAttribute('onfocus','topToBottom(downMap.get(parseInt(this.getAttribute(\'id\'))),highlight)');
+			ipt.setAttribute('onblur','topToBottom(downMap.get(parseInt(this.getAttribute(\'id\'))),backFromHighlight)');
+		}
+
+		li.appendChild(ipt);
+		
+		ul.appendChild(li);
+	}
+
+	function test(){
+		console.log('test');
+	}
+
+	function helper(ipt){
+		leftToRight(acrossMap.get(parseInt(ipt.getAttribute('id'))),highlight);
+	}
+
+	function automove(fromCell){
+		nextCoordinate = new Coordinate(fromCell.cellIndex,fromCell.parentNode.rowIndex );
+		
+		if(autoMoveRight.checked && fromCell.cellIndex != size-1){
+			nextCoordinate.x++
+		}else if(autoMoveDown.checked && fromCell.parentNode.rowIndex != size-1){
+			nextCoordinate.y++
+		}
+		
+		nextCell = getCell(nextCoordinate);
+		
+		if(nextCell.classList.contains("white")){
+			getCell(nextCoordinate).getElementsByTagName("input")[0].select();
+		}
+	}
+
+	function deleteId(button,map){
+		var id = parseInt(button.getAttribute("associateId"));
+		
+		//transform to black every square not crossed by a word in another direction
+		// And deleting the definition
+		if(map == acrossMap){
+			leftToRight(map.get(id),transformingToBlackHorizontal);
+			ulAcross.removeChild(document.getElementById("a" + id));
+		}else{	
+			topToBottom(map.get(id),transformingToBlackVertical);
+			ulDown.removeChild(document.getElementById("d" + id));
+		}
+		
+		//deleting the entry in the corresponding map
+		//map.delete(id);
+	}
+		
+	</script>
+
+}
+

@@ -4,7 +4,8 @@
     TODO
     - auto move to next cell when typing
     - move using arrows
-    - solve letter/word/puzzle buttons
+    - solve letter/word/puzzle buttons: DONE
+	- Add js to input.select() new input
     ...
 *@
 
@@ -23,14 +24,14 @@
     			        
     			        case (c, 0) => {
     			            <td class="white">
-    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}">
+    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}" onkeypress="getNextCell(@{x}, @{y})">
     			            </td>
     			        }
     			        
     			        case (c, i) => {
     			            <td class="white">
     			                <span class="number">@i</span>
-    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}">
+    			                <input class="cell" autocomplete="off" maxlength="1" solution="@c" id="c-@{x + "-" + y}" onkeypress="getNextCell(@{x}, @{y})">
     			            </td>
     			        }
     			        
@@ -60,6 +61,24 @@
 	<button type="button" onclick="correctCrossword()">Correct!</button>
 	
 	<script>
+	
+		var direction = "None";
+		
+		@for(word <- crossword.words) {
+			@for(i <- 0 until word._1.length) {
+				@if(word._4.toString == "South") {
+					document.getElementById("c-" + @{word._3.x + "-" + (word._3.y + i)}).setAttribute("direction", "South");
+				}
+				@if(word._4.toString == "East") {
+					document.getElementById("c-" + @{word._3.x + "-" + (word._3.y + i)}).setAttribute("direction", "East");
+				}
+			}
+		}
+		
+		function getNextCell(x, y) {
+		
+		}
+		
 		function correctCrossword() {
 		
 			var correct = true;
@@ -81,5 +100,7 @@
 				alert("You finished the crossword. Congratulations")
 			}
 		}
+		
+		
 	</script>
 }
