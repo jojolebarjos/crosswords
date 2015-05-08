@@ -2,7 +2,7 @@
 -- Dictionary
 create table Words (
 	wid int not null,
-	word varchar(50) not null,
+	word varchar(200) not null,
 	primary key (wid),
 	unique index (word)
 );
@@ -12,6 +12,8 @@ create table Neighbors (
 	widfrom int not null,
 	widto int not null,
 	weight float not null,
+	index (widfrom),
+	index (widto),
 	primary key (widfrom, widto),
 	foreign key (widfrom)
 		references Words(wid)

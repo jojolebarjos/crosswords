@@ -3,6 +3,10 @@ package controllers
 import scala.collection.mutable
 import play.api.libs.json.{Json, JsValue, JsArray}
 
+/**
+ * Represents a crossword
+ * @param json a json representation of a crossword
+ */
 class Crossword(val json: JsValue) {
     
     val title = (json \ "title").asOpt[String]
@@ -47,6 +51,9 @@ class Crossword(val json: JsValue) {
     
 }
 
+/**
+ * Represents a crossword
+ */
 object Crossword {
     
     def clean(word: String) =

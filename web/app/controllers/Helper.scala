@@ -2,6 +2,9 @@ package controllers
 
 sealed trait Direction
 
+/**
+ * Represent the direction
+ */
 object Direction {
 
   def apply(name: String): Direction = name.toLowerCase.trim match {
@@ -14,15 +17,30 @@ object Direction {
 
 }
 
+/**
+ * Represent the north
+ */
 case object North extends Direction
 
+/**
+ * Represent the east
+ */
 case object East extends Direction
 
+/**
+ * Represent the south
+ */
 case object South extends Direction
 
+/**
+ * Represent the west
+ */
 case object West extends Direction
 
 
+/**
+ * Represent a vector
+ */
 case class Vec(x: Int, y: Int) {
 
   def unary_- = Vec(-x, -y)
@@ -34,6 +52,9 @@ case class Vec(x: Int, y: Int) {
   
 }
 
+/**
+ * Represent a vector
+ */
 object Vec {
 
   val zero = Vec(0, 0)

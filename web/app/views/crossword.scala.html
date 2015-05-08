@@ -56,4 +56,30 @@
     @grid()
     @list("Across", crossword.across)
     @list("Down", crossword.down)
+	
+	<button type="button" onclick="correctCrossword()">Correct!</button>
+	
+	<script>
+		function correctCrossword() {
+		
+			var correct = true;
+			for (i = 0; i < @crossword.height; i++) { 
+				for (j = 0; j < @crossword.width; j++) { 
+					var input = document.getElementById("c-" + i + "-" + j);
+					if (input) {
+						if (input.value != input.getAttribute('solution')) {
+							input.parentNode.className = "red";
+							correct = false;
+						} else {
+							input.parentNode.className = "green";
+						}
+					}
+				}
+			}
+			
+			if (correct) {
+				alert("You finished the crossword. Congratulations")
+			}
+		}
+	</script>
 }
