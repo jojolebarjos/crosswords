@@ -84,7 +84,8 @@ object Stem {
   ///TODO : check for ligature. Ask if they have to be split. ex : Æ is considered a letter in its own right
   def normalize(word : String) : String ={
     Normalizer.normalize(removeEscapes(word), Normalizer.Form.NFKD)
-          .replaceAll("""[^\p{ASCII}]""", "").replaceAll("""[^\w]""", " ").replaceAll("""_""", "")
+          .replaceAll("""[^\p{ASCII}]""", "").replaceAll("""[^\w]""", " ").replaceAll("""[_\n\r]""", " ")
+          .replaceAll("""\s+""", " ").trim
   }
 
   def reduce(word : String) : String = {
@@ -100,6 +101,6 @@ object Stem {
    * Clean and simplify text.
    */
   def clean(sentence: String): Seq[String] = {
-    normalize(sentence).split("\\s+").map(reduce).filter(_ != "")
+    normalize(sentence).split("\\s").map(reduce)//.filter(_ != "")
   }
 }
