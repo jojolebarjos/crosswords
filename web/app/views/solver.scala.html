@@ -14,9 +14,28 @@
 	<input type="radio" name="group1" value="None" id="None"> None
 	<input type="radio" name="group1" value="Right" id="Right" checked> Right
 	<input type="radio" name="group1" value="Down" id="Down"> Down
+	<p><button type="button" onclick="send()">Ask for answers</button></p>
 
 	<script>
 
+	//AJAX
+	
+	var successFn = function(data) {
+        parseAnswer(data);
+
+		console.debug("Success of Ajax Call");
+		console.debug(data);
+    };
+    var errorFn = function(err) {
+    console.debug("Error of ajax Call");
+    console.debug(err);
+    }
+
+    ajax1 = {
+    success: successFn,
+    error: errorFn
+    }
+	
 	//Interpréter le résultat, proposer une solution
 
 	/* Some issues:
@@ -46,6 +65,7 @@
 	//Maps
 	var acrossMap = new Map();
 	var downMap = new Map();
+	var solutionMap = new Map();
 
 	//Sets (Every square which is a part of a word in the given direction)
 	var acrossSet = new Set();
@@ -562,10 +582,154 @@
 		}
 		
 		//deleting the entry in the corresponding map
-		//map.delete(id);
+		map.delete(id);
 	}
 		
-	</script>
+		
+	//Object representing a true word for communication with the scala interface.
+	function trueWord(id,word,definition){
+		this.id = id;
+		this.word = word;
+		this.definition = definition;
+		
+		this.stringify = stringifyWord;
+	}
 
+	//Transform a trueWord into the format : id-word-definition;
+	function stringifyWord(){
+		return this.id + "-" + this.word + "-" + this.definition + ";";
+	}
+
+	//Is called when the button ask for answers is called. 
+	//Make a big string containing all informations about the words and their definitions.
+	//Send them to the "solver" that will answer to propose solutions.
+	//Send the following format : id-word-definition;id-word-definition;
+	function send(){
+
+		var patternToReplace = /[^a-zA-Z?]/g ;
+		var stringToSend = "";
+		var arrayOfAllWords = [];
+		var stringToAdd = "";
+		
+		//console.log("AcrossMap:");
+		acrossMap.forEach(function (word, id){
+			//console.log(id);
+			//console.log(word);
+			
+			for (i = 0; i < (word.endingPoint.x-word.startingPoint.x)+1; i++) { 
+				var cellCoordinate = new Coordinate(word.startingPoint.x + i,word.startingPoint.y);
+				var cell = getCell(cellCoordinate);
+				
+				stringToAdd += cell.getElementsByTagName("input")[0].value;
+				
+				if(!cell.getElementsByTagName("input")[0].value){
+					stringToAdd += '?';
+				}
+			}
+			stringToAdd = stringToAdd.replace(patternToReplace,"?");
+				
+			//console.log(stringToAdd);
+			var tw = new trueWord("a" + id, stringToAdd, document.getElementById("a"+id).getElementsByTagName("input")[0].value);
+			//console.log(tw);
+			//console.log(tw.stringify());
+			arrayOfAllWords[arrayOfAllWords.length] = tw.stringify();
+			//console.log(arrayOfAllWords);
+			stringToAdd = "";
+				
+		});
+
+		//console.log("DownMap:");
+		downMap.forEach(function (word, id){
+			//console.log(id);
+			//console.log(word);
+			
+			for (i = 0; i < (word.endingPoint.y-word.startingPoint.y)+1; i++) { 
+				var cellCoordinate = new Coordinate(word.startingPoint.x,word.startingPoint.y + i);
+				var cell = getCell(cellCoordinate);
+				
+				stringToAdd += cell.getElementsByTagName("input")[0].value;
+				
+				if(!cell.getElementsByTagName("input")[0].value){
+					stringToAdd += '?';
+				}
+			}
+			stringToAdd = stringToAdd.replace(patternToReplace,"?");
+				
+			//console.log(stringToAdd);
+			var tw = new trueWord("d" + id, stringToAdd, document.getElementById("d"+id).getElementsByTagName("input")[0].value);
+			//console.log(tw);
+			//console.log(tw.stringify());
+			arrayOfAllWords[arrayOfAllWords.length] = tw.stringify();
+			//console.log(arrayOfAllWords);
+			stringToAdd = "";
+		
+		});
+		
+		//console.log(arrayOfAllWords);
+		
+		for	(index = 0; index < arrayOfAllWords.length; index++) {
+			stringToSend += arrayOfAllWords[index];
+		}
+		
+		console.log(stringToSend);
+		if (stringToSend.length != 0) {
+			jsRoutes.controllers.Search.searchSolver(stringToSend).ajax(ajax1);
+		}
+	}
+
+	//Parse an answer of the following format : id-word1,word2,word3,word4;id-word5;id-;
+	function parseAnswer(answer){
+	
+		document.getElementById("solverOutput").innerHTML = "<h2>Results:</h2><br>";
+		var isSomething = false;
+	
+		if (answer.length != 0) {
+			//id-word1,word2,word3,word4;id-word1;
+			var entryArray = answer.split(';');
+			
+			//console.log(entryArray);
+			
+			//associate id to possible solutions
+			solutionMap.clear();
+			
+			for	(index = 0; index < entryArray.length; index++) {
+				if(entryArray[index]){
+					temp = entryArray[index].split('-');
+					
+					console.log(temp);
+					
+					id = temp[0]
+					
+					if(temp[1]){
+						possibleWordsArray = temp[1].split(',');
+						isSomething = true;
+						document.getElementById("solverOutput").innerHTML += id + ": ";
+						for (i = 0; i < possibleWordsArray.length; i++) {
+							document.getElementById("solverOutput").innerHTML += "<a href=\"https://en.wiktionary.org/wiki/" + possibleWordsArray[i] + "\">" + possibleWordsArray[i] +"</a>  ";
+						}
+						
+						document.getElementById("solverOutput").innerHTML += "<br>";
+					} else {
+						possibleWordsArray = [];
+					}
+					
+					//console.log(id);
+					//console.log(possibleWordsArray);
+					
+					solutionMap.set(id, possibleWordsArray);
+				}
+
+			}
+			
+			//console.log(solutionMap);
+		}
+		
+		if (!isSomething) {
+			document.getElementById("solverOutput").innerHTML += "No results!";
+		}
+	}
+	</script>
+	
+	<div id="solverOutput"></div>
 }
 

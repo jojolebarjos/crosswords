@@ -243,22 +243,42 @@ object Search extends Controller {
 
     val positionWordClue = crosswordEntry.split(";").map(w => {
       val l = w.split("-")
-      (l(0), l(1), l(2))
-    }).flatMap(t => {
-      var result = List((t._1, ""))
-      val stems = Stem.clean(t._3)
-      val wordsWeight = getWordsFromDB(stems)
+	  if (l.size == 0) {
+		("", "", "")
+	  } else if (l.size == 2){
+		(l(0), l(1), "")
+	  } else {
+		(l(0), l(1), l(2))
+	  }
+    }).map(t => {
+	  var result = (t._1, "")
+	  if ((t._1 == "") && (t._2 == "") && (t._3 == "")) {
+		result = ("", "")
+	  } else {
+		  if (t._3 == "") {
+			val searchClean = t._2.toUpperCase().replaceAll( """[^A-Z\*\?]""", "").replaceAll( """\*""", """.*""").replaceAll( """\?""", """.""")
+			val listMatched = retrieveWordFromPattern(searchClean.replaceAll( """\.\*""", """%""").replaceAll( """\.""", """\_""")).map(_.toUpperCase()).filter(_.matches(searchClean))
 
-      val matchClean = t._2.toUpperCase().replaceAll( """[^A-Z\*\?]""", "").replaceAll( """\*""", """.*""").replaceAll( """\?""", """.""")
+			if (!listMatched.isEmpty) {
+			  result = (t._1, listMatched.take(numberOfResults).reduce(_ + "," + _))
+			}
+		  } else {
+			  val stems = Stem.clean(t._3)
+			  val wordsWeight = getWordsFromDB(stems)
 
-      val filteredWordsWeight = wordsWeight.map(k => (k._1.toUpperCase(), k._2)).filter(_._1.matches(matchClean)).take(numberOfResults)
+			  val matchClean = t._2.toUpperCase().replaceAll( """[^A-Z\*\?]""", "").replaceAll( """\*""", """.*""").replaceAll( """\?""", """.""")
 
-      if (!filteredWordsWeight.isEmpty) {
-        result = filteredWordsWeight.map(w => (t._1, w._1))
-      }
+			  val filteredWordsWeight = wordsWeight.map(_._1.toUpperCase()).filter(_.matches(matchClean)).take(numberOfResults)
+
+			  if (!filteredWordsWeight.isEmpty) {
+				result = (t._1, filteredWordsWeight.reduce(_ + "," + _))
+			  }
+		  }
+	  }
+      
 
       result
-    })
+    }).filter(_._2 != "")
 
     var result = ""
     if (!positionWordClue.isEmpty) {
