@@ -5,6 +5,7 @@ import java.io.File
 import crosswords.spark.JsonInputFormat._
 import org.apache.hadoop.io.compress.BZip2Codec
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsObject
 
@@ -152,8 +153,10 @@ object SimilarityNew {
     val norm2stemWeighted = norm2stem.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, EQUIV_WEIGHT))
     val stem2normWeighted = norm2stemWeighted.map(t => (t._2, t._1, t._3))
 
-    val stemWords2stemWordsWeighted = stemWords2stemWords.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, ASSO_WEIGHT))
-    val stemDefs2stemDefsWeighted = stemDefs2stemDefs.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, EXAMPLES_WEIGHT))
+    val stemWords2stemWordsWeighted = stemWords2stemWords.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map{e =>
+      if (e._1.equals(e._2)) (e._1, e._2, EQUIV_WEIGHT) else (e._1, e._2, ASSO_WEIGHT)}
+    val stemDefs2stemDefsWeighted = stemDefs2stemDefs.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map{e =>
+      if (e._1.equals(e._2)) (e._1, e._2, EQUIV_WEIGHT) else (e._1, e._2, EXAMPLES_WEIGHT)}
 
     val stemWords2exprWeighted = stemWords2expr.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, ASSO_WEIGHT))
     val expr2stemWordsWeighted = stemWords2exprWeighted.map(t => (t._2, t._1, t._3))
