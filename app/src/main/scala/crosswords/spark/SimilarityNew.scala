@@ -63,7 +63,7 @@ object SimilarityNew {
    * of the Stemmer.
    * Clean the crossword and wiktionary definitions and save the results in the specified directory.
    * The results are saved in csv-like format of the type:
-   * "<unstem word>\00<stem word comma separated>\00<unstem def>\00<stem def comma separated>"
+   * "<normalized word comma sep>;<stem word comma sep>;<normalized def comma sep>;<stem def comma sep>"
    * @param crosswordEntries A collection of crosswords
    * @param wikiEntries A collection of wiktionary articles
    * @param outputDirectory The path (with no ending file separator) where to write the results
@@ -205,7 +205,24 @@ object SimilarityNew {
    * @return A collection of edges with the similarity between the two words
    */
   def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
-    edges.reduceByKey((c1, c2) => Math.max(c1, c2)).map(t => (t._1._1, t._1._2, t._2))
+    val combined = edges.reduceByKey((c1, c2) => Math.max(c1, c2)).map(t => (t._1._1, t._1._2, t._2))
+    increaseConnectivity(combined)
+  }
+
+  def increaseConnectivity(edges: RDD[(Long, Long, Float)]): RDD[(Long, Long, Float)] = {
+    val from = edges.map(t => (t._1, (t._2, t._3)))
+    val to = edges.map(t => (t._2, (t._1, t._3)))
+
+    // Compute the edges between any word at distance 2
+    val newEdges = to.join(from).map{t =>
+      val src = t._2._1
+      val dest = t._2._2
+      (src._1, dest._1, src._2 * dest._2)
+    }
+
+    // Recompute the weight between the edges with the increased connections
+    val recombine = (edges ++ newEdges).map(t => ((t._1, t._2), t._3)).reduceByKey((w1, w2) => Math.max(w1, w2))
+    recombine.map(t => (t._1._1, t._1._2, t._2)).filter(_._3 >= EXAMPLES_WEIGHT)
   }
 
   def search(edges: RDD[(Long, Long, Float)], query: Seq[String], dictionary: RDD[(Long, String)]): Seq[(String, Float)] = {
