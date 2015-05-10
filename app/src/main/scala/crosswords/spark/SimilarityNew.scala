@@ -4,7 +4,7 @@ import java.io.File
 
 import crosswords.spark.JsonInputFormat._
 import org.apache.hadoop.io.compress.BZip2Codec
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsObject
@@ -28,14 +28,15 @@ object SimilarityNew {
   private val CLEANED_PARTITIONS_COUNT = 20
 
   def main(args: Array[String]) {
-    System.setProperty("hadoop.home.dir", "C:/winutils/")
-    val context = new SparkContext("local[8]", "shell")
+    //System.setProperty("hadoop.home.dir", "C:/winutils/")
+    val conf = new SparkConf().set("spark.yarn.maxAppAttempts", "1") // Failing faster is good
+    val context = new SparkContext()
 
     //val crosswords = context.jsObjectFile("../data/crosswords/*.bz2").map(_._2)
     //val words = context.jsObjectFile("../data/definitions/*.bz2").map(_._2)
     //clean(crosswords, words, "../data/cleaned")
 
-    val cleanData = loadCleaned("../data/cleaned", context)
+    val cleanData = loadCleaned("hdfs:///projects/crosswords/cleaned", context)
     val weightedData = buildWeightedEdges(cleanData)
     val dict = createDictionary(weightedData)
     val indexed = toIndex(weightedData, dict)
@@ -46,14 +47,11 @@ object SimilarityNew {
       top.foreach(println)
     }*/
 
-    val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3).coalesce(CLEANED_PARTITIONS_COUNT)
-    csvResult.saveAsTextFile("../data/matrix/adjacency", classOf[BZip2Codec])
+    val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3)//.coalesce(CLEANED_PARTITIONS_COUNT)
+    csvResult.saveAsTextFile("hdfs:///projects/crosswords/res/complex/adjacency", classOf[BZip2Codec])
 
-    val csvDict = dict.map(t => t._1 + "," + t._2).coalesce(CLEANED_PARTITIONS_COUNT)
-    csvDict.saveAsTextFile("../data/matrix/index2word", classOf[BZip2Codec])
-
-    val res = (result.count(), dict.count())
-    println(res)
+    val csvDict = dict.map(t => t._1 + "," + t._2)//.coalesce(CLEANED_PARTITIONS_COUNT)
+    csvDict.saveAsTextFile("hdfs:///projects/crosswords/res/complex/index2word", classOf[BZip2Codec])
 
     context.stop()
   }
@@ -205,8 +203,10 @@ object SimilarityNew {
    * @return A collection of edges with the similarity between the two words
    */
   def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
-    val combined = edges.reduceByKey((c1, c2) => Math.max(c1, c2)).map(t => (t._1._1, t._1._2, t._2))
-    increaseConnectivity(combined)
+    val combined = edges.reduceByKey((c1, c2) => Math.max(c1, c2)).map(t => (t._1._1, t._1._2, t._2)).cache()
+    val increased = increaseConnectivity(combined)
+    combined.unpersist()
+    increased
   }
 
   def increaseConnectivity(edges: RDD[(Long, Long, Float)]): RDD[(Long, Long, Float)] = {
