@@ -30,7 +30,7 @@ object SimilarityNew {
   def main(args: Array[String]) {
     //System.setProperty("hadoop.home.dir", "C:/winutils/")
     val conf = new SparkConf().set("spark.yarn.maxAppAttempts", "1") // Failing faster is good
-    val context = new SparkContext()
+    val context = new SparkContext(conf)
 
     //val crosswords = context.jsObjectFile("../data/crosswords/*.bz2").map(_._2)
     //val words = context.jsObjectFile("../data/definitions/*.bz2").map(_._2)
