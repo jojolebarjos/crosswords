@@ -13,7 +13,10 @@ libraryDependencies ++= Seq(
   ws
 )
 
-libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.18"
+
+//libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.18"
+
+libraryDependencies += "org.xerial" % "sqlite-jdbc" % "3.8.9.1"
 
 libraryDependencies += "edu.mit" % "jwi" % "2.2.3"
 
