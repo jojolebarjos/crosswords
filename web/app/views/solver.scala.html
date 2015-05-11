@@ -542,6 +542,12 @@
 		li.appendChild(ipt);
 		
 		ul.appendChild(li);
+		
+		if(ul == ulAcross){
+			li.innerHTML += "<div id=\"solutiona" + idToAdd + "\" ></div>";
+		}else{
+			li.innerHTML += "<div id=\"solutiond" + idToAdd + "\" ></div>";
+		}
 	}
 
 	function test(){
@@ -680,7 +686,6 @@
 	//Parse an answer of the following format : id-word1,word2,word3,word4;id-word5;id-;
 	function parseAnswer(answer){
 	
-		document.getElementById("solverOutput").innerHTML = "<h2>Results:</h2><br>";
 		var isSomething = false;
 	
 		if (answer.length != 0) {
@@ -703,12 +708,11 @@
 					if(temp[1]){
 						possibleWordsArray = temp[1].split(',');
 						isSomething = true;
-						document.getElementById("solverOutput").innerHTML += id + ": ";
+						document.getElementById("solution" + id).innerHTML = "<br>";
 						for (i = 0; i < possibleWordsArray.length; i++) {
-							document.getElementById("solverOutput").innerHTML += "<a href=\"https://en.wiktionary.org/wiki/" + possibleWordsArray[i] + "\">" + possibleWordsArray[i] +"</a>  ";
+							document.getElementById("solution" + id).innerHTML += "<a style=\"font-size: 15px\"; href=\"https://en.wiktionary.org/wiki/" + possibleWordsArray[i] + "\">" + possibleWordsArray[i] +"</a>  ;  ";
 						}
 						
-						document.getElementById("solverOutput").innerHTML += "<br>";
 					} else {
 						possibleWordsArray = [];
 					}
@@ -730,6 +734,5 @@
 	}
 	</script>
 	
-	<div id="solverOutput"></div>
 }
 
