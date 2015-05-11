@@ -1,5 +1,6 @@
 package controllers
 
+import java.io.{BufferedWriter, FileWriter, File}
 import java.sql.{ResultSet, DriverManager}
 
 import crosswords.util.Packer
@@ -133,7 +134,7 @@ object CrosswordBuilder {
    */
   def generateCrosswordsAndPushToTheDatabase(maxNumberCrosswords: Int) = {
     while (crosswordNumber <= maxNumberCrosswords) {
-      val wordsList = Search.getRandomWordsFromDB(10000).filter(t => (t._2.size >= 2) && (t._2.size <= 20))
+      val wordsList = Search.getRandomWordsFromDB(10000).filter(t => (t._2.size >= 2) && (t._2.size <= 17))
       val wordsWithDefinitions = wordsList.filter(w => if (allWordsDefinitions.contains(w._2)) {
         allWordsDefinitions(w._2) match {
           case Some(jsArray) =>
@@ -172,8 +173,13 @@ object CrosswordBuilder {
    * @param crossword the crossword
    * @param wordIndex the words indexes
    */
+  val output: File = new File("output.txt")
+  val outputStream = new BufferedWriter(new FileWriter(output))
+
   def insertCrosswordIntoDB(crossword: Crossword, wordIndex: Map[String, Int]) = {
-    val dbc = "jdbc:mysql://localhost:3306/testDatabase?user=root&password=Root2015"//"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+
+    /*
+    val dbc = "jdbc:sqlite:../db/cw"//"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
     var conn = DriverManager.getConnection(dbc)
     var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)
     // create the table
@@ -193,12 +199,31 @@ object CrosswordBuilder {
 
       prep.executeUpdate
     }
+
+    */
+
+    val i1 = "INSERT INTO crosswords (cwid,source,lang,title,url,author,cwdate,difficulty) " +
+      """VALUES ('""" + crosswordNumber + """','""" + crossword.source.get + """','eng','""" +
+      crossword.title.get + """','""" + crossword.url.get +
+      """','""" + crossword.author.get + """','2015/05/07',1);"""
+
+    outputStream.write(i1)
+
+    for (wordTuple <- crossword.words) {
+
+      var i2 = "INSERT INTO items (cwid,wid,xcoord,ycoord,clue,direction) " +
+        "VALUES (" + crosswordNumber + "," + wordIndex(wordTuple._1) + "," + wordTuple._3.x + "," + wordTuple._3.y +
+        """,'""" + wordTuple._2 + """','""" + wordTuple._4 + """');"""
+
+      outputStream.write(i2)
+    }
   }
 
 
   def main(args: Array[String]) {
     //generateCrossword(wordsTest, definitionsTest)
-    generateCrosswordsAndPushToTheDatabase(10000)
+    generateCrosswordsAndPushToTheDatabase(1000)
+    outputStream.close()
   }
 }
 

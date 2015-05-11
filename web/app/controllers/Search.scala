@@ -134,29 +134,30 @@ object Search extends Controller {
    */
   def getRandomWordsFromDB(numberWords: Int): List[(Int, String)] = {
 
-    val dbc = "jdbc:mysql://localhost:3306/testDatabase?user=root&password=Root2015" //"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+    val dbc = "jdbc:sqlite:../db/cw" //"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
     var conn = DriverManager.getConnection(dbc)
-    var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-    var resultWords: List[(Int, String)] = List()
+      var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+      var resultWords: List[(Int, String)] = List()
 
-    try {
-      // select the tuples (7,14) and (8,16)
-      val rs = statement.executeQuery( """SELECT * FROM words order by RAND() LIMIT """ + numberWords)
+      try {
+        // select the tuples (7,14) and (8,16)
+        val rs = statement.executeQuery( """SELECT * FROM words order by RANDOM() LIMIT """ + numberWords)
 
-      // Iterate Over ResultSet
-      while (rs.next) {
-        val word = rs.getString("word")
-        val wid = rs.getInt("wid")
+        // Iterate Over ResultSet
+        while (rs.next) {
+          val word = rs.getString("word")
+          val wid = rs.getInt("wid")
 
-        if (word.matches("^[a-zA-Z]*$") && (word.length > 0)) {
-          resultWords = (wid, word) :: resultWords
+          if (word.matches("^[a-zA-Z]*$") && (word.length > 0)) {
+            resultWords = (wid, word) :: resultWords
+          }
         }
       }
-    }
-    finally {
-      conn.close
-    }
-    resultWords
+      finally {
+        conn.close
+      }
+      resultWords
+
   }
 
 
@@ -197,8 +198,8 @@ object Search extends Controller {
 
   /**
    * Used with ajax if we want to print all similarities with a pattern
-   * @param searchText the word for similarity test
-   * @param word the word for matching test
+   * @param words the word for similarity test
+   * @param matching the word for matching test
    * @return an action
    */
   def searchAssociateMatching(words: String, matching: String) = Action {

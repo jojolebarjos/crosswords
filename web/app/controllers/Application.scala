@@ -30,7 +30,7 @@ object Application extends Controller {
   def getRandomCrossword(): Crossword = {
     val crossword = DB.withConnection { connection =>
       val statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-      val result = statement.executeQuery("""SELECT * FROM crosswords c ORDER BY RAND() LIMIT 1""")
+      val result = statement.executeQuery("""SELECT * FROM crosswords c ORDER BY RANDOM() LIMIT 1""")
 
       var generalFormat = """{ """
 
@@ -42,7 +42,7 @@ object Application extends Controller {
         val language = result.getString("lang")
         val title = result.getString("title")
         val url = result.getString("url")
-        val date = result.getDate("cwdate")
+        val date = """'2015/05/07'"""//result.getDate("cwdate")
 
         generalFormat += """"source" : """" + source + """", "language" : """" + language + """", "title" : """" +
           title + """", "url" : """" + url + """", "date" : """" + date + """", """
