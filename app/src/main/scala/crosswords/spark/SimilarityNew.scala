@@ -26,6 +26,8 @@ object SimilarityNew {
 
   private val CLEANED_PARTITIONS_COUNT = 20
 
+  private val DISTANCE_DAMPING = 0.5f
+
   def main(args: Array[String]) {
     //System.setProperty("hadoop.home.dir", "C:/winutils/")
     val context = new SparkContext("local[8]", "shell")
@@ -40,12 +42,12 @@ object SimilarityNew {
     val indexed = toIndex(weightedData, dict)
     val result = combine(indexed)*/
 
-    val result = context.textFile("../data/matrix/adjacency/part-*").map{s =>
+    val result = context.textFile("../data/matrixNew/adjacency/part-*").map{s =>
       val args = s.split(",")
       (args(0).toLong, args(1).toLong, args(2).toFloat)
     }
 
-    val dict = context.textFile("../data/matrix/index2word/part-*").map{s =>
+    val dict = context.textFile("../data/matrixNew/index2word/part-*").map{s =>
       val args = s.split(",")
       (args(0).toLong, args(1))
     }
@@ -247,15 +249,16 @@ object SimilarityNew {
     val dist1Nodes = dist1.map(t => (t._1, (t._2, t._3))).collectAsMap()
 
     // Set of nodes at distance 2 of a node of the query (represented as node, querynode, path)
+    // We damp the weights coming from distance 2 because these are less reliable
     val dist2 = edges.flatMap { t => dist1Nodes.get(t._2) match {
-        case Some(node) => if (t._3 >= 0.999f || node._2 >= 0.999f) List(((t._1, node._1), t._3 * node._2)) else Nil
+        case Some(node) => if (node._2 >= 0.999f) List(((t._1, node._1), t._3 * DISTANCE_DAMPING)) else Nil
         case _ => Nil
       }
     }
     // Regroup if there are many paths between the two nodes
-    val dist2Unique = dist2.reduceByKey((path1, path2) => Math.max(path1, path2))
+    val uniquePaths = (dist1.map(t => ((t._1, t._2), t._3)) ++ dist2).reduceByKey((path1, path2) => Math.max(path1, path2))
 
-    val test = (dist1.map(t => (t._1, t._3)) ++ dist2Unique.map(t => (t._1._1, t._2))).reduceByKey((weight1, weight2) => weight1 + weight2)
+    val test = uniquePaths.map(t => (t._1._1, t._2)).reduceByKey((weight1, weight2) => weight1 + weight2)
     test.sortBy(-_._2).take(10).map(t => (index2Word(t._1), t._2))
   }
 }
