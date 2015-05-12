@@ -159,10 +159,8 @@ object SimilarityNew {
     val norm2stemWeighted = norm2stem.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, EQUIV_WEIGHT))
     val stem2normWeighted = norm2stemWeighted.map(t => (t._2, t._1, t._3))
 
-    val stemWords2stemWordsWeighted = stemWords2stemWords.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map{e =>
-      if (e._1.equals(e._2)) (e._1, e._2, EQUIV_WEIGHT) else (e._1, e._2, ASSO_WEIGHT)}
-    val stemDefs2stemDefsWeighted = stemDefs2stemDefs.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map{e =>
-      if (e._1.equals(e._2)) (e._1, e._2, EQUIV_WEIGHT) else (e._1, e._2, EXAMPLES_WEIGHT)}
+    val stemWords2stemWordsWeighted = stemWords2stemWords.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, ASSO_WEIGHT))
+    val stemDefs2stemDefsWeighted = stemDefs2stemDefs.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, EXAMPLES_WEIGHT))
 
     val stemWords2exprWeighted = stemWords2expr.reduce((rdd1, rdd2) => rdd1 ++ rdd2).map(e => (e._1, e._2, ASSO_WEIGHT))
     val expr2stemWordsWeighted = stemWords2exprWeighted.map(t => (t._2, t._1, t._3))
@@ -211,10 +209,8 @@ object SimilarityNew {
    * @return A collection of edges with the similarity between the two words
    */
   def combine(edges: RDD[((Long, Long), Float)]): RDD[(Long, Long, Float)] = {
-    val combined = edges.reduceByKey((c1, c2) => Math.max(c1, c2)).map(t => (t._1._1, t._1._2, t._2)).cache()
-    val increased = increaseConnectivity(combined)
-    combined.unpersist()
-    increased
+    val combined = edges.reduceByKey((c1, c2) => Math.max(c1, c2)).map(t => (t._1._1, t._1._2, t._2))
+    combined.filter(t => t._1 != t._2)
   }
 
   def increaseConnectivity(edges: RDD[(Long, Long, Float)]): RDD[(Long, Long, Float)] = {
