@@ -252,7 +252,7 @@ object SimilarityNew {
 
     // Set of nodes at distance 2 of a node of the query (represented as node, querynode, path)
     val dist2 = edges.flatMap { t => dist1Nodes.get(t._2) match {
-        case Some(node) => List(((t._1, node._1), t._3 * node._2))
+        case Some(node) => if (t._3 >= 0.999f || node._2 >= 0.999f) List(((t._1, node._1), t._3 * node._2)) else Nil
         case _ => Nil
       }
     }
