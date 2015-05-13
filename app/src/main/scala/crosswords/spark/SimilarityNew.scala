@@ -5,6 +5,7 @@ import java.io.File
 import crosswords.spark.JsonInputFormat._
 import org.apache.hadoop.io.compress.BZip2Codec
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsObject
 
@@ -30,19 +31,19 @@ object SimilarityNew {
 
   def main(args: Array[String]) {
     //System.setProperty("hadoop.home.dir", "C:/winutils/")
-    val context = new SparkContext("local[8]", "shell")
+    val context = new SparkContext()
 
     //val crosswords = context.jsObjectFile("../data/crosswords/*.bz2").map(_._2)
     //val words = context.jsObjectFile("../data/definitions/*.bz2").map(_._2)
     //clean(crosswords, words, "../data/cleaned")
 
-    /*val cleanData = loadCleaned("hdfs:///projects/crosswords/cleaned", context)
+    val cleanData = loadCleaned("hdfs:///user/lmvalett/cleaned", context)
     val weightedData = buildWeightedEdges(cleanData)
     val dict = createDictionary(weightedData)
     val indexed = toIndex(weightedData, dict)
-    val result = combine(indexed)*/
+    val result = combine(indexed)
 
-    val result = context.textFile("../data/matrixNew/adjacency/part-*").map{s =>
+    /*val result = context.textFile("../data/matrixNew/adjacency/part-*").map{s =>
       val args = s.split(",")
       (args(0).toLong, args(1).toLong, args(2).toFloat)
     }
@@ -50,12 +51,24 @@ object SimilarityNew {
     val dict = context.textFile("../data/matrixNew/index2word/part-*").map{s =>
       val args = s.split(",")
       (args(0).toLong, args(1))
-    }
+    }*/
 
-    for (line <- Source.stdin.getLines()) {
-      val top = searchDist2(result, Stem.normalize(line).split("\\s"), dict)
-      top.foreach(println)
+    def parseCSV(s: String): Seq[Seq[String]] = {
+      s.split(";").map(s => s.split(",").toSeq)
     }
+    val testData = context.textFile("hdfs:///user/lmvalett/part-00000.bz2").sample(false, 0.001).map(parseCSV).map(t => (t(0).head, t(2)))
+    val testCount = testData.count()
+
+    val hitsRdd = testData.map { t =>
+      val top5 = searchDist2(result, t._2, dict)
+      if (top5.contains(t._1)) {
+        1
+      } else {
+        0
+      }
+    }
+    val hits = hitsRdd.reduce((i1, i2) => i1 + i2)
+    context.parallelize(List(hits + ", " + testCount)).saveAsTextFile("hdfs:///user/lmvalett/out")
 
     /*val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3)//.coalesce(CLEANED_PARTITIONS_COUNT)
     csvResult.saveAsTextFile("hdfs:///projects/crosswords/res/complex/adjacency", classOf[BZip2Codec])
@@ -236,7 +249,7 @@ object SimilarityNew {
     val index2Word = dictionary.collectAsMap()
     val queryIndex = query.map(word2Index)
     val test = edges.filter(t => queryIndex.contains(t._2)).map(t => (t._1, t._3)).reduceByKey((t1, t2) => t1 + t2)
-    test.sortBy(-_._2).take(10).map(t => (index2Word(t._1), t._2))
+    test.sortBy(-_._2).take(5).map(t => (index2Word(t._1), t._2))
   }
 
   def searchDist2(edges: RDD[(Long, Long, Float)], query: Seq[String], dictionary: RDD[(Long, String)]): Seq[(String, Float)] = {
@@ -259,6 +272,6 @@ object SimilarityNew {
     val uniquePaths = (dist1.map(t => ((t._1, t._2), t._3)) ++ dist2).reduceByKey((path1, path2) => Math.max(path1, path2))
 
     val test = uniquePaths.map(t => (t._1._1, t._2)).reduceByKey((weight1, weight2) => weight1 + weight2)
-    test.sortBy(-_._2).take(10).map(t => (index2Word(t._1), t._2))
+    test.sortBy(-_._2).take(5).map(t => (index2Word(t._1), t._2))
   }
 }
