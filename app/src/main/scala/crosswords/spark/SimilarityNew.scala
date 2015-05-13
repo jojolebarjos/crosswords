@@ -5,6 +5,7 @@ import java.io.File
 import crosswords.spark.JsonInputFormat._
 import org.apache.hadoop.io.compress.BZip2Codec
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsObject
 
@@ -36,13 +37,13 @@ object SimilarityNew {
     //val words = context.jsObjectFile("../data/definitions/*.bz2").map(_._2)
     //clean(crosswords, words, "../data/cleaned")
 
-    /*val cleanData = loadCleaned("hdfs:///projects/crosswords/cleaned", context)
+    val cleanData = loadCleaned("hdfs:///user/lmvalett/cleaned", context)
     val weightedData = buildWeightedEdges(cleanData)
-    val dict = createDictionary(weightedData)
+    val dict = createDictionary(weightedData).cache()
     val indexed = toIndex(weightedData, dict)
-    val result = combine(indexed)*/
+    val result = combine(indexed)
 
-    val result = context.textFile("../data/matrixNew/adjacency/part-*").map{s =>
+    /*val result = context.textFile("../data/matrixNew/adjacency/part-*").map{s =>
       val args = s.split(",")
       (args(0).toLong, args(1).toLong, args(2).toFloat)
     }
@@ -50,12 +51,22 @@ object SimilarityNew {
     val dict = context.textFile("../data/matrixNew/index2word/part-*").map{s =>
       val args = s.split(",")
       (args(0).toLong, args(1))
-    }
+    }*/
 
-    for (line <- Source.stdin.getLines()) {
-      val top = searchDist2(result, Stem.normalize(line).split("\\s"), dict)
-      top.foreach(println)
+    def parseCSV(s: String): Seq[Seq[String]] = {
+      s.split(";").map(s => s.split(",").toSeq)
     }
+    val testData = context.textFile("hdfs:///user/lmvalett/part-00000.bz2").take(50).map(parseCSV).map(t => (t(0).head, t(2)))
+    val reverseDict = Dictionary.swap(dict).cache()
+
+    var hits = 0
+    testData.foreach { t =>
+      val top5 = searchDist2(result, t._2, dict, reverseDict)
+      if (top5.contains(t._1)) {
+        hits += 1
+      }
+    }
+    context.parallelize(List(hits)).saveAsTextFile("hdfs:///user/lmvalett/out")
 
     /*val csvResult = result.map(t => t._1 + "," + t._2 + "," + t._3)//.coalesce(CLEANED_PARTITIONS_COUNT)
     csvResult.saveAsTextFile("hdfs:///projects/crosswords/res/complex/adjacency", classOf[BZip2Codec])
@@ -231,34 +242,33 @@ object SimilarityNew {
     recombine.map(t => (t._1._1, t._1._2, t._2)).filter(_._3 >= EXAMPLES_WEIGHT)
   }
 
-  def searchDist1(edges: RDD[(Long, Long, Float)], query: Seq[String], dictionary: RDD[(Long, String)]): Seq[(String, Float)] = {
-    val word2Index = Dictionary.swap(dictionary).collectAsMap()
-    val index2Word = dictionary.collectAsMap()
-    val queryIndex = query.map(word2Index)
+  def searchDist1(edges: RDD[(Long, Long, Float)], query: Seq[String], dict: RDD[(Long, String)], reverseDict: RDD[(String, Long)]): Seq[(String, Float)] = {
+    val queryIndex = query.flatMap(reverseDict.lookup)
     val test = edges.filter(t => queryIndex.contains(t._2)).map(t => (t._1, t._3)).reduceByKey((t1, t2) => t1 + t2)
-    test.sortBy(-_._2).take(10).map(t => (index2Word(t._1), t._2))
+    test.sortBy(-_._2).take(5).map(t => (dict.lookup(t._1).head, t._2))
   }
 
-  def searchDist2(edges: RDD[(Long, Long, Float)], query: Seq[String], dictionary: RDD[(Long, String)]): Seq[(String, Float)] = {
-    val word2Index = Dictionary.swap(dictionary).collectAsMap()
-    val index2Word = dictionary.collectAsMap()
-    val queryIndex = query.map(word2Index)
+  def searchDist2(edges: RDD[(Long, Long, Float)], query: Seq[String], dict: RDD[(Long, String)], reverseDict: RDD[(String, Long)]): Seq[(String, Float)] = {
+    val queryIndex = query.flatMap(reverseDict.lookup)
 
     // Set of nodes at distance 1 of a node of the query
     val dist1 = edges.filter(t => queryIndex.contains(t._2))
-    val dist1Nodes = dist1.map(t => (t._1, (t._2, t._3))).collectAsMap()
+    val propagateSearch = dist1.filter(t => t._3 >= 0.999f).map(t => (t._1, (t._2, t._3))).collectAsMap()
 
     // Set of nodes at distance 2 of a node of the query (represented as node, querynode, path)
     // We damp the weights coming from distance 2 because these are less reliable
-    val dist2 = edges.flatMap { t => dist1Nodes.get(t._2) match {
-        case Some(node) => if (node._2 >= 0.999f) List(((t._1, node._1), t._3 * DISTANCE_DAMPING)) else Nil
-        case _ => Nil
+    val dist2 = edges.flatMap { t =>
+      val node = propagateSearch.get(t._2)
+      if (node.nonEmpty) {
+        List(((t._1, node.head._1), t._3 * DISTANCE_DAMPING))
+      } else {
+        Nil
       }
     }
     // Regroup if there are many paths between the two nodes
     val uniquePaths = (dist1.map(t => ((t._1, t._2), t._3)) ++ dist2).reduceByKey((path1, path2) => Math.max(path1, path2))
 
     val test = uniquePaths.map(t => (t._1._1, t._2)).reduceByKey((weight1, weight2) => weight1 + weight2)
-    test.sortBy(-_._2).take(10).map(t => (index2Word(t._1), t._2))
+    test.sortBy(-_._2).take(5).map(t => (dict.lookup(t._1).head, t._2))
   }
 }
