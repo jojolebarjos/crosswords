@@ -42,7 +42,7 @@ object Application extends Controller {
         val language = result.getString("lang")
         val title = result.getString("title")
         val url = result.getString("url")
-        val date = """'2015/05/07'"""//result.getDate("cwdate")
+        val date = """'2015/05/13'"""
 
         generalFormat += """"source" : """" + source + """", "language" : """" + language + """", "title" : """" +
           title + """", "url" : """" + url + """", "date" : """" + date + """", """

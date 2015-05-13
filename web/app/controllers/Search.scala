@@ -134,7 +134,7 @@ object Search extends Controller {
    */
   def getRandomWordsFromDB(numberWords: Int): List[(Int, String)] = {
 
-    val dbc = "jdbc:sqlite:../db/cw" //"jdbc:mysql://192.168.56.1:3306/testDatabase?user=root&password=vm" // observe that we specify the database name this time
+    val dbc = "jdbc:sqlite:../db/cw"
     var conn = DriverManager.getConnection(dbc)
       var statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
       var resultWords: List[(Int, String)] = List()
@@ -240,6 +240,11 @@ object Search extends Controller {
     Ok(searching(searchText))
   }
 
+  /**
+   * Used with ajax to return possible words that match the Solver page entry
+   * @param crosswordEntry the solve crossword entry
+   * @return an action with the possible matching
+   */
   def searchSolver(crosswordEntry: String) = Action {
 
     val positionWordClue = crosswordEntry.split(";").map(w => {
@@ -297,5 +302,4 @@ object Search extends Controller {
     Ok(Routes.javascriptRouter("jsRoutes")(routes.javascript.Search.searchMatching, routes.javascript.Search.searchAssociate, routes.javascript.Search.searchAssociateMatching,
       routes.javascript.Search.searchSolver)).as("text/javascript")
   }
-
 }

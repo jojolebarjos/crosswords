@@ -1,5 +1,4 @@
-
-package crosswords.util
+package controllers
 
 import java.io._
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}

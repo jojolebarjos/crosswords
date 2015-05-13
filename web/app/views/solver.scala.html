@@ -108,23 +108,6 @@
 	var ulAcross = document.getElementsByTagName('ul')[0];
 	var ulDown = document.getElementsByTagName('ul')[1];
 
-	/*
-	var t = document.getElementById("table");
-		d = t.getElementsByTagName("tr")[0];
-		r = d.getElementsByTagName("td")[0];
-		ipt = r.getElementsByTagName("input")[0];
-		
-		if(!ipt){
-			console.log('?');
-		}
-		else if(ipt.value == ' '){
-			console.log('?');
-		}
-		else{
-			console.log(ipt.value);
-		}
-
-	*/
 
 	//Obtaining cell from coordinate
 	function getCell(coordinate){
@@ -322,11 +305,6 @@
 			for(var j=0;j<size;j++){
 				var td=document.createElement('td');
 				td.setAttribute('class', 'black');
-				//td.setAttribute('class', 'cell');
-				//td.classList.add("black");
-				//td.classList.add("black");
-				//td.setAttribute('class', 'black');
-				//td.classList.add("black");
 			
 				td.setAttribute('onmousedown', 'down(this)');
 				td.setAttribute('onmouseup', 'up(this)');
@@ -477,25 +455,6 @@
 		else{
 			console.log("Rule for describing a new word: A word is at least of length 2 and is either horizontal(left to right) or vertical(top to bottom) but cannot be diagonal");
 		}
-		/*
-		var t = document.getElementById("table");
-		d = t.getElementsByTagName("tr")[0];
-		r = d.getElementsByTagName("td")[0];
-		ipt = r.getElementsByTagName("input")[0];
-		
-		if(!ipt){
-			console.log('?');
-		}
-		else if(!ipt.value){
-			console.log('?');
-		}
-		else if(ipt.value == ' '){
-			console.log('?');
-		}
-		else{
-			console.log(ipt.value);
-		}
-		*/
 	}
 
 	//Add a li with an input into acrossUl

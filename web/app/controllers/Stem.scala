@@ -26,10 +26,8 @@ object Stem {
   val dict = initWordNetDictionary
   val wordnetStemmer = new WordnetStemmer(dict)
 
-  //TODO: Complete it when bad cases are identified.
   private val bad_cases = List("AM", "IS", "AR", "A")
 
-  // TODO: Complete it when corner cases are identified.
   private val escapes = Map(
     """’""" -> """'""",
     "Æ" -> "AE",
@@ -59,9 +57,7 @@ object Stem {
   }
 
   private def initWordNetDictionary = {
-    val wordNetHome = System.getenv("WNHOME")
-    val path = wordNetHome + File.separator + "WordNet-3.0" + File.separator + "dict"
-    //val path = """/home/tux/Desktop/WordNet-3.0/WordNet-3.0/dict"""
+    val path = """..""" + File.separator + "WordNet-3.0" + File.separator + "dict"
     val url = new URL("file",null,path)
 
     val wordNetDictionary = new Dictionary(url)
@@ -80,7 +76,6 @@ object Stem {
     }
   }
 
-  ///TODO : check for ligature. Ask if they have to be split. ex : Æ is considered a letter in its own right
   def normalize(word : String) : String ={
     Normalizer.normalize(removeEscapes(word), Normalizer.Form.NFKD)
           .replaceAll("""[^\p{ASCII}]""", "").replaceAll("""[^_\w]""", " ")

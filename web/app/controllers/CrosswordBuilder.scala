@@ -1,10 +1,9 @@
 package controllers
 
-import java.io.{BufferedWriter, FileWriter, File}
-import java.sql.{ResultSet, DriverManager}
+import java.io.{BufferedWriter, File, FileWriter}
 
-import crosswords.util.Packer
-import play.api.libs.json.{JsString, JsArray, JsValue, Json}
+import play.api.libs.json.{JsArray, JsString, JsValue, Json}
+
 import scala.util.Random
 import scala.util.control.Breaks._
 
@@ -168,14 +167,13 @@ object CrosswordBuilder {
     }
   }
 
+  val output: File = new File("output.txt")
+  val outputStream = new BufferedWriter(new FileWriter(output))
   /**
    * Insert a crossword into the database with respect of words index
    * @param crossword the crossword
    * @param wordIndex the words indexes
    */
-  val output: File = new File("output.txt")
-  val outputStream = new BufferedWriter(new FileWriter(output))
-
   def insertCrosswordIntoDB(crossword: Crossword, wordIndex: Map[String, Int]) = {
 
     /*
